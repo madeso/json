@@ -8,12 +8,12 @@ JSON for humans is designed to be a simple input/output "stb style" library to r
 
 **What does stb style library mean?** It means that it is distributet as a single header without templates and external dependencies and in one file you have to define a macro to "implement the implementations". See the [stb repo](https://github.com/nothings/stb) and [stb howto](https://github.com/nothings/stb/blob/master/docs/stb_howto.txt) for a more detailed infomation.
 
-# Roadmap
+## Roadmap
 
 1. Make sure it parses regular JSON files correctly.
 2. Add a simple output/to string function to serialize dom back to disk/string.
 
-# Possible future roadmap
+## Possible future roadmap
 
 * Make faster and less dependent on STL
 * Make usable in not modern C++ and C?
@@ -22,7 +22,7 @@ JSON for humans is designed to be a simple input/output "stb style" library to r
 * [json 5](https://json5.org)
 * [h json](https://hjson.org/)
 
-# USP (unique selling points)
+## USP (unique selling points)
 
 * Line numbers are available after json has loaded successfully
 * Single header file
