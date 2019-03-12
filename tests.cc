@@ -420,4 +420,5 @@ TEST_CASE("same-chars", "[spec]")
 // todo: add utf8 tests
 // todo: add more weird tests
 // add json terminal app to time the tests https://github.com/serde-rs/json-benchmark
+// https://github.com/sheredom/json.h/tree/master/test
 
