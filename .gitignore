@@ -34,3 +34,5 @@
 # vim
 *.un~
 
+# build folder
+build/
