@@ -47,7 +47,9 @@ set(tests_src
 source_group("" FILES ${tests_src})
 include_directories(SYSTEM external/catch/)
 add_executable(tests ${tests_src})
-enable_testing()
-add_test(tests tests)
 
-
+add_custom_command(TARGET tests POST_BUILD
+    COMMAND tests
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running tests"
+)
