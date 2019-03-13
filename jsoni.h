@@ -216,9 +216,98 @@ Bool  * Value::AsBool  () { return nullptr; }
 Null  * Value::AsNull  () { return nullptr; }
 Int   * Value::AsInt() { return nullptr; }
 
+struct PrettyPrintVisitor : public Visitor
+{
+  PrettyPrint settings;
+  std::ostream* stream;
+
+  void StreamString(const std::string& str)
+  {
+    // todo: escape string
+    *stream << '\"';
+    for (char c : str)
+    {
+      switch(c)
+      {
+      case '\"': case '\\':
+        *stream << "\\" << c;
+        break;
+      case '\b':
+        *stream << "\\b";
+        break;
+      case '\f':
+        *stream << "\\f";
+        break;
+      case '\n':
+        *stream << "\\n";
+        break;
+      case '\r':
+        *stream << "\\r";
+        break;
+      case '\t':
+        *stream << "\\t";
+        break;
+      default:
+        *stream << c;
+        break;
+      }
+    }
+    *stream << '\"';
+  }
+
+  void VisitObject(Object* object) override
+  {
+    bool first = true;
+    *stream << '{';
+    for (auto o : object->object)
+    {
+      if (first) { first = false; }
+      else { *stream << ','; }
+      StreamString(o.first);
+      *stream << ':';
+      o.second->Visit(this);
+    }
+    *stream << '}';
+  }
+  void VisitArray(Array * array) override
+  {
+    bool first = true;
+    *stream << '[';
+    for (auto o : array->array)
+    {
+      if (first) { first = false; }
+      else       { *stream << ','; }
+      o->Visit(this);
+    }
+    *stream << ']';
+  }
+
+  void VisitString(String* string) override
+  {
+    StreamString(string->string);
+  }
+  void VisitNumber(Number* number) override
+  {
+    *stream << number->number;
+  }
+  void VisitBool(Bool  * boolean) override
+  {
+    *stream << (boolean->boolean ? "true" : "false");
+  }
+  void VisitNull(Null*) override
+  {
+    *stream << "null";
+  }
+};
+
 std::string ToString(Value* value, const PrettyPrint& pp)
 {
-  return "";
+  std::ostringstream ss;
+  PrettyPrintVisitor vis;
+  vis.settings = pp;
+  vis.stream = &ss;
+  value->Visit(&vis);
+  return ss.str();
 }
 
 void Visitor::VisitInt(Int* integer) { VisitNumber(integer); }
@@ -302,7 +391,7 @@ std::ostream& operator<<(std::ostream& s, const ParseResult& result)
   }
   else
   {
-    s << "No errors detected, but currently unable to print data";
+    s << ToString(result.value.get(), PrettyPrint::Compact());
   }
   return s;
 }
