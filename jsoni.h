@@ -312,6 +312,8 @@ std::ostream& operator<<(std::ostream& s, const ParseResult& result)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Here comes the parser
 
+// todo: change all these parsers to a better structure with loops instead of this while/switch/state structure
+
 struct Parser;
 
 struct Parser
@@ -708,8 +710,10 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
 
 std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
 {
-  enum class State { ExpectDash, Expect19, ExpectDigit1, Expect0, ExpectDot, ExpectDigit2, ExpectE, Ended };
+  enum class State { ExpectDash, Expect19, ExpectDigit1, Expect0, ExpectDot, ExpectDigit2, ExpectE, ExpectDigit3, Ended };
   State state = State::Expect0;
+
+  std::ostringstream o;
 
   if (parser->Peek() == '-')
   {
@@ -735,6 +739,7 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
     {
     case State::ExpectDash:
       EXPECT("-");
+      o << '-';
       if (parser->Peek() == '0')
       {
         state = State::Expect0;
@@ -756,6 +761,7 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
         AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character, expected 1-9");
         return nullptr;
       }
+      o << c;
 
       if (IsDigit09(parser->Peek()))
       {
@@ -764,6 +770,10 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
       else if (parser->Peek() == '.')
       {
         state = State::ExpectDot;
+      }
+      else if (parser->Peek() == 'e' || parser->Peek() == 'E')
+      {
+        state = State::ExpectE;
       }
       else
       {
@@ -779,6 +789,7 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
         AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character, expected 0-9");
         return nullptr;
       }
+      o << c;
 
       if (IsDigit09(parser->Peek()))
       {
@@ -796,6 +807,7 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
       break;
     case State::Expect0:
       EXPECT("0");
+      o << '0';
       if (parser->Peek() == '.')
       {
         state = State::ExpectDot;
@@ -811,6 +823,7 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
       break;
     case State::ExpectDot:
       EXPECT(".");
+      o << '.';
       if (IsDigit09(parser->Peek()))
       {
         state = State::ExpectDigit2;
@@ -829,6 +842,7 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
         AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character, expected 0-9");
         return nullptr;
       }
+      o << c;
       if (IsDigit09(parser->Peek()))
       {
         // do nothing
@@ -844,8 +858,37 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
     }
       break;
     case State::ExpectE:
-      AddError(result, parser, Error::Type::InvalidCharacter, "Not implemented exponent numbers yet");
-      return nullptr;
+    {
+      char c = parser->Read();
+      if (c != 'e' && c != 'E')
+      {
+        AddError(result, parser, Error::Type::InvalidCharacter, "Not E");
+        return nullptr;
+      }
+      o << c;
+
+      if (parser->Peek() == '+' || parser->Peek() == '-')
+      {
+        char s = parser->Read();
+        o << s;
+      }
+      state = State::ExpectDigit3;
+    }
+    break;
+    case State::ExpectDigit3:
+    {
+      char d = parser->Read();
+      if (!IsDigit09(d))
+      {
+        AddError(result, parser, Error::Type::InvalidCharacter, "Not a digit");
+        return nullptr;
+      }
+
+      if (!IsDigit09(parser->Peek()) )
+      {
+        state = State::Ended;
+      }
+    }
       break;
     case State::Ended:
       assert(false && "number loop should have ended");
@@ -853,8 +896,11 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
     }
   }
 
-  // todo: actually parse number...
-  return std::make_shared<Number>(42.0);
+  // todo: is this the correct way to parse?
+  std::istringstream in(o.str());
+  double d;
+  in >> d;
+  return std::make_shared<Number>(d);
 }
 
 bool IsValidFirstDigit(char c)
