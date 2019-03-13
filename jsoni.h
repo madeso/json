@@ -475,22 +475,17 @@ std::shared_ptr<String> ParseString (ParseResult* result, Parser* parser);
 std::shared_ptr<Number> ParseNumber (ParseResult* result, Parser* parser);
 // std::shared_ptr<Int   > ParseInt    (ParseResult* result, Parser* parser);
 
-bool IsDigit09(char c)
+bool IsDigit(char c)
 {
   return c >= '0' && c <= '9';
 }
 
 bool IsHex(char c)
 {
-  return IsDigit09(c)
+  return IsDigit(c)
     || (c >= 'a' && c <= 'z')
     || (c >= 'A' && c <= 'Z')
     ;
-}
-
-bool IsDigit19(char c)
-{
-  return c >= '1' && c <= '9';
 }
 
 bool IsValidFirstDigit(char c);
@@ -797,189 +792,63 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
 
 std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
 {
-  enum class State { ExpectDash, Expect19, ExpectDigit1, Expect0, ExpectDot, ExpectDigit2, ExpectE, ExpectDigit3, Ended };
-  State state = State::Expect0;
-
   std::ostringstream o;
 
   if (parser->Peek() == '-')
   {
-    state = State::ExpectDash;
+    o << parser->Read();
   }
-  else if (IsDigit19(parser->Peek()) )
+
+  if (parser->Peek() == '0')
   {
-    state = State::Expect19;
-  }
-  else if (parser->Peek() == '0')
-  {
-    state = State::Expect0;
+    o << parser->Read();
   }
   else
   {
-    AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character");
-    return nullptr;
+    if(!IsDigit(parser->Peek()))
+    {
+      AddError(result, parser, Error::Type::InvalidCharacter, "Invalid first character as a number");
+      return nullptr;
+    }
+    o << parser->Read();
+    while(IsDigit(parser->Peek()))
+    {
+      o << parser->Read();
+    }
+  }
+  
+  if(parser->Peek() == '.')
+  {
+    o << parser->Read();
+    if(!IsDigit(parser->Peek()))
+    {
+      AddError(result, parser, Error::Type::InvalidCharacter, "Invalid first character in a fractional number");
+      return nullptr;
+    }
+    o << parser->Read();
+    while(IsDigit(parser->Peek()))
+    {
+      o << parser->Read();
+    }
   }
 
-  while (state != State::Ended)
+  if(parser->Peek() == 'e' || parser->Peek() == 'E')
   {
-    switch (state)
+    o << parser->Read();
+    if(parser->Peek() == '+' || parser->Peek() == '-')
     {
-    case State::ExpectDash:
-      EXPECT("-");
-      o << '-';
-      if (parser->Peek() == '0')
-      {
-        state = State::Expect0;
-      }
-      else if (IsDigit19(parser->Peek()))
-      {
-        state = State::Expect19;
-      }
-      else
-      {
-        AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character");
-      }
-      break;
-    case State::Expect19:
-    {
-      const char c = parser->Read();
-      if (!IsDigit19(c))
-      {
-        AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character, expected 1-9");
-        return nullptr;
-      }
-      o << c;
+      o << parser->Read();
+    }
 
-      if (IsDigit09(parser->Peek()))
-      {
-        state = State::ExpectDigit1;
-      }
-      else if (parser->Peek() == '.')
-      {
-        state = State::ExpectDot;
-      }
-      else if (parser->Peek() == 'e' || parser->Peek() == 'E')
-      {
-        state = State::ExpectE;
-      }
-      else
-      {
-        state = State::Ended;
-      }
-    }
-      break;
-    case State::ExpectDigit1:
+    if(!IsDigit(parser->Peek()))
     {
-      const char c = parser->Read();
-      if (!IsDigit09(c))
-      {
-        AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character, expected 0-9");
-        return nullptr;
-      }
-      o << c;
-
-      if (IsDigit09(parser->Peek()))
-      {
-        // no need to do anything here, just keep looping
-      }
-      else if (parser->Peek() == '.')
-      {
-        state = State::ExpectDot;
-      }
-      else
-      {
-        state = State::Ended;
-      }
+      AddError(result, parser, Error::Type::InvalidCharacter, "Invalid first character in a exponent");
+      return nullptr;
     }
-      break;
-    case State::Expect0:
-      EXPECT("0");
-      o << '0';
-      if (parser->Peek() == '.')
-      {
-        state = State::ExpectDot;
-      }
-      else if (parser->Peek() == 'e' || parser->Peek() == 'E')
-      {
-        state = State::ExpectE;
-      }
-      else
-      {
-        state = State::Ended;
-      }
-      break;
-    case State::ExpectDot:
-      EXPECT(".");
-      o << '.';
-      if (IsDigit09(parser->Peek()))
-      {
-        state = State::ExpectDigit2;
-      }
-      else
-      {
-        AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character, expected 1-9");
-        return nullptr;
-      }
-      break;
-    case State::ExpectDigit2:
+    o << parser->Read();
+    while(IsDigit(parser->Peek()))
     {
-      const char c = parser->Read();
-      if (!IsDigit09(c))
-      {
-        AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character, expected 0-9");
-        return nullptr;
-      }
-      o << c;
-      if (IsDigit09(parser->Peek()))
-      {
-        // do nothing
-      }
-      else if (parser->Peek() == 'e' || parser->Peek() == 'E')
-      {
-        state = State::ExpectE;
-      }
-      else
-      {
-        state = State::Ended;
-      }
-    }
-      break;
-    case State::ExpectE:
-    {
-      char c = parser->Read();
-      if (c != 'e' && c != 'E')
-      {
-        AddError(result, parser, Error::Type::InvalidCharacter, "Not E");
-        return nullptr;
-      }
-      o << c;
-
-      if (parser->Peek() == '+' || parser->Peek() == '-')
-      {
-        char s = parser->Read();
-        o << s;
-      }
-      state = State::ExpectDigit3;
-    }
-    break;
-    case State::ExpectDigit3:
-    {
-      char d = parser->Read();
-      if (!IsDigit09(d))
-      {
-        AddError(result, parser, Error::Type::InvalidCharacter, "Not a digit");
-        return nullptr;
-      }
-
-      if (!IsDigit09(parser->Peek()) )
-      {
-        state = State::Ended;
-      }
-    }
-      break;
-    case State::Ended:
-      assert(false && "number loop should have ended");
-      break;
+      o << parser->Read();
     }
   }
 
@@ -993,8 +862,7 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
 bool IsValidFirstDigit(char c)
 {
   if (c == '-') return true;
-  if (c == '0') return true;
-  if (IsDigit19(c)) return true;
+  if (IsDigit(c)) return true;
   return false;
 }
 
