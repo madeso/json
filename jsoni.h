@@ -26,19 +26,15 @@ struct Int;
 
 struct Location
 {
-  Location() : line(-1), column(-1) {}
-  explicit Location(int l) : line(l), column(-1) {}
-  Location(int l, int c) : line(l), column(c) {}
+  Location();
+  explicit Location(int l);
+  Location(int l, int c);
 
   int line;
   int column;
 };
 
-std::ostream& operator<<(std::ostream& s, const Location& location)
-{
-  s << "(" << location.line << ", " << location.column << ")";
-  return s;
-}
+std::ostream& operator<<(std::ostream& s, const Location& location);
 
 struct Visitor
 {
@@ -55,89 +51,87 @@ struct Value
 {
   Location location;
 
-  virtual ~Value() {}
+  virtual ~Value();
 
   virtual void Visit(Visitor* visitor) = 0;
 
-  virtual Object* AsObject() { return nullptr; }
-  virtual Array * AsArray () { return nullptr; }
-  virtual String* AsString() { return nullptr; }
-  virtual Number* AsNumber() { return nullptr; }
-  virtual Bool  * AsBool  () { return nullptr; }
-  virtual Null  * AsNull  () { return nullptr; }
-  virtual Int   * AsInt() { return nullptr; }
+  virtual Object* AsObject();
+  virtual Array * AsArray ();
+  virtual String* AsString();
+  virtual Number* AsNumber();
+  virtual Bool  * AsBool  ();
+  virtual Null  * AsNull  ();
+  virtual Int   * AsInt();
 };
 
 struct Object : public Value
 {
   std::map<std::string, std::shared_ptr<Value>> object;
 
-  void Visit(Visitor* visitor) override { visitor->VisitObject(this); }
+  void Visit(Visitor* visitor) override;
 
-  Object* AsObject() override { return this; }
+  Object* AsObject() override;
 };
 
 struct Array : public Value
 {
   std::vector<std::shared_ptr<Value>> array;
 
-  void Visit(Visitor* visitor) override { visitor->VisitArray(this); }
+  void Visit(Visitor* visitor) override;
 
-  Array* AsArray() override { return this; }
+  Array* AsArray() override;
 };
 
 struct String : public Value
 {
   std::string string;
 
-  void Visit(Visitor* visitor) override { visitor->VisitString(this); }
+  void Visit(Visitor* visitor) override;
 
-  String* AsString() override { return this; }
+  String* AsString() override;
 
-  explicit String(const std::string& s="") : string(s) {}
+  explicit String(const std::string& s="");
 };
 
 struct Number : public Value
 {
   double number;
 
-  void Visit(Visitor* visitor) override { visitor->VisitNumber(this); }
+  void Visit(Visitor* visitor) override;
 
-  Number* AsNumber() override { return this; }
+  Number* AsNumber() override;
 
-  explicit Number(double d) : number(d) {}
+  explicit Number(double d);
 };
 
 struct Bool : public Value
 {
   bool boolean;
 
-  void Visit(Visitor* visitor) override { visitor->VisitBool(this); }
+  void Visit(Visitor* visitor) override;
 
-  Bool* AsBool() override { return this; }
+  Bool* AsBool() override;
 
-  explicit Bool(bool b) : boolean(b) {}
+  explicit Bool(bool b);
 };
 
 struct Null : public Value
 {
-  void Visit(Visitor* visitor) override { visitor->VisitNull(this); }
+  void Visit(Visitor* visitor) override;
 
-  Null* AsNull() override { return this; }
+  Null* AsNull() override;
 };
 
 struct Int : public Number
 {
   int integer;
 
-  void Visit(Visitor* visitor) override { visitor->VisitInt(this); }
+  void Visit(Visitor* visitor) override;
 
-  Int* AsInt() override { return this; }
+  Int* AsInt() override;
 
-  explicit Int(int i) : Number(i), integer(i) { }
+  explicit Int(int i);
 };
-
-void Visitor::VisitInt(Int* integer) { VisitNumber(integer); }
 
 struct Error
 {
@@ -158,8 +152,85 @@ struct Error
   std::string message;
   Location location;
 
-  Error(Type t, const std::string& m, const Location& l=Location()) : type(t), message(m), location(l) {}
+  Error(Type t, const std::string& m, const Location& l=Location());
 };
+
+std::ostream& operator<<(std::ostream& s, const Error::Type& type);
+
+std::ostream& operator<<(std::ostream& s, const Error& error);
+
+// todo: this structure seems weird, make it into something that feels less weird
+struct ParseResult
+{
+  // contains errors if parsing failed
+  std::vector<Error> errors;
+
+  // one of these are non-null if parsing didn't fail
+  std::shared_ptr<Object> object;
+  std::shared_ptr<Array> array;
+
+  bool HasError() const;
+
+  operator bool() const;
+};
+
+std::ostream& operator<<(std::ostream& s, const ParseResult& result);
+
+ParseResult Parse(const std::string& str);
+
+#ifdef JSONI_IMPLEMENTATION
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Implementation detail..
+
+Location::Location() : line(-1), column(-1) {}
+Location::Location(int l) : line(l), column(-1) {}
+Location::Location(int l, int c) : line(l), column(c) {}
+
+std::ostream& operator<<(std::ostream& s, const Location& location)
+{
+  s << "(" << location.line << ", " << location.column << ")";
+  return s;
+}
+
+Value::~Value() {}
+Object* Value::AsObject() { return nullptr; }
+Array * Value::AsArray () { return nullptr; }
+String* Value::AsString() { return nullptr; }
+Number* Value::AsNumber() { return nullptr; }
+Bool  * Value::AsBool  () { return nullptr; }
+Null  * Value::AsNull  () { return nullptr; }
+Int   * Value::AsInt() { return nullptr; }
+
+void Visitor::VisitInt(Int* integer) { VisitNumber(integer); }
+
+void Object::Visit(Visitor* visitor) { visitor->VisitObject(this); }
+Object* Object::AsObject() { return this; }
+
+void Array::Visit(Visitor* visitor) { visitor->VisitArray(this); }
+Array* Array::AsArray() { return this; }
+
+void String::Visit(Visitor* visitor) { visitor->VisitString(this); }
+String* String::AsString() { return this; }
+String::String(const std::string& s) : string(s) {}
+
+void Number::Visit(Visitor* visitor) { visitor->VisitNumber(this); }
+Number* Number::AsNumber() { return this; }
+Number::Number(double d) : number(d) {}
+
+void Bool::Visit(Visitor* visitor) { visitor->VisitBool(this); }
+Bool* Bool::AsBool() { return this; }
+Bool::Bool(bool b) : boolean(b) {}
+
+void Null::Visit(Visitor* visitor) { visitor->VisitNull(this); }
+Null* Null::AsNull() { return this; }
+
+void Int::Visit(Visitor* visitor) { visitor->VisitInt(this); }
+Int* Int::AsInt() { return this; }
+Int::Int(int i) : Number(i), integer(i) { }
+
+
+Error::Error(Type t, const std::string& m, const Location& l) : type(t), message(m), location(l) {}
 
 std::ostream& operator<<(std::ostream& s, const Error::Type& type)
 {
@@ -184,33 +255,21 @@ std::ostream& operator<<(std::ostream& s, const Error::Type& type)
   return s;
 }
 
-
 std::ostream& operator<<(std::ostream& s, const Error& error)
 {
   s << error.type << error.location << ": " << error.message;
   return s;
 }
 
-// todo: this structure seems weird, make it into something that feels less weird
-struct ParseResult
+bool ParseResult::HasError() const
 {
-  // contains errors if parsing failed
-  std::vector<Error> errors;
+  return object == nullptr && array == nullptr;
+}
 
-  // one of these are non-null if parsing didn't fail
-  std::shared_ptr<Object> object;
-  std::shared_ptr<Array> array;
-
-  bool HasError() const
-  {
-    return object == nullptr && array == nullptr;
-  }
-
-  operator bool() const
-  {
-    return !HasError();
-  }
-};
+ParseResult::operator bool() const
+{
+  return !HasError();
+}
 
 std::ostream& operator<<(std::ostream& s, const ParseResult& result)
 {
@@ -229,10 +288,9 @@ std::ostream& operator<<(std::ostream& s, const ParseResult& result)
   return s;
 }
 
-ParseResult Parse(const std::string& str);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Implementation and detail..
+// Here comes the parser
 
 struct Parser;
 
@@ -814,6 +872,8 @@ ParseResult Parse(const std::string& str)
   Parser parser{ str };
   return Parse(&parser);
 }
+
+#endif // JSONI_IMPLEMENTATION
 
 #endif // JSONI_H
 

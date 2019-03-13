@@ -38,6 +38,10 @@ endif()
 set(tests_src
   tests_main.cc
   tests_checker.cc
+  tests_jsonh.cc
+  tests_spec.cc
+  tests_utf8.cc
+  tests_whitebox.cc
   )
 source_group("" FILES ${tests_src})
 include_directories(SYSTEM external/catch/)
