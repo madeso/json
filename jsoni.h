@@ -45,7 +45,7 @@ struct Visitor
   virtual void VisitNumber (Number* number ) = 0;
   virtual void VisitBool   (Bool  * boolean) = 0;
   virtual void VisitNull   (Null  * null   ) = 0;
-  virtual void VisitInt    (Int   * integer);
+  virtual void VisitInt    (Int   * integer) = 0;
 };
 
 struct PrettyPrint
@@ -69,7 +69,7 @@ struct Value
   virtual Number* AsNumber();
   virtual Bool  * AsBool  ();
   virtual Null  * AsNull  ();
-  virtual Int   * AsInt();
+  virtual Int   * AsInt   ();
 };
 
 std::string ToString(Value* value, const PrettyPrint& pp);
@@ -132,7 +132,7 @@ struct Null : public Value
   Null* AsNull() override;
 };
 
-struct Int : public Number
+struct Int : public Value
 {
   int integer;
 
@@ -214,7 +214,7 @@ String* Value::AsString() { return nullptr; }
 Number* Value::AsNumber() { return nullptr; }
 Bool  * Value::AsBool  () { return nullptr; }
 Null  * Value::AsNull  () { return nullptr; }
-Int   * Value::AsInt() { return nullptr; }
+Int   * Value::AsInt   () { return nullptr; }
 
 struct PrettyPrintVisitor : public Visitor
 {
@@ -298,6 +298,10 @@ struct PrettyPrintVisitor : public Visitor
   {
     *stream << "null";
   }
+  void VisitInt(Int* integer) override
+  {
+    *stream << integer->integer;
+  }
 };
 
 std::string ToString(Value* value, const PrettyPrint& pp)
@@ -309,8 +313,6 @@ std::string ToString(Value* value, const PrettyPrint& pp)
   value->Visit(&vis);
   return ss.str();
 }
-
-void Visitor::VisitInt(Int* integer) { VisitNumber(integer); }
 
 void Object::Visit(Visitor* visitor) { visitor->VisitObject(this); }
 Object* Object::AsObject() { return this; }
@@ -335,7 +337,7 @@ Null* Null::AsNull() { return this; }
 
 void Int::Visit(Visitor* visitor) { visitor->VisitInt(this); }
 Int* Int::AsInt() { return this; }
-Int::Int(int i) : Number(i), integer(i) { }
+Int::Int(int i) : integer(i) { }
 
 
 Error::Error(Type t, const std::string& m, const Location& l) : type(t), message(m), location(l) {}
@@ -472,8 +474,7 @@ std::shared_ptr<Value > ParseValue  (ParseResult* result, Parser* parser);
 std::shared_ptr<Object> ParseObject (ParseResult* result, Parser* parser);
 std::shared_ptr<Array > ParseArray  (ParseResult* result, Parser* parser);
 std::shared_ptr<String> ParseString (ParseResult* result, Parser* parser);
-std::shared_ptr<Number> ParseNumber (ParseResult* result, Parser* parser);
-// std::shared_ptr<Int   > ParseInt    (ParseResult* result, Parser* parser);
+std::shared_ptr<Value> ParseNumber (ParseResult* result, Parser* parser);
 
 bool IsDigit(char c)
 {
@@ -790,7 +791,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
   return std::make_shared<String>(ss.str());
 }
 
-std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
+std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
 {
   std::ostringstream o;
 
