@@ -11,6 +11,7 @@
 // util types
 struct Location;
 struct Visitor;
+struct PrettyPrint;
 struct Error;
 struct ParseResult;
 
@@ -44,7 +45,14 @@ struct Visitor
   virtual void VisitNumber (Number* number ) = 0;
   virtual void VisitBool   (Bool  * boolean) = 0;
   virtual void VisitNull   (Null  * null   ) = 0;
-  virtual void VisitInt(Int   * integer);
+  virtual void VisitInt    (Int   * integer);
+};
+
+struct PrettyPrint
+{
+  // todo: add options here
+
+  static PrettyPrint Compact();
 };
 
 struct Value
@@ -63,6 +71,8 @@ struct Value
   virtual Null  * AsNull  ();
   virtual Int   * AsInt();
 };
+
+std::string ToString(Value* value, const PrettyPrint& pp);
 
 struct Object : public Value
 {
@@ -193,6 +203,11 @@ std::ostream& operator<<(std::ostream& s, const Location& location)
   return s;
 }
 
+PrettyPrint PrettyPrint::Compact()
+{
+  return {};
+}
+
 Value::~Value() {}
 Object* Value::AsObject() { return nullptr; }
 Array * Value::AsArray () { return nullptr; }
@@ -201,6 +216,11 @@ Number* Value::AsNumber() { return nullptr; }
 Bool  * Value::AsBool  () { return nullptr; }
 Null  * Value::AsNull  () { return nullptr; }
 Int   * Value::AsInt() { return nullptr; }
+
+std::string ToString(Value* value, const PrettyPrint& pp)
+{
+  return "";
+}
 
 void Visitor::VisitInt(Int* integer) { VisitNumber(integer); }
 
