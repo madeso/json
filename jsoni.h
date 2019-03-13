@@ -816,9 +816,12 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
       o << parser->Read();
     }
   }
+
+  bool is_integer = true;
   
   if(parser->Peek() == '.')
   {
+    is_integer = false;
     o << parser->Read();
     if(!IsDigit(parser->Peek()))
     {
@@ -834,6 +837,7 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
 
   if(parser->Peek() == 'e' || parser->Peek() == 'E')
   {
+    is_integer = false;
     o << parser->Read();
     if(parser->Peek() == '+' || parser->Peek() == '-')
     {
@@ -854,9 +858,28 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
 
   // todo: is this the correct way to parse?
   std::istringstream in(o.str());
-  double d;
-  in >> d;
-  return std::make_shared<Number>(d);
+  if(is_integer)
+  {
+    int d;
+    in >> d;
+    if(in.fail())
+    {
+      AddError(result, parser, Error::Type::UnknownError, "Failed to parse integer: " + o.str());
+      return nullptr;
+    }
+    return std::make_shared<Int>(d);
+  }
+  else
+  {
+    double d;
+    in >> d;
+    if(in.fail())
+    {
+      AddError(result, parser, Error::Type::UnknownError, "Failed to parse number: " + o.str());
+      return nullptr;
+    }
+    return std::make_shared<Number>(d);
+  }
 }
 
 bool IsValidFirstDigit(char c)
