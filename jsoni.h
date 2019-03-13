@@ -313,6 +313,14 @@ bool IsDigit09(char c)
   return c >= '0' && c <= '9';
 }
 
+bool IsHex(char c)
+{
+  return IsDigit09(c)
+    || (c >= 'a' && c <= 'z')
+    || (c >= 'A' && c <= 'Z')
+    ;
+}
+
 bool IsDigit19(char c)
 {
   return c >= '1' && c <= '9';
@@ -445,6 +453,7 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
     case State::ExpectEnd:
       EXPECT("]");
       state = State::Ended;
+      break;
     case State::Ended:
       assert(false && "array loop should have ended");
       break;
@@ -512,6 +521,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
     case State::ExpectEnd:
       EXPECT("}");
       state = State::Ended;
+      break;
     case State::Ended:
       assert(false && "object loop should have ended");
       break;
@@ -523,8 +533,99 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
 
 std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
 {
-  AddError(result, parser, Error::Type::UnknownError, "Not implemented string parsing...");
-  return nullptr;
+  enum class State { ExpectStart, AnyCharacter, ExpectSlash, ExpectEnd, Ended };
+  State state = State::ExpectStart;
+  std::ostringstream ss;
+
+  while(state != State::Ended)
+  {
+    switch(state)
+    {
+      case State::ExpectStart:
+        EXPECT("\"");
+        if(parser->Peek()=='\"')
+        {
+          state = State::ExpectEnd;
+        }
+        else if(parser->Peek()=='\\')
+        {
+          state = State::ExpectSlash;
+        }
+        else
+        {
+          state = State::AnyCharacter;
+        }
+        break;
+      case State::AnyCharacter:
+      {
+        char c = parser->Read();
+        if(c == 0 )
+        {
+          AddError(result, parser, Error::Type::InvalidCharacter, "Unexpected EOF in string");
+          return nullptr;
+        }
+        ss << c;
+        if(parser->Peek() == '\\')
+        {
+         state = State::ExpectSlash;
+        }
+        else if(parser->Peek() == '\"')
+        {
+         state = State::ExpectEnd;
+        }
+      } 
+      break;
+      case State::ExpectSlash:
+      EXPECT("\\");
+#define ESCAPE(c, r) if(parser->Peek() == c) { ss << r; }
+      ESCAPE('\"', '\"')
+      else ESCAPE('\\', '\\')
+      else ESCAPE('/', '/')
+      else ESCAPE('b', '\b')
+      else ESCAPE('f', '\f')
+      else ESCAPE('n', '\n')
+      else ESCAPE('r', '\r')
+      else ESCAPE('t', '\t')
+      else if(parser->Peek() == 'u'
+          && IsHex(parser->Peek(1))
+          && IsHex(parser->Peek(2))
+          && IsHex(parser->Peek(3))
+          && IsHex(parser->Peek(4))
+          )
+      {
+        parser->Read(); // u
+        parser->Read(); // hex1
+        parser->Read(); // hex2
+        parser->Read(); // hex3
+        parser->Read(); // hex4
+        AddError(result, parser, Error::Type::UnknownError, "hex not currently handled");
+        return nullptr;
+      }
+      else
+      {
+        AddError(result, parser, Error::Type::InvalidCharacter, "Invalid escape sequence");
+        return nullptr;
+      }
+      if(parser->Peek() == '\"')
+      {
+        state = State::ExpectEnd;
+      }
+      else
+      {
+        state = State::AnyCharacter;
+      }
+      break;
+    case State::ExpectEnd:
+      EXPECT("\"");
+      state = State::Ended;
+      break;
+    case State::Ended:
+      assert(false && "object loop should have ended");
+      break;
+    }
+  }
+
+  return std::make_shared<String>(ss.str());
 }
 
 std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
@@ -547,6 +648,7 @@ std::shared_ptr<Number> ParseNumber(ParseResult* result, Parser* parser)
   else
   {
     AddError(result, parser, Error::Type::InvalidCharacter, "Invalid character");
+    return nullptr;
   }
 
   while (state != State::Ended)
