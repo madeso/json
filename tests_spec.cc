@@ -7,8 +7,8 @@ TEST_CASE("same-chars", "[spec]")
 {
   auto j = Parse(R"(["\u002F", "\u002f", "\/", "/"])");
   REQUIRE(j);
-  REQUIRE(j.array != nullptr);
-  const auto& array = j.array->array;
+  REQUIRE(j.value->AsArray() != nullptr);
+  const auto& array = j.value->AsArray()->array;
   REQUIRE(array.size() == 4);
 
   auto* a = array[0]->AsString();

@@ -175,9 +175,8 @@ struct ParseResult
   // contains errors if parsing failed
   std::vector<Error> errors;
 
-  // one of these are non-null if parsing didn't fail
-  std::shared_ptr<Object> object;
-  std::shared_ptr<Array> array;
+  // is non-null is parsing succeeded
+  std::shared_ptr<Value> value;
 
   bool HasError() const;
 
@@ -283,7 +282,7 @@ std::ostream& operator<<(std::ostream& s, const Error& error)
 
 bool ParseResult::HasError() const
 {
-  return object == nullptr && array == nullptr;
+  return value == nullptr;
 }
 
 ParseResult::operator bool() const
@@ -377,8 +376,7 @@ void SkipSpaces(Parser* parser)
 void AddError(ParseResult* result, Parser* parser, Error::Type type, const std::string& err)
 {
   result->errors.push_back(Error{type, err, Location{parser->line, parser->column} });
-  result->array = nullptr;
-  result->object = nullptr;
+  result->value = nullptr;
 }
 
 std::shared_ptr<Value > ParseValue  (ParseResult* result, Parser* parser);
@@ -918,12 +916,12 @@ ParseResult Parse(Parser* parser)
 
   if (parser->Peek() == '[')
   {
-    ParseArray(&res, parser);
+    res.value = ParseArray(&res, parser);
     return res;
   }
   else if(parser->Peek() == '{')
   {
-    ParseObject(&res, parser);
+    res.value = ParseObject(&res, parser);
     return res;
   }
   else
