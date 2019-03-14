@@ -849,6 +849,11 @@ std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
   if (parser->Peek() == '0')
   {
     o << parser->Read();
+    if(IsDigit(parser->Peek()))
+    {
+      AddError(result, parser, Error::Type::InvalidNumber, "Numbers can't have leading zeroes");
+      return nullptr;
+    }
   }
   else
   {
