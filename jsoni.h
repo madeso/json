@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <sstream>
 
 #include <cassert>
 
@@ -199,8 +200,8 @@ ParseResult Parse(const std::string& str);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementation detail..
 
-Location::Location() : line(-1), column(-1) {}
-Location::Location(tloc l) : line(l), column(-1) {}
+Location::Location() : line(0), column(0) {}
+Location::Location(tloc l) : line(l), column(0) {}
 Location::Location(tloc l, tloc c) : line(l), column(c) {}
 
 std::ostream& operator<<(std::ostream& s, const Location& location)
@@ -500,10 +501,10 @@ void AppendChar(std::ostream& s, char c)
     char c = parser->Read();\
     if( c != expected_string[0] )\
     {\
-      std::stringstream ss;\
-      ss << "Expected character " << expected_string << " but found ";\
-      AppendChar(ss, c);\
-      AddError(result, parser, Error::Type::InvalidCharacter, ss.str());\
+      std::stringstream expect_ss;\
+      expect_ss << "Expected character " << expected_string << " but found ";\
+      AppendChar(expect_ss, c);\
+      AddError(result, parser, Error::Type::InvalidCharacter, expect_ss.str());\
       return nullptr;\
     }\
     SkipSpaces(parser);\

@@ -34,9 +34,17 @@ if(CMAKE_CONFIGURATION_TYPES)
     CACHE STRING "Reset the configurations to what we need" FORCE)
 endif()
 
+set(main_src
+  jsoni.h
+  main.cc
+  )
+source_group("" FILES ${main_src})
+add_executable(json ${main_src})
 
 set(tests_src
+  jsoni.h
   tests_main.cc
+  tests_impl.cc
   tests_checker.cc
   tests_jsonh.cc
   tests_spec.cc
