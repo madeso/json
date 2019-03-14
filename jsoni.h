@@ -495,14 +495,14 @@ void AppendChar(std::ostream& s, char c)
   }
 }
 
-#define EXPECT(expected_string)\
+#define EXPECT(expected_char)\
   do\
   {\
     char c = parser->Read();\
-    if( c != expected_string[0] )\
+    if( c != expected_char )\
     {\
       std::stringstream expect_ss;\
-      expect_ss << "Expected character " << expected_string << " but found ";\
+      expect_ss << "Expected character " << expected_char << " but found ";\
       AppendChar(expect_ss, c);\
       AddError(result, parser, Error::Type::InvalidCharacter, expect_ss.str());\
       return nullptr;\
@@ -623,7 +623,7 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
     switch (state)
     {
     case State::ExpectStart:
-      EXPECT("[");
+      EXPECT('[');
       if (parser->Peek() == ']')
       {
         state = State::ExpectEnd;
@@ -656,11 +656,11 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
       }
       break;
     case State::ExpectComma:
-      EXPECT(",");
+      EXPECT(',');
       state = State::ExpectValue;
       break;
     case State::ExpectEnd:
-      EXPECT("]");
+      EXPECT(']');
       state = State::Ended;
       break;
     case State::Ended:
@@ -685,7 +685,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
     switch (state)
     {
     case State::ExpectStart:
-      EXPECT("{");
+      EXPECT('{');
       if (parser->Peek() == '}')
       {
         state = State::ExpectEnd;
@@ -702,7 +702,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
       {
         return nullptr;
       }
-      EXPECT(":");
+      EXPECT(':');
       auto v = ParseValue(result, parser);
       if (v == nullptr)
       {
@@ -724,11 +724,11 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
     }
     break;
     case State::ExpectComma:
-      EXPECT(",");
+      EXPECT(',');
       state = State::ExpectValue;
       break;
     case State::ExpectEnd:
-      EXPECT("}");
+      EXPECT('}');
       state = State::Ended;
       break;
     case State::Ended:
@@ -751,7 +751,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
     switch(state)
     {
       case State::ExpectStart:
-        EXPECT("\"");
+        EXPECT('\"');
         if(parser->Peek()=='\"')
         {
           state = State::ExpectEnd;
@@ -785,7 +785,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
       } 
       break;
       case State::ExpectSlash:
-      EXPECT("\\");
+      EXPECT('\\');
 #define ESCAPE(c, r) if(parser->Peek() == c) { ss << r; }
       ESCAPE('\"', '\"')
       else ESCAPE('\\', '\\')
@@ -825,7 +825,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
       }
       break;
     case State::ExpectEnd:
-      EXPECT("\"");
+      EXPECT('\"');
       state = State::Ended;
       break;
     case State::Ended:
