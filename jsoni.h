@@ -812,7 +812,11 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
       }
       else
       {
-        AddError(result, parser, Error::Type::InvalidCharacter, "Invalid escape sequence");
+        const char escape_char = parser->Peek();
+        std::ostringstream ss;
+        ss << "Illegal escape sequence: ";
+        AppendChar(ss, escape_char);
+        AddError(result, parser, Error::Type::IllegalEscape, ss.str());
         return nullptr;
       }
       if(parser->Peek() == '\"')
