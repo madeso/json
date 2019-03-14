@@ -660,7 +660,7 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
       state = State::ExpectValue;
       break;
     case State::ExpectEnd:
-      EXPECT(Error::Type::InvalidCharacter, ']');
+      EXPECT(Error::Type::UnclosedArray, ']');
       state = State::Ended;
       break;
     case State::Ended:
