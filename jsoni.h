@@ -469,7 +469,45 @@ void SkipSpaces(Parser* parser)
   }
 }
 
-#define EXPECT(expected_string) do { char c = parser->Read(); if( c != expected_string[0] ) { AddError(result, parser, Error::Type::InvalidCharacter, "Expected character " expected_string); return nullptr; } SkipSpaces(parser); } while(false)
+void AppendChar(std::ostream& s, char c)
+{
+  switch(c)
+  {
+    case '\n':
+      s << "<newline>";
+      break;
+    case '\r':
+      s << "<linefeed>";
+      break;
+    case 0:
+      s << "<EOF>";
+      break;
+    case '\t':
+      s << "<tab>";
+      break;
+    case ' ':
+      s << "<space>";
+      break;
+    default:
+      s << c;
+      break;
+  }
+}
+
+#define EXPECT(expected_string)\
+  do\
+  {\
+    char c = parser->Read();\
+    if( c != expected_string[0] )\
+    {\
+      std::stringstream ss;\
+      ss << "Expected character " << expected_string << " but found ";\
+      AppendChar(ss, c);\
+      AddError(result, parser, Error::Type::InvalidCharacter, ss.str());\
+      return nullptr;\
+    }\
+    SkipSpaces(parser);\
+  } while(false)
 
 void AddError(ParseResult* result, Parser* parser, Error::Type type, const std::string& err)
 {
@@ -905,11 +943,21 @@ ParseResult Parse(Parser* parser)
   if (parser->Peek() == '[')
   {
     res.value = ParseArray(&res, parser);
+    SkipSpaces(parser);
+    if(parser->HasMoreChar())
+    {
+      AddError(&res, parser, Error::Type::NotEof, "Expected EOF after array");
+    }
     return res;
   }
   else if(parser->Peek() == '{')
   {
     res.value = ParseObject(&res, parser);
+    SkipSpaces(parser);
+    if(parser->HasMoreChar())
+    {
+      AddError(&res, parser, Error::Type::NotEof, "Expected EOF after object");
+    }
     return res;
   }
   else
