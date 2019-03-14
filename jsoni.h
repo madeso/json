@@ -649,6 +649,11 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
         {
           state = State::ExpectComma;
         }
+        else if(parser->Peek() == ':')
+        {
+          AddError(result, parser, Error::Type::InvalidCharacter, "Found colon instead of comma");
+          return nullptr;
+        }
         else
         {
           state = State::ExpectEnd;
