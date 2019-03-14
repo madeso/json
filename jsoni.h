@@ -8,9 +8,11 @@
 
 #include <cassert>
 
+#include <cstdint>
+
 // defines
-using tint = int;
-using tloc = int;
+using tint = int64_t;
+using tloc = size_t;
 using tnum = double;
 
 // util types
