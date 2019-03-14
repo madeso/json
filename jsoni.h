@@ -8,6 +8,11 @@
 
 #include <cassert>
 
+// defines
+using tint = int;
+using tloc = int;
+using tnum = double;
+
 // util types
 struct Location;
 struct Visitor;
@@ -28,11 +33,11 @@ struct Int;
 struct Location
 {
   Location();
-  explicit Location(int l);
-  Location(int l, int c);
+  explicit Location(tloc l);
+  Location(tloc l, tloc c);
 
-  int line;
-  int column;
+  tloc line;
+  tloc column;
 };
 
 std::ostream& operator<<(std::ostream& s, const Location& location);
@@ -105,13 +110,13 @@ struct String : public Value
 
 struct Number : public Value
 {
-  double number;
+  tnum number;
 
   void Visit(Visitor* visitor) override;
 
   Number* AsNumber() override;
 
-  explicit Number(double d);
+  explicit Number(tnum d);
 };
 
 struct Bool : public Value
@@ -134,13 +139,13 @@ struct Null : public Value
 
 struct Int : public Value
 {
-  int integer;
+  tint integer;
 
   void Visit(Visitor* visitor) override;
 
   Int* AsInt() override;
 
-  explicit Int(int i);
+  explicit Int(tint i);
 };
 
 struct Error
@@ -193,8 +198,8 @@ ParseResult Parse(const std::string& str);
 // Implementation detail..
 
 Location::Location() : line(-1), column(-1) {}
-Location::Location(int l) : line(l), column(-1) {}
-Location::Location(int l, int c) : line(l), column(c) {}
+Location::Location(tloc l) : line(l), column(-1) {}
+Location::Location(tloc l, tloc c) : line(l), column(c) {}
 
 std::ostream& operator<<(std::ostream& s, const Location& location)
 {
@@ -326,7 +331,7 @@ String::String(const std::string& s) : string(s) {}
 
 void Number::Visit(Visitor* visitor) { visitor->VisitNumber(this); }
 Number* Number::AsNumber() { return this; }
-Number::Number(double d) : number(d) {}
+Number::Number(tnum d) : number(d) {}
 
 void Bool::Visit(Visitor* visitor) { visitor->VisitBool(this); }
 Bool* Bool::AsBool() { return this; }
@@ -337,7 +342,7 @@ Null* Null::AsNull() { return this; }
 
 void Int::Visit(Visitor* visitor) { visitor->VisitInt(this); }
 Int* Int::AsInt() { return this; }
-Int::Int(int i) : integer(i) { }
+Int::Int(tint i) : integer(i) { }
 
 
 Error::Error(Type t, const std::string& m, const Location& l) : type(t), message(m), location(l) {}
@@ -409,13 +414,13 @@ struct Parser;
 struct Parser
 {
   std::string str;
-  int index = 0;
+  tloc index = 0;
 
   explicit Parser(const std::string& s) : str(s) {}
 
-  char Peek(int advance = 0) const
+  char Peek(tloc advance = 0) const
   {
-    const int i = index + advance;
+    const tloc i = index + advance;
     if (index >= str.size()) return 0;
     return str[i];
   }
@@ -425,8 +430,8 @@ struct Parser
     return index < str.size();
   }
 
-  int line = 0;
-  int column = 0;
+  tloc line = 0;
+  tloc column = 0;
 
   char Read()
   {
@@ -861,7 +866,7 @@ std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
   std::istringstream in(o.str());
   if(is_integer)
   {
-    int d;
+    tint d;
     in >> d;
     if(in.fail())
     {
@@ -872,7 +877,7 @@ std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
   }
   else
   {
-    double d;
+    tnum d;
     in >> d;
     if(in.fail())
     {
