@@ -12,10 +12,10 @@ JSON for humans is designed to be a simple input/output "stb style" library to r
 
 1. Make sure it parses regular JSON files correctly.
 2. Add a simple output/to string function to serialize dom back to disk/string.
+3. Make faster and less dependent on STL
 
 ## Possible future roadmap
 
-* Make faster and less dependent on STL
 * Make usable in not modern C++ and C?
 * [Relaxed json](https://github.com/Tencent/rapidjson/issues/36)
 * [s json](https://github.com/Autodesk/sjson) from [autodesk stingray](http://help.autodesk.com/view/Stingray/ENU/?guid=__stingray_help_managing_content_sjson_html)
@@ -26,4 +26,14 @@ JSON for humans is designed to be a simple input/output "stb style" library to r
 
 * Line numbers are available after json has loaded successfully
 * Single header file
+
+## License
+
+MIT
+
+## Limitations
+
+Currently the array and object parsing is stack based. What does this mean? Given a json file 1.json containing [1] and another 3.json containing [[[3]]] the library currently parses 1000.json without a problem but encounter a stack overflow on 1000000.json. So it shouldn't be any limitations for manually written json but still is something worth mentioning.
+
+The current implementation of the object uses a std::map for storing the key/values but according to the specification there can be many entries with the same key. A conforming json parser can introduce additional limits so this is one.
 
