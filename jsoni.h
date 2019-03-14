@@ -950,7 +950,7 @@ ParseResult Parse(Parser* parser)
   {
     res.value = ParseArray(&res, parser);
     SkipSpaces(parser);
-    if(parser->HasMoreChar())
+    if(res.value.get() != nullptr && parser->HasMoreChar())
     {
       AddError(&res, parser, Error::Type::NotEof, "Expected EOF after array");
     }
@@ -960,7 +960,7 @@ ParseResult Parse(Parser* parser)
   {
     res.value = ParseObject(&res, parser);
     SkipSpaces(parser);
-    if(parser->HasMoreChar())
+    if(res.value.get() != nullptr && parser->HasMoreChar())
     {
       AddError(&res, parser, Error::Type::NotEof, "Expected EOF after object");
     }
