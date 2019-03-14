@@ -495,7 +495,7 @@ void AppendChar(std::ostream& s, char c)
   }
 }
 
-#define EXPECT(expected_char)\
+#define EXPECT(error_type, expected_char)\
   do\
   {\
     char c = parser->Read();\
@@ -504,7 +504,7 @@ void AppendChar(std::ostream& s, char c)
       std::stringstream expect_ss;\
       expect_ss << "Expected character " << expected_char << " but found ";\
       AppendChar(expect_ss, c);\
-      AddError(result, parser, Error::Type::InvalidCharacter, expect_ss.str());\
+      AddError(result, parser, error_type, expect_ss.str());\
       return nullptr;\
     }\
     SkipSpaces(parser);\
@@ -623,7 +623,7 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
     switch (state)
     {
     case State::ExpectStart:
-      EXPECT('[');
+      EXPECT(Error::Type::InvalidCharacter, '[');
       if (parser->Peek() == ']')
       {
         state = State::ExpectEnd;
@@ -656,11 +656,11 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
       }
       break;
     case State::ExpectComma:
-      EXPECT(',');
+      EXPECT(Error::Type::InvalidCharacter, ',');
       state = State::ExpectValue;
       break;
     case State::ExpectEnd:
-      EXPECT(']');
+      EXPECT(Error::Type::InvalidCharacter, ']');
       state = State::Ended;
       break;
     case State::Ended:
@@ -685,7 +685,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
     switch (state)
     {
     case State::ExpectStart:
-      EXPECT('{');
+      EXPECT(Error::Type::InvalidCharacter, '{');
       if (parser->Peek() == '}')
       {
         state = State::ExpectEnd;
@@ -702,7 +702,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
       {
         return nullptr;
       }
-      EXPECT(':');
+      EXPECT(Error::Type::InvalidCharacter, ':');
       auto v = ParseValue(result, parser);
       if (v == nullptr)
       {
@@ -724,11 +724,11 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
     }
     break;
     case State::ExpectComma:
-      EXPECT(',');
+      EXPECT(Error::Type::InvalidCharacter, ',');
       state = State::ExpectValue;
       break;
     case State::ExpectEnd:
-      EXPECT('}');
+      EXPECT(Error::Type::InvalidCharacter, '}');
       state = State::Ended;
       break;
     case State::Ended:
@@ -751,7 +751,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
     switch(state)
     {
       case State::ExpectStart:
-        EXPECT('\"');
+        EXPECT(Error::Type::InvalidCharacter, '\"');
         if(parser->Peek()=='\"')
         {
           state = State::ExpectEnd;
@@ -785,7 +785,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
       } 
       break;
       case State::ExpectSlash:
-      EXPECT('\\');
+      EXPECT(Error::Type::InvalidCharacter, '\\');
 #define ESCAPE(c, r) if(parser->Peek() == c) { ss << r; }
       ESCAPE('\"', '\"')
       else ESCAPE('\\', '\\')
@@ -825,7 +825,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
       }
       break;
     case State::ExpectEnd:
-      EXPECT('\"');
+      EXPECT(Error::Type::InvalidCharacter, '\"');
       state = State::Ended;
       break;
     case State::Ended:
