@@ -1,6 +1,6 @@
-# JSON for humans
+# JSON parser for humans
 
-JSON for humans is designed to be a simple input/output "stb style" library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
+JSON parser for humans, or jsonh for short, is designed to be a simple input/output "stb style" library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
 
 **What does simple input/output library mean?** It means there are no extra functions to create json making the library more complex. There is also no custom struct to json functions. If this is not what you are looking for, perhaps have a look at [JSON for Modern C++](https://github.com/nlohmann/json) instead.
 
@@ -13,6 +13,14 @@ JSON for humans is designed to be a simple input/output "stb style" library to r
 1. Make sure it parses regular JSON files correctly.
 2. Add a simple output/to string function to serialize dom back to disk/string.
 3. Make faster and less dependent on STL
+
+## How to use
+
+Add jsonh.h to your project in some way. In one file, #define JSONH\_IMPLEMENTATION to get the implementation for the classes and functions.
+
+  auto j = Parse(json\_string);
+  if(!j) { std::cerr << j; return 0; }
+  // j.value now contains the parsed json object
 
 ## Possible future roadmap
 
