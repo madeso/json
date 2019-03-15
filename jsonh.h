@@ -789,7 +789,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
 {
   EXPECT(Error::Type::InvalidCharacter, '\"');
 
-  std::ostringstream ss;
+  std::ostringstream string_buffer;
 
   while(parser->Peek() != '\"')
   {
@@ -801,19 +801,28 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
     }
     else if(c == '\\')
     {
-      if(!ParseEscapeCode(result, parser, ss))
+      if(!ParseEscapeCode(result, parser, string_buffer))
       {
         return nullptr;
       }
     }
+    else if(c < 0x1f)
+    {
+      std::ostringstream ss;
+      ss << "the ";
+      AppendChar(ss, c);
+      ss << " character must be escaped";
+      AddError(result, parser, Error::Type::InvalidCharacterInString, ss.str());
+      return nullptr;
+    }
     else
     {
-      ss << c;
+      string_buffer << c;
     }
   }
   EXPECT(Error::Type::InvalidCharacter, '\"');
 
-  return std::make_shared<String>(ss.str());
+  return std::make_shared<String>(string_buffer.str());
 }
 
 std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
