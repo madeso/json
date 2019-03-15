@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "jsoni.h"
+#include "jsonh.h"
 
 // this comes from https://github.com/miloyip/nativejson-benchmark/tree/master/data/roundtrip
 

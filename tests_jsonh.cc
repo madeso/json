@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "jsoni.h"
+#include "jsonh.h"
 
 // https://github.com/sheredom/json.h/tree/master/test
 

@@ -2,7 +2,7 @@
 #include <fstream>
 
 #define JSONI_IMPLEMENTATION
-#include "jsoni.h"
+#include "jsonh.h"
 
 // todo: time the tests https://github.com/serde-rs/json-benchmark
 
