@@ -234,7 +234,7 @@ TEST_CASE("fail26", "[checker]")
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
-  REQUIRE(j.errors[0].type == Error::Type::InvalidCharacterInString);
+  REQUIRE(j.errors[0].type == Error::Type::IllegalEscape);
 }
 
 TEST_CASE("fail27", "[checker]")
