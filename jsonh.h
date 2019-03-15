@@ -745,6 +745,46 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
   return object;
 }
 
+bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss)
+{
+#define ESCAPE(c, r) if(parser->Peek() == c) { ss << r; }
+  ESCAPE('\"', '\"')
+  else ESCAPE('\\', '\\')
+  else ESCAPE('/', '/')
+  else ESCAPE('b', '\b')
+  else ESCAPE('f', '\f')
+  else ESCAPE('n', '\n')
+  else ESCAPE('r', '\r')
+  else ESCAPE('t', '\t')
+#undef ESCAPE
+  else if(parser->Peek() == 'u'
+      && IsHex(parser->Peek(1))
+      && IsHex(parser->Peek(2))
+      && IsHex(parser->Peek(3))
+      && IsHex(parser->Peek(4))
+      )
+  {
+    parser->Read(); // u
+    parser->Read(); // hex1
+    parser->Read(); // hex2
+    parser->Read(); // hex3
+    parser->Read(); // hex4
+    AddError(result, parser, Error::Type::UnknownError, "hex not currently handled");
+    return false;
+  }
+  else
+  {
+    const char escape_char = parser->Peek();
+    std::ostringstream ss;
+    ss << "Illegal escape sequence: ";
+    AppendChar(ss, escape_char);
+    AddError(result, parser, Error::Type::IllegalEscape, ss.str());
+    return false;
+  }
+
+  return true;
+}
+
 std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
 {
   EXPECT(Error::Type::InvalidCharacter, '\"');
@@ -753,51 +793,22 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
 
   while(parser->Peek() != '\"')
   {
-    char c = parser->Read();
+    const char c = parser->Read();
     if(c == 0 )
     {
       AddError(result, parser, Error::Type::InvalidCharacter, "Unexpected EOF in string");
       return nullptr;
     }
-    ss << c;
-    if(parser->Peek() == '\\')
+    else if(c == '\\')
     {
-      parser->Read();
-
-#define ESCAPE(c, r) if(parser->Peek() == c) { ss << r; }
-      ESCAPE('\"', '\"')
-      else ESCAPE('\\', '\\')
-      else ESCAPE('/', '/')
-      else ESCAPE('b', '\b')
-      else ESCAPE('f', '\f')
-      else ESCAPE('n', '\n')
-      else ESCAPE('r', '\r')
-      else ESCAPE('t', '\t')
-#undef ESCAPE
-      else if(parser->Peek() == 'u'
-          && IsHex(parser->Peek(1))
-          && IsHex(parser->Peek(2))
-          && IsHex(parser->Peek(3))
-          && IsHex(parser->Peek(4))
-          )
+      if(!ParseEscapeCode(result, parser, ss))
       {
-        parser->Read(); // u
-        parser->Read(); // hex1
-        parser->Read(); // hex2
-        parser->Read(); // hex3
-        parser->Read(); // hex4
-        AddError(result, parser, Error::Type::UnknownError, "hex not currently handled");
         return nullptr;
       }
-      else
-      {
-        const char escape_char = parser->Peek();
-        std::ostringstream ss;
-        ss << "Illegal escape sequence: ";
-        AppendChar(ss, escape_char);
-        AddError(result, parser, Error::Type::IllegalEscape, ss.str());
-        return nullptr;
-      }
+    }
+    else
+    {
+      ss << c;
     }
   }
   EXPECT(Error::Type::InvalidCharacter, '\"');
