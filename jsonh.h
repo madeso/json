@@ -1,5 +1,5 @@
-#ifndef JSONI_H
-#define JSONI_H
+#ifndef JSONH_H
+#define JSONH_H
 
 #include <vector>
 #include <map>
@@ -195,7 +195,7 @@ std::ostream& operator<<(std::ostream& s, const ParseResult& result);
 
 ParseResult Parse(const std::string& str);
 
-#ifdef JSONI_IMPLEMENTATION
+#ifdef JSONH_IMPLEMENTATION
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Implementation detail..
@@ -988,7 +988,7 @@ ParseResult Parse(const std::string& str)
   return Parse(&parser);
 }
 
-#endif // JSONI_IMPLEMENTATION
+#endif // JSONH_IMPLEMENTATION
 
-#endif // JSONI_H
+#endif // JSONH_H
 

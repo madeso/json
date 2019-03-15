@@ -1,2 +1,2 @@
-#define JSONI_IMPLEMENTATION
+#define JSONH_IMPLEMENTATION
 #include "jsonh.h"
