@@ -520,7 +520,7 @@ std::shared_ptr<Value > ParseValue  (ParseResult* result, Parser* parser);
 std::shared_ptr<Object> ParseObject (ParseResult* result, Parser* parser);
 std::shared_ptr<Array > ParseArray  (ParseResult* result, Parser* parser);
 std::shared_ptr<String> ParseString (ParseResult* result, Parser* parser);
-std::shared_ptr<Value> ParseNumber (ParseResult* result, Parser* parser);
+std::shared_ptr<Value>  ParseNumber (ParseResult* result, Parser* parser);
 
 bool IsDigit(char c)
 {
@@ -747,50 +747,23 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
 
 std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
 {
-  enum class State { ExpectStart, AnyCharacter, ExpectSlash, ExpectEnd, Ended };
-  State state = State::ExpectStart;
+  EXPECT(Error::Type::InvalidCharacter, '\"');
+
   std::ostringstream ss;
 
-  while(state != State::Ended)
+  while(parser->Peek() != '\"')
   {
-    switch(state)
+    char c = parser->Read();
+    if(c == 0 )
     {
-      case State::ExpectStart:
-        EXPECT(Error::Type::InvalidCharacter, '\"');
-        if(parser->Peek()=='\"')
-        {
-          state = State::ExpectEnd;
-        }
-        else if(parser->Peek()=='\\')
-        {
-          state = State::ExpectSlash;
-        }
-        else
-        {
-          state = State::AnyCharacter;
-        }
-        break;
-      case State::AnyCharacter:
-      {
-        char c = parser->Read();
-        if(c == 0 )
-        {
-          AddError(result, parser, Error::Type::InvalidCharacter, "Unexpected EOF in string");
-          return nullptr;
-        }
-        ss << c;
-        if(parser->Peek() == '\\')
-        {
-         state = State::ExpectSlash;
-        }
-        else if(parser->Peek() == '\"')
-        {
-         state = State::ExpectEnd;
-        }
-      } 
-      break;
-      case State::ExpectSlash:
-      EXPECT(Error::Type::InvalidCharacter, '\\');
+      AddError(result, parser, Error::Type::InvalidCharacter, "Unexpected EOF in string");
+      return nullptr;
+    }
+    ss << c;
+    if(parser->Peek() == '\\')
+    {
+      parser->Read();
+
 #define ESCAPE(c, r) if(parser->Peek() == c) { ss << r; }
       ESCAPE('\"', '\"')
       else ESCAPE('\\', '\\')
@@ -800,6 +773,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
       else ESCAPE('n', '\n')
       else ESCAPE('r', '\r')
       else ESCAPE('t', '\t')
+#undef ESCAPE
       else if(parser->Peek() == 'u'
           && IsHex(parser->Peek(1))
           && IsHex(parser->Peek(2))
@@ -824,24 +798,9 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
         AddError(result, parser, Error::Type::IllegalEscape, ss.str());
         return nullptr;
       }
-      if(parser->Peek() == '\"')
-      {
-        state = State::ExpectEnd;
-      }
-      else
-      {
-        state = State::AnyCharacter;
-      }
-      break;
-    case State::ExpectEnd:
-      EXPECT(Error::Type::InvalidCharacter, '\"');
-      state = State::Ended;
-      break;
-    case State::Ended:
-      assert(false && "object loop should have ended");
-      break;
     }
   }
+  EXPECT(Error::Type::InvalidCharacter, '\"');
 
   return std::make_shared<String>(ss.str());
 }
