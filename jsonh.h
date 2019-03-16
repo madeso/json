@@ -720,6 +720,27 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
   return object;
 }
 
+int CharToHex(char c)
+{
+  if(c >= '0' && c<='9')
+  {
+    return c - '0';
+  }
+  else if(c >= 'a' && c<='f')
+  {
+    return 10 + (c - 'a');
+  }
+  else if(c >= 'A' && c<='F')
+  {
+    return 10 + (c - 'A');
+  }
+  else
+  {
+    assert(false && "Invalid hex code");
+    return 0;
+  }
+}
+
 bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss)
 {
 #define ESCAPE(c, r) if(parser->Peek() == c) { parser->Read(); ss << r; }
@@ -740,12 +761,12 @@ bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss
       )
   {
     parser->Read(); // u
-    parser->Read(); // hex1
-    parser->Read(); // hex2
-    parser->Read(); // hex3
-    parser->Read(); // hex4
-    AddError(result, parser, Error::Type::UnknownError, "hex not currently handled");
-    return false;
+    const auto hex1 = CharToHex(parser->Read()); // hex1
+    const auto hex2 = CharToHex(parser->Read()); // hex2
+    const auto hex3 = CharToHex(parser->Read()); // hex3
+    const auto hex4 = CharToHex(parser->Read()); // hex4
+    const char val = (hex1 << 16) & (hex2 << 8) & (hex3 << 4) & hex4;
+    ss << val;
   }
   else
   {
