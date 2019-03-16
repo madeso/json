@@ -617,7 +617,7 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
   EXPECT(Error::Type::InvalidCharacter, '[');
 
   bool first = true;
-  while (parser->Peek() != ']')
+  while (parser->HasMoreChar() && parser->Peek() != ']')
   {
     if(first)
     {
@@ -638,10 +638,16 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
       array->array.push_back(v);
     }
     SkipSpaces(parser);
-    if(parser->Peek() == ':')
+
+    const auto next_char = parser->Peek();
+    switch(next_char)
     {
-      AddError(result, parser, Error::Type::InvalidCharacter, "Found colon instead of comma");
-      return nullptr;
+      case ':':
+        AddError(result, parser, Error::Type::InvalidCharacter, "Found colon instead of comma");
+        return nullptr;
+      case '}':
+        AddError(result, parser, Error::Type::UnclosedArray, "Found }. A square bracket ] closes the array.");
+        return nullptr;
     }
   }
 
