@@ -612,68 +612,40 @@ std::shared_ptr<Value> ParseValue(ParseResult* result, Parser* parser)
 
 std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
 {
-  enum class State { ExpectStart, ExpectValue, ExpectComma, ExpectEnd, Ended };
-
-  State state = State::ExpectStart;
-
   auto array = std::make_shared<Array>();
 
-  while(state != State::Ended)
-  { 
-    switch (state)
+  EXPECT(Error::Type::InvalidCharacter, '[');
+
+  bool first = true;
+  while (parser->Peek() != ']')
+  {
+    if(first)
     {
-    case State::ExpectStart:
-      EXPECT(Error::Type::InvalidCharacter, '[');
-      if (parser->Peek() == ']')
-      {
-        state = State::ExpectEnd;
-      }
-      else
-      {
-        state = State::ExpectValue;
-      }
-      break;
-    case State::ExpectValue:
-      {
-        auto v = ParseValue(result, parser);
-        if (v == nullptr)
-        {
-          return nullptr;
-        }
-        else
-        {
-          array->array.push_back(v);
-        }
-        SkipSpaces(parser);
-        if (parser->Peek() == ',')
-        {
-          state = State::ExpectComma;
-        }
-        else if(parser->Peek() == ':')
-        {
-          AddError(result, parser, Error::Type::InvalidCharacter, "Found colon instead of comma");
-          return nullptr;
-        }
-        else
-        {
-          state = State::ExpectEnd;
-        }
-      }
-      break;
-    case State::ExpectComma:
+      first = false;
+    }
+    else
+    {
       EXPECT(Error::Type::InvalidCharacter, ',');
-      state = State::ExpectValue;
-      break;
-    case State::ExpectEnd:
-      EXPECT(Error::Type::UnclosedArray, ']');
-      state = State::Ended;
-      break;
-    case State::Ended:
-      assert(false && "array loop should have ended");
-      break;
+    }
+
+    auto v = ParseValue(result, parser);
+    if (v == nullptr)
+    {
+      return nullptr;
+    }
+    else
+    {
+      array->array.push_back(v);
+    }
+    SkipSpaces(parser);
+    if(parser->Peek() == ':')
+    {
+      AddError(result, parser, Error::Type::InvalidCharacter, "Found colon instead of comma");
+      return nullptr;
     }
   }
 
+  EXPECT(Error::Type::InvalidCharacter, ']');
   return array;
 }
 
