@@ -299,7 +299,7 @@ TEST_CASE("fail33", "[checker]")
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
-  REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+  REQUIRE(j.errors[0].type == Error::Type::UnclosedArray);
 }
 
 //////////////////////////////////////////////////////////////////////////
