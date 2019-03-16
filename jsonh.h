@@ -722,7 +722,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
 
 bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss)
 {
-#define ESCAPE(c, r) if(parser->Peek() == c) { ss << r; }
+#define ESCAPE(c, r) if(parser->Peek() == c) { parser->Read(); ss << r; }
   ESCAPE('\"', '\"')
   else ESCAPE('\\', '\\')
   else ESCAPE('/', '/')
