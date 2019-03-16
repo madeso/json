@@ -509,7 +509,6 @@ void AppendChar(std::ostream& s, char c)
       AddError(result, parser, c?error_type:Error::Type::UnexpectedEof, expect_ss.str());\
       return nullptr;\
     }\
-    SkipSpaces(parser);\
   } while(false)
 
 void AddError(ParseResult* result, Parser* parser, Error::Type type, const std::string& err)
@@ -623,6 +622,7 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
   auto array = std::make_shared<Array>();
 
   EXPECT(Error::Type::InvalidCharacter, '[');
+  SkipSpaces(parser);
 
   const auto start_of_array = parser->GetLocation();
 
@@ -636,6 +636,7 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
     else
     {
       EXPECT(Error::Type::InvalidCharacter, ',');
+      SkipSpaces(parser);
     }
 
     auto v = ParseValue(result, parser);
@@ -678,6 +679,7 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
 std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
 {
   EXPECT(Error::Type::InvalidCharacter, '{');
+  SkipSpaces(parser);
   auto object = std::make_shared<Object>();
 
   bool first = true;
@@ -690,6 +692,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
     else
     {
       EXPECT(Error::Type::InvalidCharacter, ',');
+      SkipSpaces(parser);
     }
 
     auto s = ParseString(result, parser);
@@ -698,6 +701,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
       return nullptr;
     }
     EXPECT(Error::Type::InvalidCharacter, ':');
+    SkipSpaces(parser);
     auto v = ParseValue(result, parser);
     if (v == nullptr)
     {
@@ -711,6 +715,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
   }
 
   EXPECT(Error::Type::InvalidCharacter, '}');
+  SkipSpaces(parser);
 
   return object;
 }
@@ -791,6 +796,7 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
     }
   }
   EXPECT(Error::Type::InvalidCharacter, '\"');
+  SkipSpaces(parser);
 
   return std::make_shared<String>(string_buffer.str());
 }
