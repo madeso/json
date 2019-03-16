@@ -433,8 +433,13 @@ struct Parser
     return index < str.size();
   }
 
-  tloc line = 0;
+  tloc line = 1;
   tloc column = 0;
+
+  Location GetLocation() const
+  {
+    return {line, column};
+  }
 
   char Read()
   {
@@ -513,7 +518,13 @@ void AppendChar(std::ostream& s, char c)
 void AddError(ParseResult* result, Parser* parser, Error::Type type, const std::string& err)
 {
   result->errors.push_back(Error{type, err, Location{parser->line, parser->column} });
+  // todo: assert here instead of assigning, since the value shouldn't be set anyway...
   result->value = nullptr;
+}
+
+void AddNote(ParseResult* result, const Location& loc, const std::string& note)
+{
+  result->errors.push_back(Error{Error::Type::Note, note, loc});
 }
 
 std::shared_ptr<Value > ParseValue  (ParseResult* result, Parser* parser);
@@ -616,6 +627,8 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
 
   EXPECT(Error::Type::InvalidCharacter, '[');
 
+  const auto start_of_array = parser->GetLocation();
+
   bool first = true;
   while (parser->HasMoreChar() && parser->Peek() != ']')
   {
@@ -647,11 +660,21 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
         return nullptr;
       case '}':
         AddError(result, parser, Error::Type::UnclosedArray, "Found }. A square bracket ] closes the array.");
+        AddNote(result, start_of_array, "Array started here");
         return nullptr;
     }
   }
 
-  EXPECT(Error::Type::InvalidCharacter, ']');
+  const auto end = parser->Read();
+  if(end != ']')
+  {
+    std::ostringstream ss;
+    ss << "Expected end of array but found ";
+    AppendChar(ss, end);
+    AddError(result, parser, Error::Type::UnclosedArray, ss.str());
+    AddNote(result, start_of_array, "Array started here");
+    return nullptr;
+  }
   return array;
 }
 
