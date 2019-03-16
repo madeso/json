@@ -680,68 +680,40 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
 
 std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
 {
-  enum class State { ExpectStart, ExpectValue, ExpectComma, ExpectEnd, Ended };
-
-  State state = State::ExpectStart;
-
+  EXPECT(Error::Type::InvalidCharacter, '{');
   auto object = std::make_shared<Object>();
 
-  while (state != State::Ended)
+  bool first = true;
+  while (parser->HasMoreChar() && parser->Peek() != '}')
   {
-    switch (state)
+    if(first)
     {
-    case State::ExpectStart:
-      EXPECT(Error::Type::InvalidCharacter, '{');
-      if (parser->Peek() == '}')
-      {
-        state = State::ExpectEnd;
-      }
-      else
-      {
-        state = State::ExpectValue;
-      }
-      break;
-    case State::ExpectValue:
-    {
-      auto s = ParseString(result, parser);
-      if (s == nullptr)
-      {
-        return nullptr;
-      }
-      EXPECT(Error::Type::InvalidCharacter, ':');
-      auto v = ParseValue(result, parser);
-      if (v == nullptr)
-      {
-        return nullptr;
-      }
-      else
-      {
-        object->object[s->string] = v;
-      }
-      SkipSpaces(parser);
-      if (parser->Peek() == ',')
-      {
-        state = State::ExpectComma;
-      }
-      else
-      {
-        state = State::ExpectEnd;
-      }
+      first = false;
     }
-    break;
-    case State::ExpectComma:
+    else
+    {
       EXPECT(Error::Type::InvalidCharacter, ',');
-      state = State::ExpectValue;
-      break;
-    case State::ExpectEnd:
-      EXPECT(Error::Type::InvalidCharacter, '}');
-      state = State::Ended;
-      break;
-    case State::Ended:
-      assert(false && "object loop should have ended");
-      break;
     }
+
+    auto s = ParseString(result, parser);
+    if (s == nullptr)
+    {
+      return nullptr;
+    }
+    EXPECT(Error::Type::InvalidCharacter, ':');
+    auto v = ParseValue(result, parser);
+    if (v == nullptr)
+    {
+      return nullptr;
+    }
+    else
+    {
+      object->object[s->string] = v;
+    }
+    SkipSpaces(parser);
   }
+
+  EXPECT(Error::Type::InvalidCharacter, '}');
 
   return object;
 }
