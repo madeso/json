@@ -231,7 +231,6 @@ struct PrettyPrintVisitor : public Visitor
 
   void StreamString(const std::string& str)
   {
-    // todo: escape string
     *stream << '\"';
     for (char c : str)
     {
@@ -409,8 +408,6 @@ std::ostream& operator<<(std::ostream& s, const ParseResult& result)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Here comes the parser
-
-// todo: change all these parsers to a better structure with loops instead of this while/switch/state structure
 
 struct Parser;
 
