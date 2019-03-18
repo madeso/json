@@ -765,7 +765,7 @@ bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss
     const auto hex2 = CharToHex(parser->Read()); // hex2
     const auto hex3 = CharToHex(parser->Read()); // hex3
     const auto hex4 = CharToHex(parser->Read()); // hex4
-    const char val = (hex1 << 16) & (hex2 << 8) & (hex3 << 4) & hex4;
+    const char val = (hex1 << 12) | (hex2 << 8) | (hex3 << 4) | hex4;
     ss << val;
   }
   else
