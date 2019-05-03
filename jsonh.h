@@ -295,7 +295,10 @@ struct PrettyPrintVisitor : public Visitor
   }
   void VisitNumber(Number* number) override
   {
-    *stream << number->number;
+    // can't really detect if it is -0 or 0, should we? does it have a special value?
+    // https://stackoverflow.com/questions/45795397/behaviour-of-negative-zero-0-0-in-comparison-with-positive-zero-0-0/45795465
+    if(number->number == 0 ) *stream << "0.0";
+    else *stream << number->number;
   }
   void VisitBool(Bool  * boolean) override
   {

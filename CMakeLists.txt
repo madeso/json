@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0)
 set_property(GLOBAL PROPERTY USE_FOLDERS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-project(jsoni)
+project(jsonh)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 14)
@@ -35,14 +35,14 @@ if(CMAKE_CONFIGURATION_TYPES)
 endif()
 
 set(main_src
-  jsoni.h
+  jsonh.h
   main.cc
   )
 source_group("" FILES ${main_src})
 add_executable(json ${main_src})
 
 set(tests_src
-  jsoni.h
+  jsonh.h
   tests_main.cc
   tests_impl.cc
   tests_checker.cc
@@ -56,8 +56,8 @@ source_group("" FILES ${tests_src})
 include_directories(SYSTEM external/catch/)
 add_executable(tests ${tests_src})
 
-add_custom_command(TARGET tests POST_BUILD
-    COMMAND tests
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Running tests"
-)
+# add_custom_command(TARGET tests POST_BUILD
+# COMMAND tests
+# WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+# COMMENT "Running tests"
+# )
