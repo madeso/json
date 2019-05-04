@@ -1,12 +1,14 @@
 # JSON parser for humans
 
+[![Build Status](https://www.travis-ci.org/madeso/json.svg?branch=master)](https://www.travis-ci.org/madeso/json)
+
 JSON parser for humans, or jsonh for short, is designed to be a simple input/output "stb style" library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
 
 **What does simple input/output library mean?** It means there are no extra functions to create json making the library more complex. There is also no custom struct to json functions. If this is not what you are looking for, perhaps have a look at [JSON for Modern C++](https://github.com/nlohmann/json) instead.
 
-**What does "written by humans" mean?** It means that given a choice between helpful error messages/syntax and performance, helpfullness will always win. This means that for every json value, there is a corresponing line/column entry so that when you search in your database for the user entered value and don't find it you can let the user know where in the json the value was requested. If this is not what you are looking for, perhaps have a look at [rapidjson](https://github.com/Tencent/rapidjson) instead.
+**What does "written by humans" mean?** It means that given a choice between helpful error messages/syntax and performance, helpfulness will always win. This means that for every json value, there is a corresponding line/column entry so that when you search in your database for the user entered value and don't find it you can let the user know where in the json the value was requested. If this is not what you are looking for, perhaps have a look at [rapidjson](https://github.com/Tencent/rapidjson) instead.
 
-**What does stb style library mean?** It means that it is distributet as a single header without templates and external dependencies and in one file you have to define a macro to "implement the implementations". See the [stb repo](https://github.com/nothings/stb) and [stb howto](https://github.com/nothings/stb/blob/master/docs/stb_howto.txt) for a more detailed infomation.
+**What does stb style library mean?** It means that it is distributed as a single header without templates and external dependencies and in one file you have to define a macro to "implement the implementations". See the [stb repo](https://github.com/nothings/stb) and [stb howto](https://github.com/nothings/stb/blob/master/docs/stb_howto.txt) for a more detailed information.
 
 ## Roadmap
 
@@ -53,7 +55,7 @@ MIT
 
 ## Limitations
 
-Currently the array and object parsing is stack based. What does this mean? Given a json file 1.json containing [1] and another 3.json containing [[[3]]] the library currently parses 1000.json without a problem but encounter a stack overflow on 1000000.json. So it shouldn't be any limitations for manually written json but still is something worth mentioning.
+Currently the array and object parsing is stack based. What does this mean? Given a json file 1.json containing [1] and another 3.json containing [[[3]]] the library currently parses 1000.json without a problem but encounter a stack overflow on 1000000.json. So I don't think this will be any limitations for manually written json but still is something worth mentioning.
 
 The current implementation of the object uses a std::map for storing the key/values but according to the specification there can be many entries with the same key. A conforming json parser can introduce additional limits so this is one.
 
