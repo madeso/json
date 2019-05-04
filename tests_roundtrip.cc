@@ -607,10 +607,32 @@ TEST_CASE("roundtrip19", "[roundtrip]")
 TEST_CASE("roundtrip20", "[roundtrip]")
 {
   const std::string src = R"([0.0])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto n1 = aj1->array[0]->AsNumber();
+  auto n2 = aj2->array[0]->AsNumber();
+
+  REQUIRE(n1);
+  REQUIRE(n2);
+
+  REQUIRE(n1->number == Approx(0.0));
+  REQUIRE(n2->number == Approx(0.0));
 }
 
 // should we support -0.0
@@ -628,19 +650,63 @@ TEST_CASE("roundtrip21", "[roundtrip]")
 TEST_CASE("roundtrip22", "[roundtrip]")
 {
   const std::string src = R"([1.2345])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto n1 = aj1->array[0]->AsNumber();
+  auto n2 = aj2->array[0]->AsNumber();
+
+  REQUIRE(n1);
+  REQUIRE(n2);
+
+  REQUIRE(n1->number == Approx(1.2345));
+  REQUIRE(n2->number == Approx(1.2345));
 }
 
 TEST_CASE("roundtrip23", "[roundtrip]")
 {
   const std::string src = R"([-1.2345])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto n1 = aj1->array[0]->AsNumber();
+  auto n2 = aj2->array[0]->AsNumber();
+
+  REQUIRE(n1);
+  REQUIRE(n2);
+
+  REQUIRE(n1->number == Approx(-1.2345));
+  REQUIRE(n2->number == Approx(-1.2345));
 }
 
 // failed to parse number on osx but not on linux?
@@ -664,36 +730,86 @@ TEST_CASE("roundtrip25", "[roundtrip]")
 }
 */
 
+TEST_CASE("why does shorter scientific fail to read?", "[crazy]")
+{
+  // this is ok...
+  std::istringstream ssa("2.2250738585072014e-308");
+  double a;
+  ssa >> a;
+  CHECK_FALSE(ssa.fail());
+  CHECK(ssa.eof());
+
+  // but this is not?
+  // fails in osx
+  // read looks ok in debugger/inspector
+  std::istringstream ssb("2.22507e-308");
+  double b;
+  ssb >> b;
+  CHECK_FALSE(ssb.fail());
+  CHECK(ssa.eof());
+}
+
 TEST_CASE("roundtrip26", "[roundtrip]")
 {
   const std::string src = R"([2.2250738585072014e-308])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
   // do we need to support roundtrip of doubles?
   // REQUIRE(dmp == src);
-  auto* arr = j.value->AsArray();
-  REQUIRE(arr);
-  REQUIRE(arr->array.size() == 1);
-  auto* num = arr->array[0]->AsNumber();
-  REQUIRE(num);
-  REQUIRE(num->number == Approx(2.2250738585072014e-308) );
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto n1 = aj1->array[0]->AsNumber();
+  auto n2 = aj2->array[0]->AsNumber();
+
+  REQUIRE(n1);
+  REQUIRE(n2);
+
+  REQUIRE(n1->number == Approx(2.2250738585072014e-308));
+  REQUIRE(n2->number == Approx(2.2250738585072014e-308));
 }
 
 TEST_CASE("roundtrip27", "[roundtrip]")
 {
   const std::string src = R"([1.7976931348623157e308])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
   // same reason as above
   // REQUIRE(dmp == src);
 
-  auto* arr = j.value->AsArray();
-  REQUIRE(arr);
-  REQUIRE(arr->array.size() == 1);
-  auto* num = arr->array[0]->AsNumber();
-  REQUIRE(num);
-  REQUIRE(num->number == Approx(1.7976931348623157e308) );
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto n1 = aj1->array[0]->AsNumber();
+  auto n2 = aj2->array[0]->AsNumber();
+
+  REQUIRE(n1);
+  REQUIRE(n2);
+
+  REQUIRE(n1->number == Approx(1.7976931348623157e308));
+  REQUIRE(n2->number == Approx(1.7976931348623157e308));
 }
 
