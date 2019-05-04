@@ -47,8 +47,10 @@ std::ostream& operator<<(std::ostream& s, const Location& location);
 
 struct Visitor
 {
+  // will not recurse, if you want to visit the children, you have to keep calling Visit
   virtual void VisitObject (Object* object ) = 0;
   virtual void VisitArray  (Array * array  ) = 0;
+
   virtual void VisitString (String* string ) = 0;
   virtual void VisitNumber (Number* number ) = 0;
   virtual void VisitBool   (Bool  * boolean) = 0;
@@ -71,6 +73,7 @@ struct Value
 
   virtual void Visit(Visitor* visitor) = 0;
 
+  // only exact matches
   virtual Object* AsObject();
   virtual Array * AsArray ();
   virtual String* AsString();

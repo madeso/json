@@ -12,19 +12,33 @@ JSON parser for humans, or jsonh for short, is designed to be a simple input/out
 
 ## Roadmap
 
-1. Make sure it parses regular JSON files correctly.
-2. Add a simple output/to string function to serialize dom back to disk/string.
-3. Make faster and less dependent on STL
+1. Make sure it parses regular JSON files correctly on linux/osx/windows.
+2. Add a simple output/to string function to serialize dom back to disk/string (pretty + compact).
+3. Perhaps one or two things from from the "Possible future roadmap"
+4. Make faster and less dependent on STL
 
 ## How to use
 
-Add jsonh.h to your project in some way. In one file, #define JSONH\_IMPLEMENTATION to get the implementation for the classes and functions.
+1. Add jsonh.h to your project in some way.
+
+2. In _one_ file, #define JSONH\_IMPLEMENTATION to get the implementation for the classes and functions.
 
 ```cpp
-// 1. Parse string into DOM structure
+// in main.cpp
+#define JSONH_IMPLMENENTATION
+#include "jsonh.h"
+
+// in other_files.cpp
+#include "json.h"
+```
+
+3. Use it!
+
+```cpp
+// 3a. Parse string into DOM structure
 auto j = Parse(json_string);
 
-// 2. Check for errors
+// 3b. Check for errors
 if(!j) { std::cerr << j; return 0; }
 // or
 if(j.HasErrors()) { std::cerr << j; return 0; };
@@ -33,8 +47,46 @@ if(!j.errors.empty()) { std::cerr << j; return 0; };
 // or
 if(j.value == nullptr) { std::cerr << j; return 0; };
 
-// 3. Use j.value
+// 3c. Use j.value
+std::shared_ptr<Value> root = j.value;
+
+// the root of a json can eiter be a array or a object.
+Array* arr = root->AsArray();
+Object* obj = root->AsObject();
+
+// Both functions return a nullptr if the root isn't array or a object. 
+
+// Array::array is a std::vector of shared_ptr to Value
+// 
+// struct Array : public Value
+// {
+//   std::vector<std::shared_ptr<Value>> array;
+// };
+
+
+// Object::object is a std::map of std::string to shared_ptr to Value
+// 
+// struct Object : public Value
+// {
+//   std::map<std::string, std::shared_ptr<Value>> object;
+// };
+ 
 ```
+
+Other types of values are
+
+* Null (AsNull)
+* Bool(AsBool, Bool::boolean)
+* Int(AsInt(), Int::integer)
+* Number(AsNumber(), Number::number)
+* String (AsString(), String::string)
+
+Numbers in jsonh are either represented as Int or as Number. 0 is a Int, while 0.0 is a Number.
+Since there are scenarios where it is important if it is one and not the other,
+array indices for example.
+
+jsonh _will not_ do any conversions for you. If you AsNumber a
+0 value, you will get nullptr.
 
 ## Possible future roadmap
 
@@ -43,6 +95,7 @@ if(j.value == nullptr) { std::cerr << j; return 0; };
 * [s json](https://github.com/Autodesk/sjson) from [autodesk stingray](http://help.autodesk.com/view/Stingray/ENU/?guid=__stingray_help_managing_content_sjson_html)
 * [json 5](https://json5.org)
 * [h json](https://hjson.org/)
+* macro arguments to define namespace, struct name prefixes or custom names for structs
 
 ## USP (unique selling points)
 
