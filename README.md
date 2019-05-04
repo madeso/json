@@ -19,9 +19,19 @@ JSON parser for humans, or jsonh for short, is designed to be a simple input/out
 Add jsonh.h to your project in some way. In one file, #define JSONH\_IMPLEMENTATION to get the implementation for the classes and functions.
 
 ```cpp
-auto j = Parse(json\_string);
+// 1. Parse string into DOM structure
+auto j = Parse(json_string);
+
+// 2. Check for errors
 if(!j) { std::cerr << j; return 0; }
-// j.value now contains the parsed json object
+// or
+if(j.HasErrors()) { std::cerr << j; return 0; };
+// or
+if(!j.errors.empty()) { std::cerr << j; return 0; };
+// or
+if(j.value == nullptr) { std::cerr << j; return 0; };
+
+// 3. Use j.value
 ```
 
 ## Possible future roadmap
