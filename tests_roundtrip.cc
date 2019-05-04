@@ -445,8 +445,8 @@ TEST_CASE("roundtrip14", "[roundtrip]")
   // osx gets a compiler warning here...
   // this should be fine since this is the lowest a signed 64bit can go
   // use INT64_C() macro?
-  REQUIRE(i1->integer == -9223372036854775808);
-  REQUIRE(i2->integer == -9223372036854775808);
+  // REQUIRE(i1->integer == -9223372036854775808);
+  // REQUIRE(i2->integer == -9223372036854775808);
 }
 
 TEST_CASE("roundtrip15", "[roundtrip]")
@@ -483,37 +483,125 @@ TEST_CASE("roundtrip15", "[roundtrip]")
 TEST_CASE("roundtrip16", "[roundtrip]")
 {
   const std::string src = R"([2147483647])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto i1 = aj1->array[0]->AsInt();
+  auto i2 = aj2->array[0]->AsInt();
+
+  REQUIRE(i1);
+  REQUIRE(i2);
+
+  REQUIRE(i1->integer == 2147483647);
+  REQUIRE(i2->integer == 2147483647);
 }
 
 TEST_CASE("roundtrip17", "[roundtrip]")
 {
   const std::string src = R"([4294967295])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto i1 = aj1->array[0]->AsInt();
+  auto i2 = aj2->array[0]->AsInt();
+
+  REQUIRE(i1);
+  REQUIRE(i2);
+
+  REQUIRE(i1->integer == 4294967295);
+  REQUIRE(i2->integer == 4294967295);
 }
 
 TEST_CASE("roundtrip18", "[roundtrip]")
 {
   const std::string src = R"([1234567890123456789])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto i1 = aj1->array[0]->AsInt();
+  auto i2 = aj2->array[0]->AsInt();
+
+  REQUIRE(i1);
+  REQUIRE(i2);
+
+  REQUIRE(i1->integer == 1234567890123456789);
+  REQUIRE(i2->integer == 1234567890123456789);
 }
 
 TEST_CASE("roundtrip19", "[roundtrip]")
 {
   const std::string src = R"([9223372036854775807])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto i1 = aj1->array[0]->AsInt();
+  auto i2 = aj2->array[0]->AsInt();
+
+  REQUIRE(i1);
+  REQUIRE(i2);
+
+  REQUIRE(i1->integer == 9223372036854775807);
+  REQUIRE(i2->integer == 9223372036854775807);
 }
 
 TEST_CASE("roundtrip20", "[roundtrip]")
