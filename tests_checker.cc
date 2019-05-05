@@ -415,14 +415,56 @@ TEST_CASE("pass2", "[checker]")
 
 TEST_CASE("pass3", "[checker]")
 {
-  auto j = Parse(R"(
+  const std::string src = R"(
 {
     "JSON Test Pattern pass3": {
         "The outermost value": "must be an object or array.",
         "In this test": "It is an object."
     }
 }
-    )");
-  REQUIRE(j);
+    )";
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto oj1 = j1.value->AsObject();
+  auto oj2 = j2.value->AsObject();
+
+  REQUIRE(oj1);
+  REQUIRE(oj2);
+
+  REQUIRE(oj1->object.size() == 1);
+  REQUIRE(oj2->object.size() == 1);
+
+  auto c1 = oj1->object["JSON Test Pattern pass3"]->AsObject();
+  auto c2 = oj2->object["JSON Test Pattern pass3"]->AsObject();
+
+  REQUIRE(c1);
+  REQUIRE(c2);
+
+  REQUIRE(c1->object.size() == 2);
+  REQUIRE(c2->object.size() == 2);
+
+  auto sa1 = c1->object["The outermost value"]->AsString();
+  auto sa2 = c2->object["The outermost value"]->AsString();
+
+  REQUIRE(sa1);
+  REQUIRE(sa2);
+
+  REQUIRE(sa1->string == "must be an object or array.");
+  REQUIRE(sa2->string == "must be an object or array.");
+
+
+  auto sb1 = c1->object["In this test"]->AsString();
+  auto sb2 = c2->object["In this test"]->AsString();
+
+  REQUIRE(sb1);
+  REQUIRE(sb2);
+
+  REQUIRE(sb1->string == "It is an object.");
+  REQUIRE(sb2->string == "It is an object.");
 }
 
