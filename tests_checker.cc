@@ -371,10 +371,46 @@ TEST_CASE("pass1", "[checker]")
 
 TEST_CASE("pass2", "[checker]")
 {
-  auto j = Parse(R"(
+  const std::string src = R"(
 [[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
-    )");
-  REQUIRE(j);
+    )";
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  for(int i=0; i<18; i+=1)
+  {
+    REQUIRE( aj1->array.size() ==1 );
+    REQUIRE( aj2->array.size() ==1 );
+
+    aj1 = aj1->array[0]->AsArray();
+    aj2 = aj2->array[0]->AsArray();
+
+    REQUIRE(aj1);
+    REQUIRE(aj2);
+  }
+
+  REQUIRE( aj1->array.size() ==1 );
+  REQUIRE( aj2->array.size() ==1 );
+
+  auto s1 = aj1->array[0]->AsString();
+  auto s2 = aj2->array[0]->AsString();
+
+  REQUIRE(s1);
+  REQUIRE(s2);
+
+  REQUIRE(s1->string == "Not too deep");
+  REQUIRE(s2->string == "Not too deep");
 }
 
 TEST_CASE("pass3", "[checker]")
