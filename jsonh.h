@@ -726,7 +726,7 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
   return object;
 }
 
-int CharToHex(char c)
+char CharToHex(char c)
 {
   if(c >= '0' && c<='9')
   {
@@ -777,10 +777,10 @@ bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss
   else
   {
     const char escape_char = parser->Peek();
-    std::ostringstream ss;
-    ss << "Illegal escape sequence: ";
-    AppendChar(ss, escape_char);
-    AddError(result, parser, Error::Type::IllegalEscape, ss.str());
+    std::ostringstream ess;
+    ess << "Illegal escape sequence: ";
+    AppendChar(ess, escape_char);
+    AddError(result, parser, Error::Type::IllegalEscape, ess.str());
     return false;
   }
 
