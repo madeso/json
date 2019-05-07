@@ -380,8 +380,8 @@ TEST_CASE("roundtrip12", "[roundtrip]")
   REQUIRE(i1);
   REQUIRE(i2);
 
-  REQUIRE(i1->integer == -2147483648);
-  REQUIRE(i2->integer == -2147483648);
+  REQUIRE(i1->integer == -2147483648LL);
+  REQUIRE(i2->integer == -2147483648LL);
 }
 
 TEST_CASE("roundtrip13", "[roundtrip]")
@@ -445,8 +445,8 @@ TEST_CASE("roundtrip14", "[roundtrip]")
   // osx gets a compiler warning here...
   // this should be fine since this is the lowest a signed 64bit can go
   // use INT64_C() macro?
-  // REQUIRE(i1->integer == -9223372036854775808);
-  // REQUIRE(i2->integer == -9223372036854775808);
+  REQUIRE(i1->integer == -9223372036854775808LL);
+  REQUIRE(i2->integer == -9223372036854775808LL);
 }
 
 TEST_CASE("roundtrip15", "[roundtrip]")
@@ -709,28 +709,73 @@ TEST_CASE("roundtrip23", "[roundtrip]")
   REQUIRE(n2->number == Approx(-1.2345));
 }
 
-// failed to parse number on osx but not on linux?
-/*
+// fails to parse number on osx but not on linux?
 TEST_CASE("roundtrip24", "[roundtrip]")
 {
   const std::string src = R"([5e-324])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
-  REQUIRE(dmp == src);
+  auto j1 = Parse(src);
+  REQUIRE(j1);
+
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  // do we need to support roundtrip of doubles?
+  // REQUIRE(dmp == src);
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto n1 = aj1->array[0]->AsNumber();
+  auto n2 = aj2->array[0]->AsNumber();
+
+  REQUIRE(n1);
+  REQUIRE(n2);
+
+  REQUIRE(n1->number == Approx(5e-324));
+  REQUIRE(n2->number == Approx(5e-324));
 }
 
+// fails to parse number on osx but not on linux?
 TEST_CASE("roundtrip25", "[roundtrip]")
 {
   const std::string src = R"([2.225073858507201e-308])";
-  auto j = Parse(src);
-  REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
-  REQUIRE(dmp == src);
-}
-*/
+  auto j1 = Parse(src);
+  REQUIRE(j1);
 
-TEST_CASE("why does shorter scientific fail to read?", "[crazy]")
+  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  // do we need to support roundtrip of doubles?
+  // REQUIRE(dmp == src);
+
+  auto j2 = Parse(dmp);
+  REQUIRE(j2);
+
+  auto aj1 = j1.value->AsArray();
+  auto aj2 = j2.value->AsArray();
+
+  REQUIRE(aj1);
+  REQUIRE(aj2);
+
+  REQUIRE(aj1->array.size() == 1);
+  REQUIRE(aj2->array.size() == 1);
+
+  auto n1 = aj1->array[0]->AsNumber();
+  auto n2 = aj2->array[0]->AsNumber();
+
+  REQUIRE(n1);
+  REQUIRE(n2);
+
+  REQUIRE(n1->number == Approx(2.225073858507201e-308));
+  REQUIRE(n2->number == Approx(2.225073858507201e-308));
+}
+
+TEST_CASE("why does shorter scientific fail to read on osx?", "[crazy]")
 {
   // this is ok...
   std::istringstream ssa("2.2250738585072014e-308");
