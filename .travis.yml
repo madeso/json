@@ -1,6 +1,14 @@
 language: cpp
-dist: xenial
 compiler: clang
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+    - os: osx
+      osx_image: xcode10.2
+  allow_failures:
+    - os: osx
 
 script:
   - mkdir -p build
