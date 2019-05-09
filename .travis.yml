@@ -15,7 +15,7 @@ matrix:
 script:
   - mkdir -p build
   - cd build
-  - cmake -G $GENERATOR ..
+  - cmake -G "$GENERATOR" ..
   - cmake --build .
   - ls
   - ./tests
