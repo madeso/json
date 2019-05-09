@@ -775,25 +775,6 @@ TEST_CASE("roundtrip25", "[roundtrip]")
   REQUIRE(n2->number == Approx(2.225073858507201e-308));
 }
 
-TEST_CASE("why does shorter scientific fail to read on osx?", "[crazy]")
-{
-  // this is ok...
-  std::istringstream ssa("2.2250738585072014e-308");
-  double a;
-  ssa >> a;
-  CHECK_FALSE(ssa.fail());
-  CHECK(ssa.eof());
-
-  // but this is not?
-  // fails in osx
-  // read looks ok in debugger/inspector
-  std::istringstream ssb("2.22507e-308");
-  double b;
-  ssb >> b;
-  CHECK_FALSE(ssb.fail());
-  CHECK(ssa.eof());
-}
-
 TEST_CASE("roundtrip26", "[roundtrip]")
 {
   const std::string src = R"([2.2250738585072014e-308])";
