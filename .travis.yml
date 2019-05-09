@@ -9,8 +9,12 @@ matrix:
     - os: osx
       osx_image: xcode10.2
       env: GENERATOR="Unix Makefiles"
+    - os: windows
+      env: GENERATOR="Visual Studio 15 2017"
   allow_failures:
-    - os: osx
+    - os:
+      - osx
+      - windows
 
 script:
   - mkdir -p build
