@@ -51,6 +51,7 @@ set(tests_src
   tests_utf8.cc
   tests_whitebox.cc
   tests_roundtrip.cc
+  tests_osx.cc
   )
 source_group("" FILES ${tests_src})
 include_directories(SYSTEM external/catch/)
