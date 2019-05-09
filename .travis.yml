@@ -17,10 +17,6 @@ matrix:
       env:
         - GENERATOR="Visual Studio 15 2017"
         - TESTS="./Debug/tests.exe"
-  allow_failures:
-    - os:
-      - osx
-      - windows
 
 script:
   - mkdir -p build
