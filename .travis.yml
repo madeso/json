@@ -5,15 +5,17 @@ matrix:
   include:
     - os: linux
       dist: xenial
+      env: GENERATOR="Unix Makefiles"
     - os: osx
       osx_image: xcode10.2
+      env: GENERATOR="Unix Makefiles"
   allow_failures:
     - os: osx
 
 script:
   - mkdir -p build
   - cd build
-  - cmake ..
-  - make
+  - cmake -G $GENERATOR ..
+  - cmake --build .
   - ls
   - ./tests
