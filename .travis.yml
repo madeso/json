@@ -5,12 +5,18 @@ matrix:
   include:
     - os: linux
       dist: xenial
-      env: GENERATOR="Unix Makefiles"
+      env:
+        - GENERATOR="Unix Makefiles"
+        - TESTS="./tests"
     - os: osx
       osx_image: xcode10.2
-      env: GENERATOR="Unix Makefiles"
+      env:
+        - GENERATOR="Unix Makefiles"
+        - TESTS="./tests"
     - os: windows
-      env: GENERATOR="Visual Studio 15 2017"
+      env:
+        - GENERATOR="Visual Studio 15 2017"
+        - TESTS="./Debug/tests/tests.exe"
   allow_failures:
     - os:
       - osx
@@ -22,4 +28,4 @@ script:
   - cmake -G "$GENERATOR" ..
   - cmake --build .
   - ls
-  - ./tests
+  - $TESTS
