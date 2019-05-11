@@ -41,6 +41,13 @@ set(main_src
 source_group("" FILES ${main_src})
 add_executable(json ${main_src})
 
+set(example_src
+  jsonh.h
+  example.cc
+  )
+source_group("" FILES ${example_src})
+add_executable(example ${example_src})
+
 set(tests_src
   jsonh.h
   tests_main.cc
