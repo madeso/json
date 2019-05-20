@@ -498,7 +498,7 @@ void AppendChar(std::ostream& s, char c)
       s << "<space>";
       break;
     default:
-      s << c;
+      s << c << "(" << static_cast<int>(static_cast<unsigned char>(c)) << ")";
       break;
   }
 }
@@ -808,7 +808,9 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
         return nullptr;
       }
     }
-    else if(c < 0x1f)
+    // is this correct? checker fail25 and fail27 seems to think so
+    // but json.org says to allow any unicode character
+    else if(c == '\n' || c=='\t')
     {
       std::ostringstream ss;
       ss << "the ";
