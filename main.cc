@@ -98,7 +98,7 @@ int main(int argc, char * const argv[])
       file_data.assign((std::istreambuf_iterator<char>(file_stream)),
         std::istreambuf_iterator<char>());
 
-      const auto parse_result = Parse(file_data);
+      const auto parse_result = Parse(file_data, ParseFlags::Json);
 
       if (parse_result.HasError())
       {

@@ -22,11 +22,11 @@ TEST_CASE("utf8", "[utf8]")
   }
 }
 )";
-  auto j1 = Parse(src);
+  auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
   const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
-  auto j2 = Parse(dmp);
+  auto j2 = Parse(dmp, ParseFlags::Json);
   REQUIRE(j2);
 
   // todo: check j1 and j2

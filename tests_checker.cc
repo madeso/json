@@ -6,7 +6,7 @@
 
 TEST_CASE("fail1", "[checker]")
 {
-  auto j = Parse(R"("A JSON payload should be an object or array, not a string.")");
+  auto j = Parse(R"("A JSON payload should be an object or array, not a string.")", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
@@ -14,7 +14,7 @@ TEST_CASE("fail1", "[checker]")
 
 TEST_CASE("fail2", "[checker]")
 {
-  auto j = Parse(R"(["Unclosed array")");
+  auto j = Parse(R"(["Unclosed array")", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -23,7 +23,7 @@ TEST_CASE("fail2", "[checker]")
 
 TEST_CASE("fail3", "[checker]")
 {
-  auto j = Parse(R"({unquoted_key: "keys must be quoted"})");
+  auto j = Parse(R"({unquoted_key: "keys must be quoted"})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -32,7 +32,7 @@ TEST_CASE("fail3", "[checker]")
 
 TEST_CASE("fail4", "[checker]")
 {
-  auto j = Parse(R"(["extra comma",])");
+  auto j = Parse(R"(["extra comma",])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -41,7 +41,7 @@ TEST_CASE("fail4", "[checker]")
 
 TEST_CASE("fail5", "[checker]")
 {
-  auto j = Parse(R"(["double extra comma",,])");
+  auto j = Parse(R"(["double extra comma",,])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -50,7 +50,7 @@ TEST_CASE("fail5", "[checker]")
 
 TEST_CASE("fail6", "[checker]")
 {
-  auto j = Parse(R"([   , "<-- missing value"])");
+  auto j = Parse(R"([   , "<-- missing value"])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -59,7 +59,7 @@ TEST_CASE("fail6", "[checker]")
 
 TEST_CASE("fail7", "[checker]")
 {
-  auto j = Parse(R"(["Comma after the close"],)");
+  auto j = Parse(R"(["Comma after the close"],)", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -68,7 +68,7 @@ TEST_CASE("fail7", "[checker]")
 
 TEST_CASE("fail8", "[checker]")
 {
-  auto j = Parse(R"(["Extra close"]])");
+  auto j = Parse(R"(["Extra close"]])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -77,7 +77,7 @@ TEST_CASE("fail8", "[checker]")
 
 TEST_CASE("fail9", "[checker]")
 {
-  auto j = Parse(R"({"Extra comma": true,})");
+  auto j = Parse(R"({"Extra comma": true,})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -86,7 +86,7 @@ TEST_CASE("fail9", "[checker]")
 
 TEST_CASE("fail10", "[checker]")
 {
-  auto j = Parse(R"({"Extra value after close": true} "misplaced quoted value")");
+  auto j = Parse(R"({"Extra value after close": true} "misplaced quoted value")", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -95,7 +95,7 @@ TEST_CASE("fail10", "[checker]")
 
 TEST_CASE("fail11", "[checker]")
 {
-  auto j = Parse(R"({"Illegal expression": 1 + 2})");
+  auto j = Parse(R"({"Illegal expression": 1 + 2})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -104,7 +104,7 @@ TEST_CASE("fail11", "[checker]")
 
 TEST_CASE("fail12", "[checker]")
 {
-  auto j = Parse(R"({"Illegal invocation": alert()})");
+  auto j = Parse(R"({"Illegal invocation": alert()})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -113,7 +113,7 @@ TEST_CASE("fail12", "[checker]")
 
 TEST_CASE("fail13", "[checker]")
 {
-  auto j = Parse(R"({"Numbers cannot have leading zeroes": 013})");
+  auto j = Parse(R"({"Numbers cannot have leading zeroes": 013})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -122,7 +122,7 @@ TEST_CASE("fail13", "[checker]")
 
 TEST_CASE("fail14", "[checker]")
 {
-  auto j = Parse(R"({"Numbers cannot be hex": 0x14})");
+  auto j = Parse(R"({"Numbers cannot be hex": 0x14})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -131,7 +131,7 @@ TEST_CASE("fail14", "[checker]")
 
 TEST_CASE("fail15", "[checker]")
 {
-  auto j = Parse(R"(["Illegal backslash escape: \x15"])");
+  auto j = Parse(R"(["Illegal backslash escape: \x15"])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -140,7 +140,7 @@ TEST_CASE("fail15", "[checker]")
 
 TEST_CASE("fail16", "[checker]")
 {
-  auto j = Parse(R"([\naked])");
+  auto j = Parse(R"([\naked])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -149,7 +149,7 @@ TEST_CASE("fail16", "[checker]")
 
 TEST_CASE("fail17", "[checker]")
 {
-  auto j = Parse(R"(["Illegal backslash escape: \017"])");
+  auto j = Parse(R"(["Illegal backslash escape: \017"])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -167,7 +167,7 @@ fail18.json:
 
 TEST_CASE("fail19", "[checker]")
 {
-  auto j = Parse(R"({"Missing colon" null})");
+  auto j = Parse(R"({"Missing colon" null})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -176,7 +176,7 @@ TEST_CASE("fail19", "[checker]")
 
 TEST_CASE("fail20", "[checker]")
 {
-  auto j = Parse(R"({"Double colon":: null})");
+  auto j = Parse(R"({"Double colon":: null})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -185,7 +185,7 @@ TEST_CASE("fail20", "[checker]")
 
 TEST_CASE("fail21", "[checker]")
 {
-  auto j = Parse(R"({"Comma instead of colon", null})");
+  auto j = Parse(R"({"Comma instead of colon", null})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -194,7 +194,7 @@ TEST_CASE("fail21", "[checker]")
 
 TEST_CASE("fail22", "[checker]")
 {
-  auto j = Parse(R"(["Colon instead of comma": false])");
+  auto j = Parse(R"(["Colon instead of comma": false])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -203,7 +203,7 @@ TEST_CASE("fail22", "[checker]")
 
 TEST_CASE("fail23", "[checker]")
 {
-  auto j = Parse(R"(["Bad value", truth])");
+  auto j = Parse(R"(["Bad value", truth])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -212,7 +212,7 @@ TEST_CASE("fail23", "[checker]")
 
 TEST_CASE("fail24", "[checker]")
 {
-  auto j = Parse(R"(['single quote'])");
+  auto j = Parse(R"(['single quote'])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -221,7 +221,7 @@ TEST_CASE("fail24", "[checker]")
 
 TEST_CASE("fail25", "[checker]")
 {
-  auto j = Parse(R"(["	tab	character	in	string	"])");
+  auto j = Parse(R"(["	tab	character	in	string	"])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -230,7 +230,7 @@ TEST_CASE("fail25", "[checker]")
 
 TEST_CASE("fail26", "[checker]")
 {
-  auto j = Parse(R"(["tab\   character\   in\  string\  "])");
+  auto j = Parse(R"(["tab\   character\   in\  string\  "])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -240,7 +240,7 @@ TEST_CASE("fail26", "[checker]")
 TEST_CASE("fail27", "[checker]")
 {
   auto j = Parse(R"(["line
-break"])");
+break"])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -250,7 +250,7 @@ break"])");
 TEST_CASE("fail28", "[checker]")
 {
   auto j = Parse(R"(["line\
-break"])");
+break"])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -259,7 +259,7 @@ break"])");
 
 TEST_CASE("fail29", "[checker]")
 {
-  auto j = Parse(R"([0e])");
+  auto j = Parse(R"([0e])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -268,7 +268,7 @@ TEST_CASE("fail29", "[checker]")
 
 TEST_CASE("fail30", "[checker]")
 {
-  auto j = Parse(R"([0e+])");
+  auto j = Parse(R"([0e+])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -277,7 +277,7 @@ TEST_CASE("fail30", "[checker]")
 
 TEST_CASE("fail31", "[checker]")
 {
-  auto j = Parse(R"([0e+-1])");
+  auto j = Parse(R"([0e+-1])", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -286,7 +286,7 @@ TEST_CASE("fail31", "[checker]")
 
 TEST_CASE("fail32", "[checker]")
 {
-  auto j = Parse(R"({"Comma instead if closing brace": true,)");
+  auto j = Parse(R"({"Comma instead if closing brace": true,)", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -295,7 +295,7 @@ TEST_CASE("fail32", "[checker]")
 
 TEST_CASE("fail33", "[checker]")
 {
-  auto j = Parse(R"(["mismatch"})");
+  auto j = Parse(R"(["mismatch"})", ParseFlags::Json);
   REQUIRE_FALSE(j);
   REQUIRE_FALSE(j.errors.empty());
   INFO(j);
@@ -365,7 +365,7 @@ TEST_CASE("pass1", "[checker]")
 1e-1,
 1e00,2e+00,2e-00
 ,"rosebud"]
-    )");
+    )", ParseFlags::Json);
   REQUIRE(j);
 }
 
@@ -374,12 +374,12 @@ TEST_CASE("pass2", "[checker]")
   const std::string src = R"(
 [[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
     )";
-  auto j1 = Parse(src);
+  auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
   const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
 
-  auto j2 = Parse(dmp);
+  auto j2 = Parse(dmp, ParseFlags::Json);
   REQUIRE(j2);
 
   auto aj1 = j1.value->AsArray();
@@ -423,11 +423,11 @@ TEST_CASE("pass3", "[checker]")
     }
 }
     )";
-  auto j1 = Parse(src);
+  auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
   const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
-  auto j2 = Parse(dmp);
+  auto j2 = Parse(dmp, ParseFlags::Json);
   REQUIRE(j2);
 
   auto oj1 = j1.value->AsObject();

@@ -194,9 +194,19 @@ struct ParseResult
   operator bool() const;
 };
 
+namespace ParseFlags
+{
+  enum Type
+  {
+    None = 0,
+
+    Json = None
+  };
+}
+
 std::ostream& operator<<(std::ostream& s, const ParseResult& result);
 
-ParseResult Parse(const std::string& str);
+ParseResult Parse(const std::string& str, ParseFlags::Type flags);
 
 #ifdef JSONH_IMPLEMENTATION
 
@@ -967,7 +977,7 @@ ParseResult Parse(Parser* parser)
   }
 }
 
-ParseResult Parse(const std::string& str)
+ParseResult Parse(const std::string& str, ParseFlags::Type)
 {
   Parser parser{ str };
   return Parse(&parser);

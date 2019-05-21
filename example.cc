@@ -20,7 +20,7 @@ std::string LoadJson();
 int main()
 {
   // parse the json
-  ParseResult result = Parse(LoadJson());
+  ParseResult result = Parse(LoadJson(), ParseFlags::Json);
 
   // check for and print parse errors
   if(!result)

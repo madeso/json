@@ -5,7 +5,7 @@
 
 TEST_CASE("same-chars", "[spec]")
 {
-  auto j = Parse(R"(["\u002F", "\u002f", "\/", "/"])");
+  auto j = Parse(R"(["\u002F", "\u002f", "\/", "/"])", ParseFlags::Json);
   REQUIRE(j);
   REQUIRE(j.value->AsArray() != nullptr);
   const auto& array = j.value->AsArray()->array;
