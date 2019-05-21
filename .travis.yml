@@ -18,7 +18,7 @@ matrix:
         - GCOV_FLAGS='--coverage'
       after_success:
         - pip install --user cpp-coveralls
-        - coveralls -r .. --gcov-options '\-lp' -e external/catch -e build/CMakeFiles/feature_tests.* -e CMakeCCompilerId.*
+        - coveralls -r .. --gcov-options '\-lp' -i jsonh.h
     - os: osx
       osx_image: xcode10.2
       env:
