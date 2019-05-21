@@ -27,9 +27,8 @@ matrix:
         - TESTS="./tests"
     - os: windows
       env:
-        - CONF=release
         - GENERATOR="Visual Studio 15 2017"
-        - TESTS="./Release/tests.exe"
+        - TESTS="./Debug/tests.exe"
 
 script:
   - mkdir -p build
