@@ -1,6 +1,7 @@
 # JSON parser for humans
 
 [![Build Status](https://www.travis-ci.org/madeso/json.svg?branch=master)](https://www.travis-ci.org/madeso/json)
+[![Coverage Status](https://coveralls.io/repos/github/madeso/json/badge.svg?branch=master)](https://coveralls.io/github/madeso/json?branch=master)
 
 JSON parser for humans, or jsonh for short, is designed to be a simple input/output "stb style" library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
 
