@@ -26,6 +26,10 @@ TEST_CASE("roundtrip01", "[roundtrip]")
   REQUIRE(aj1);
   REQUIRE(aj2);
 
+  // get coverage, make sure it's not a object...
+  REQUIRE(j1.value->AsObject() == nullptr);
+  REQUIRE(j2.value->AsObject() == nullptr);
+
   REQUIRE(aj1->array.size() == 1);
   REQUIRE(aj2->array.size() == 1);
 
@@ -39,6 +43,21 @@ TEST_CASE("roundtrip01", "[roundtrip]")
   CHECK(n2->location.line == 1);
   CHECK(n1->location.column == 1);
   CHECK(n2->location.column == 1);
+
+  // get coverage...
+  REQUIRE(aj1->array[0]->AsObject() == nullptr);
+  REQUIRE(aj2->array[0]->AsObject() == nullptr);
+  REQUIRE(aj1->array[0]->AsArray() == nullptr);
+  REQUIRE(aj2->array[0]->AsArray() == nullptr);
+  REQUIRE(aj1->array[0]->AsString() == nullptr);
+  REQUIRE(aj2->array[0]->AsString() == nullptr);
+  REQUIRE(aj1->array[0]->AsNumber() == nullptr);
+  REQUIRE(aj2->array[0]->AsNumber() == nullptr);
+  REQUIRE(aj1->array[0]->AsBool() == nullptr);
+  REQUIRE(aj2->array[0]->AsBool() == nullptr);
+  REQUIRE(aj1->array[0]->AsInt() == nullptr);
+  REQUIRE(aj2->array[0]->AsInt() == nullptr);
+
 }
 
 TEST_CASE("roundtrip02", "[roundtrip]")
@@ -70,6 +89,20 @@ TEST_CASE("roundtrip02", "[roundtrip]")
 
   REQUIRE(b1->boolean);
   REQUIRE(b2->boolean);
+
+  // get coverage...
+  REQUIRE(aj1->array[0]->AsObject() == nullptr);
+  REQUIRE(aj2->array[0]->AsObject() == nullptr);
+  REQUIRE(aj1->array[0]->AsArray() == nullptr);
+  REQUIRE(aj2->array[0]->AsArray() == nullptr);
+  REQUIRE(aj1->array[0]->AsString() == nullptr);
+  REQUIRE(aj2->array[0]->AsString() == nullptr);
+  REQUIRE(aj1->array[0]->AsNumber() == nullptr);
+  REQUIRE(aj2->array[0]->AsNumber() == nullptr);
+  REQUIRE(aj1->array[0]->AsNull() == nullptr);
+  REQUIRE(aj2->array[0]->AsNull() == nullptr);
+  REQUIRE(aj1->array[0]->AsInt() == nullptr);
+  REQUIRE(aj2->array[0]->AsInt() == nullptr);
 }
 
 TEST_CASE("roundtrip03", "[roundtrip]")
