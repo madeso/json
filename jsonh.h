@@ -584,12 +584,14 @@ std::shared_ptr<Value> ParseValue(ParseResult* result, Parser* parser)
     parser->Peek(3) == 'e'
     )
   {
+    auto ret = std::make_shared<Bool>(true);
+    ret->location = parser->GetLocation();
     parser->Read(); // t
     parser->Read(); // r
     parser->Read(); // u
     parser->Read(); // e
     SkipSpaces(parser);
-    return std::make_shared<Bool>(true);
+    return ret;
   }
 
   if (
@@ -600,13 +602,15 @@ std::shared_ptr<Value> ParseValue(ParseResult* result, Parser* parser)
     parser->Peek(4) == 'e'
     )
   {
+    auto ret = std::make_shared<Bool>(false);
+    ret->location = parser->GetLocation();
     parser->Read(); // f
     parser->Read(); // a
     parser->Read(); // l
     parser->Read(); // s
     parser->Read(); // e
     SkipSpaces(parser);
-    return std::make_shared<Bool>(false);
+    return ret;
   }
 
   if (
@@ -616,12 +620,14 @@ std::shared_ptr<Value> ParseValue(ParseResult* result, Parser* parser)
     parser->Peek(3) == 'l'
     )
   {
+    auto ret = std::make_shared<Null>();
+    ret->location = parser->GetLocation();
     parser->Read(); // n
     parser->Read(); // u
     parser->Read(); // l
     parser->Read(); // l
     SkipSpaces(parser);
-    return std::make_shared<Null>();
+    return ret;
   }
 
   if (IsValidFirstDigit(parser->Peek()))
@@ -636,6 +642,7 @@ std::shared_ptr<Value> ParseValue(ParseResult* result, Parser* parser)
 std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
 {
   auto array = std::make_shared<Array>();
+  array->location = parser->GetLocation();
 
   EXPECT(Error::Type::InvalidCharacter, '[');
   SkipSpaces(parser);
@@ -695,8 +702,9 @@ std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
 std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
 {
   EXPECT(Error::Type::InvalidCharacter, '{');
-  SkipSpaces(parser);
   auto object = std::make_shared<Object>();
+  object->location = parser->GetLocation();
+  SkipSpaces(parser);
 
   bool first = true;
   while (parser->HasMoreChar() && parser->Peek() != '}')
@@ -799,6 +807,7 @@ bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss
 
 std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
 {
+  const auto loc = parser->GetLocation();
   EXPECT(Error::Type::InvalidCharacter, '\"');
 
   std::ostringstream string_buffer;
@@ -837,12 +846,16 @@ std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
   EXPECT(Error::Type::InvalidCharacter, '\"');
   SkipSpaces(parser);
 
-  return std::make_shared<String>(string_buffer.str());
+  auto ret = std::make_shared<String>(string_buffer.str());
+  ret->location = loc;
+  return ret;
 }
 
 std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
 {
   std::ostringstream o;
+
+  const auto loc = parser->GetLocation();
 
   if (parser->Peek() == '-')
   {
@@ -922,7 +935,9 @@ std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
       AddError(result, parser, Error::Type::UnknownError, "Failed to parse integer: " + o.str());
       return nullptr;
     }
-    return std::make_shared<Int>(d);
+    auto ret = std::make_shared<Int>(d);
+    ret->location = loc;
+    return ret;
   }
   else
   {
@@ -934,7 +949,9 @@ std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
     // AddError(result, parser, Error::Type::UnknownError, "Failed to parse number: " + o.str());
     // return nullptr;
     // }
-    return std::make_shared<Number>(d);
+    auto ret = std::make_shared<Number>(d);
+    ret->location = loc;
+    return ret;
   }
 }
 
