@@ -36,7 +36,6 @@ struct Int;
 struct Location
 {
   Location();
-  explicit Location(tloc l);
   Location(tloc l, tloc c);
 
   tloc line;
@@ -214,7 +213,6 @@ ParseResult Parse(const std::string& str, ParseFlags::Type flags);
 // Implementation detail..
 
 Location::Location() : line(0), column(0) {}
-Location::Location(tloc l) : line(l), column(0) {}
 Location::Location(tloc l, tloc c) : line(l), column(c) {}
 
 std::ostream& operator<<(std::ostream& s, const Location& location)
