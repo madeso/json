@@ -15,6 +15,11 @@ TEST_CASE("roundtrip01", "[roundtrip]")
   auto j2 = Parse(dmp, ParseFlags::Json);
   REQUIRE(j2);
 
+  CHECK(j1.value->location.line == 1);
+  CHECK(j2.value->location.line == 1);
+  CHECK(j1.value->location.column == 0);
+  CHECK(j2.value->location.column == 0);
+
   auto aj1 = j1.value->AsArray();
   auto aj2 = j2.value->AsArray();
 
@@ -29,6 +34,11 @@ TEST_CASE("roundtrip01", "[roundtrip]")
 
   REQUIRE(n1);
   REQUIRE(n2);
+
+  CHECK(n1->location.line == 1);
+  CHECK(n2->location.line == 1);
+  CHECK(n1->location.column == 1);
+  CHECK(n2->location.column == 1);
 }
 
 TEST_CASE("roundtrip02", "[roundtrip]")
