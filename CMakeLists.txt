@@ -51,6 +51,7 @@ add_executable(example ${example_src})
 set(tests_src
   jsonh.h
   tests_main.cc
+  tests_impl.cc
   tests_checker.cc
   tests_jsonh.cc
   tests_spec.cc
