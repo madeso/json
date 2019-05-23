@@ -53,6 +53,7 @@ set(tests_src
   tests_main.cc
   tests_impl.cc
   tests_checker.cc
+  tests_coverage.cc
   tests_jsonh.cc
   tests_spec.cc
   tests_utf8.cc
