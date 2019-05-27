@@ -10,7 +10,7 @@ void print_help(const std::string& name)
 {
   const std::string i = "  ";
   std::cout
-    << name << "-sSpP filename\n"
+    << name << " -sSpP filename\n"
     << i << "s - make silent\n"
     << i << "S - make not silent\n"
     << i << "p - print input (ignored by silent mode)\n"
@@ -113,7 +113,7 @@ int main(int argc, char * const argv[])
       {
         if (please_print)
         {
-          std::cout << Print(parse_result.value.get(), PrintFlags::Json, PrettyPrint::Compact());
+          std::cout << Print(parse_result.value.get(), PrintFlags::Json, PrettyPrint::Pretty());
         }
       }
     }

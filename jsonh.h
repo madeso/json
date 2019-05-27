@@ -202,7 +202,10 @@ namespace PrintFlags
 
 struct PrettyPrint
 {
-  // todo: add options here
+  std::string indent;
+  std::string space;
+  std::string newline;
+  static PrettyPrint Pretty();
   static PrettyPrint Compact();
 };
 
@@ -229,6 +232,11 @@ std::ostream& operator<<(std::ostream& s, const Location& location)
   return s;
 }
 
+PrettyPrint PrettyPrint::Pretty()
+{
+  return {"  ", " ", "\n"};
+}
+
 PrettyPrint PrettyPrint::Compact()
 {
   return {};
@@ -247,6 +255,7 @@ struct PrettyPrintVisitor : public Visitor
 {
   PrettyPrint settings;
   std::ostream* stream;
+  int indent = 0;
 
   void StreamString(const std::string& str)
   {
@@ -281,30 +290,44 @@ struct PrettyPrintVisitor : public Visitor
     *stream << '\"';
   }
 
+  void Indent()
+  {
+    for(int i=0; i<indent; i+=1)
+    {
+      *stream << settings.indent;
+    }
+  }
+
   void VisitObject(Object* object) override
   {
-    bool first = true;
-    *stream << '{';
-    for (auto o : object->object)
+    *stream << '{' << settings.newline;
+    indent += 1;
+    for (auto o = object->object.begin(); o!=object->object.end(); ++o)
     {
-      if (first) { first = false; }
-      else { *stream << ','; }
-      StreamString(o.first);
-      *stream << ':';
-      o.second->Visit(this);
+      Indent();
+      StreamString(o->first);
+      *stream << ':' << settings.space;
+      o->second->Visit(this);
+      if(std::next(o) != object->object.end()) { *stream << ','; }
+      *stream << settings.newline;
     }
+    indent -= 1;
+    Indent();
     *stream << '}';
   }
   void VisitArray(Array * array) override
   {
-    bool first = true;
-    *stream << '[';
-    for (auto o : array->array)
+    *stream << '[' << settings.newline;
+    indent += 1;
+    for (auto o = array->array.begin(); o!=array->array.end(); ++o)
     {
-      if (first) { first = false; }
-      else       { *stream << ','; }
-      o->Visit(this);
+      Indent();
+      (*o)->Visit(this);
+      if(std::next(o) != array->array.end()) { *stream << ','; }
+      *stream << settings.newline;
     }
+    indent -= 1;
+    Indent();
     *stream << ']';
   }
 
@@ -340,6 +363,7 @@ std::string Print(Value* value, PrintFlags::Type, const PrettyPrint& pp)
   vis.settings = pp;
   vis.stream = &ss;
   value->Visit(&vis);
+  ss << pp.newline;
   return ss.str();
 }
 
