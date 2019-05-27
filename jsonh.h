@@ -57,13 +57,6 @@ struct Visitor
   virtual void VisitInt    (Int   * integer) = 0;
 };
 
-struct PrettyPrint
-{
-  // todo: add options here
-
-  static PrettyPrint Compact();
-};
-
 struct Value
 {
   Location location;
@@ -82,7 +75,6 @@ struct Value
   virtual Int   * AsInt   ();
 };
 
-std::string Print(Value* value, const PrettyPrint& pp);
 
 struct Object : public Value
 {
@@ -175,11 +167,6 @@ struct Error
   Error(Type t, const std::string& m, const Location& l=Location());
 };
 
-std::ostream& operator<<(std::ostream& s, const Error::Type& type);
-
-std::ostream& operator<<(std::ostream& s, const Error& error);
-
-// todo: this structure seems weird, make it into something that feels less weird
 struct ParseResult
 {
   // contains errors if parsing failed
@@ -203,9 +190,20 @@ namespace ParseFlags
   };
 }
 
-std::ostream& operator<<(std::ostream& s, const ParseResult& result);
+struct PrettyPrint
+{
+  // todo: add options here
+  static PrettyPrint Compact();
+};
+
 
 ParseResult Parse(const std::string& str, ParseFlags::Type flags);
+std::string Print(Value* value, const PrettyPrint& pp);
+
+
+std::ostream& operator<<(std::ostream& s, const Error::Type& type);
+std::ostream& operator<<(std::ostream& s, const Error& error);
+std::ostream& operator<<(std::ostream& s, const ParseResult& result);
 
 #ifdef JSONH_IMPLEMENTATION
 
