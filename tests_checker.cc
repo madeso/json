@@ -377,7 +377,7 @@ TEST_CASE("pass2", "[checker]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
 
   auto j2 = Parse(dmp, ParseFlags::Json);
   REQUIRE(j2);
@@ -426,7 +426,7 @@ TEST_CASE("pass3", "[checker]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   auto j2 = Parse(dmp, ParseFlags::Json);
   REQUIRE(j2);
 

@@ -25,7 +25,7 @@ TEST_CASE("utf8", "[utf8]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   auto j2 = Parse(dmp, ParseFlags::Json);
   REQUIRE(j2);
 

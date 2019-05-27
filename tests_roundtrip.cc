@@ -9,7 +9,7 @@ TEST_CASE("roundtrip01", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -47,7 +47,7 @@ TEST_CASE("roundtrip02", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -92,7 +92,7 @@ TEST_CASE("roundtrip03", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -123,7 +123,7 @@ TEST_CASE("roundtrip04", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -154,7 +154,7 @@ TEST_CASE("roundtrip05", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -185,7 +185,7 @@ TEST_CASE("roundtrip06", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -207,7 +207,7 @@ TEST_CASE("roundtrip07", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
 
@@ -230,7 +230,7 @@ TEST_CASE("roundtrip08", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -266,7 +266,7 @@ TEST_CASE("roundtrip09", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -303,7 +303,7 @@ TEST_CASE("roundtrip10", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -352,7 +352,7 @@ TEST_CASE("roundtrip11", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -383,7 +383,7 @@ TEST_CASE("roundtrip12", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -414,7 +414,7 @@ TEST_CASE("roundtrip13", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -445,7 +445,7 @@ TEST_CASE("roundtrip14", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -479,7 +479,7 @@ TEST_CASE("roundtrip15", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -510,7 +510,7 @@ TEST_CASE("roundtrip16", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -541,7 +541,7 @@ TEST_CASE("roundtrip17", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -572,7 +572,7 @@ TEST_CASE("roundtrip18", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -603,7 +603,7 @@ TEST_CASE("roundtrip19", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -634,7 +634,7 @@ TEST_CASE("roundtrip20", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -666,7 +666,7 @@ TEST_CASE("roundtrip21", "[roundtrip]")
   const std::string src = R"([-0.0])";
   auto j = Parse(src, ParseFlags::Json);
   REQUIRE(j);
-  const auto dmp = ToString(j.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 }
 */
@@ -677,7 +677,7 @@ TEST_CASE("roundtrip22", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -708,7 +708,7 @@ TEST_CASE("roundtrip23", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   REQUIRE(dmp == src);
 
   auto j2 = Parse(dmp, ParseFlags::Json);
@@ -740,7 +740,7 @@ TEST_CASE("roundtrip24", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   // do we need to support roundtrip of doubles?
   // REQUIRE(dmp == src);
 
@@ -773,7 +773,7 @@ TEST_CASE("roundtrip25", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   // do we need to support roundtrip of doubles?
   // REQUIRE(dmp == src);
 
@@ -805,7 +805,7 @@ TEST_CASE("roundtrip26", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   // do we need to support roundtrip of doubles?
   // REQUIRE(dmp == src);
 
@@ -837,7 +837,7 @@ TEST_CASE("roundtrip27", "[roundtrip]")
   auto j1 = Parse(src, ParseFlags::Json);
   REQUIRE(j1);
 
-  const auto dmp = ToString(j1.value.get(), PrettyPrint::Compact());
+  const auto dmp = Print(j1.value.get(), PrettyPrint::Compact());
   // same reason as above
   // REQUIRE(dmp == src);
 

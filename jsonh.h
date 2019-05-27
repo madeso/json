@@ -82,7 +82,7 @@ struct Value
   virtual Int   * AsInt   ();
 };
 
-std::string ToString(Value* value, const PrettyPrint& pp);
+std::string Print(Value* value, const PrettyPrint& pp);
 
 struct Object : public Value
 {
@@ -325,7 +325,7 @@ struct PrettyPrintVisitor : public Visitor
   }
 };
 
-std::string ToString(Value* value, const PrettyPrint& pp)
+std::string Print(Value* value, const PrettyPrint& pp)
 {
   std::ostringstream ss;
   PrettyPrintVisitor vis;
@@ -414,7 +414,7 @@ std::ostream& operator<<(std::ostream& s, const ParseResult& result)
   }
   else
   {
-    s << ToString(result.value.get(), PrettyPrint::Compact());
+    s << Print(result.value.get(), PrettyPrint::Compact());
   }
   return s;
 }
