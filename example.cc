@@ -97,10 +97,10 @@ int main()
       {
         switch(index % 4)
         {
-          case 0: std::cout << " cool"; break;
+          case 0: std::cout << " glorious"; break;
           case 1: std::cout << " awesome"; break;
           case 2: std::cout << " nice"; break;
-          case 3: std::cout << " grooovy"; break;
+          case 3: std::cout << " cool"; break;
         }
         index +=1;
       }
@@ -110,20 +110,17 @@ int main()
     // ok it's neither a object nor a integer
     // so, lets display a warning and continue (sorry I lied earlier)
 
-    // one thing that makes this json libary stand out (as far as I can tell)
-    // it the fact that all json object has a location so you can display
+    // one thing that makes this json libary stand out (as far as I know)
+    // it the fact that all json values has a location so you can display
     // proper errors when parsing a json. 
-    // To make this example shorter, all errors hence further
-    // will only return.
     const Location& loc = item->location;
-    std::cerr << "WARNING: file("
-      << loc.line << ", "
+    std::cerr << "WARNING: file(line: "
+      << loc.line << ", column:"
       << loc.column << "): "
-      << "Neiter a object nor a integer.\n";
-    return 2;
-
+      << "Neiter a object nor a integer.\n"
+      << "was: " << Print(item.get(), PrintFlags::Json, PrettyPrint::Compact())
+      << "\n";
   }
-
 
   return 0;
 }
@@ -132,12 +129,13 @@ std::string LoadJson()
 {
   return R"(
 [
-{"text": "jsonh is a"},
-3,
-{"text": " json parser,"},
-1,
-{"text": "!\n"},
-"this string will print a waning at line 8"
+  {"text": "jsonh is a"},
+  3,
+  {"text": " json parser,"},
+  1,
+  {"text": "!\n"},
+  "this string will print a waning at line 8, column 2",
+  {"text": "That's all folks!\n"}
 ]
 )";
 }
