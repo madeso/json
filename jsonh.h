@@ -11,6 +11,11 @@
 
 #include <cstdint>
 
+#ifdef JSONH_NAMESPACE
+namespace JSONH_NAMESPACE
+{
+#endif
+
 // defines
 using tint = int64_t;
 using tloc = size_t;
@@ -1031,6 +1036,11 @@ ParseResult Parse(const std::string& str, ParseFlags::Type)
 }
 
 #endif // JSONH_IMPLEMENTATION
+
+
+#ifdef JSONH_NAMESPACE
+}
+#endif
 
 #endif // JSONH_H
 

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 
+// place everything in the json namespace
+#define JSONH_NAMESPACE json
 #define JSONH_IMPLEMENTATION
 #include "jsonh.h"
 
@@ -98,7 +100,7 @@ int main(int argc, char * const argv[])
       file_data.assign((std::istreambuf_iterator<char>(file_stream)),
         std::istreambuf_iterator<char>());
 
-      const auto parse_result = Parse(file_data, ParseFlags::Json);
+      const auto parse_result = json::Parse(file_data, json::ParseFlags::Json);
 
       if (parse_result.HasError())
       {
@@ -113,7 +115,7 @@ int main(int argc, char * const argv[])
       {
         if (please_print)
         {
-          std::cout << Print(parse_result.value.get(), PrintFlags::Json, PrettyPrint::Pretty());
+          std::cout << json::Print(parse_result.value.get(), json::PrintFlags::Json, json::PrettyPrint::Pretty());
         }
       }
     }
