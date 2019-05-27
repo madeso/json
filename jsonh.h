@@ -190,6 +190,16 @@ namespace ParseFlags
   };
 }
 
+namespace PrintFlags
+{
+  enum Type
+  {
+    None = 0,
+
+    Json = None
+  };
+}
+
 struct PrettyPrint
 {
   // todo: add options here
@@ -198,7 +208,7 @@ struct PrettyPrint
 
 
 ParseResult Parse(const std::string& str, ParseFlags::Type flags);
-std::string Print(Value* value, const PrettyPrint& pp);
+std::string Print(Value* value, PrintFlags::Type flags, const PrettyPrint& pp);
 
 
 std::ostream& operator<<(std::ostream& s, const Error::Type& type);
@@ -323,7 +333,7 @@ struct PrettyPrintVisitor : public Visitor
   }
 };
 
-std::string Print(Value* value, const PrettyPrint& pp)
+std::string Print(Value* value, PrintFlags::Type, const PrettyPrint& pp)
 {
   std::ostringstream ss;
   PrettyPrintVisitor vis;
@@ -412,7 +422,7 @@ std::ostream& operator<<(std::ostream& s, const ParseResult& result)
   }
   else
   {
-    s << Print(result.value.get(), PrettyPrint::Compact());
+    s << Print(result.value.get(), PrintFlags::Json, PrettyPrint::Compact());
   }
   return s;
 }

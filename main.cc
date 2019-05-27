@@ -113,7 +113,7 @@ int main(int argc, char * const argv[])
       {
         if (please_print)
         {
-          std::cout << Print(parse_result.value.get(), PrettyPrint::Compact());
+          std::cout << Print(parse_result.value.get(), PrintFlags::Json, PrettyPrint::Compact());
         }
       }
     }
