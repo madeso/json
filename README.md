@@ -92,17 +92,6 @@ std::string json_string = Print(root.get(), PrintFlags::Json, PrettyPrinter::Pre
 
 A more complete (and compileable) example can be found in [example.cc](https://github.com/madeso/json/blob/master/example.cc).
 
-## Planned roadmap
-
-* Verify that we pass as both a conformant [ecma-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf) and as a [rfc-8259](https://tools.ietf.org/html/rfc8259) parser (the current implementation is based on the ecma spec).
-* [Relaxed json](https://github.com/Tencent/rapidjson/issues/36) (c comments and optionally ending with , in objects and arrays etc.)
-* [s json](https://github.com/Autodesk/sjson) from [autodesk stingray](http://help.autodesk.com/view/Stingray/ENU/?guid=__stingray_help_managing_content_sjson_html)
-* [json 5](https://json5.org)
-* [h json](https://hjson.org/)
-* Make faster and less dependent on STL
-* Make usable in non-modern C++ (14) and C?
-* macro arguments to add prefixes or custom names for structs
-
 ## USP (unique selling points)
 
 * Line numbers are available after json has loaded successfully
@@ -114,8 +103,9 @@ MIT
 
 ## Limitations
 
-Currently the array and object parsing is stack based. What does this mean? Given a json file 1.json containing [1] and another 3.json containing [[[3]]] the library currently parses 1000.json without a problem on my test machines but encounters a stack overflow on 1000000.json.
+Currently the array and object parsing is stack based. What does this mean? Given a json file 1.json containing [1] and another 3.json containing [[[3]]] the library currently parses 1000.json without a problem on my test machines but encounters a stack overflow on 1000000.json. (See issue #10)
 
-The current implementation of the object uses a std::map for storing the key/values but according to the specification there can be many entries with the same key. A conforming json parser can introduce additional limits so this is one. Currently, all but the last key is ignored.
+The current implementation of the object uses a std::map for storing the key/values but according to the specification there can be many entries with the same key. A conforming json parser can introduce additional limits so this is one. Currently, all but the last key is ignored. (See issue #11)
 
 Currently the root must be either a object or a array. ECMA-404 is a bit unclear if this required.
+
