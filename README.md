@@ -11,7 +11,7 @@ JSON parser for humans, or jsonh for short, is designed to be a simple cross-pla
 
 **What does stb style library mean?** It means that it is distributed as a single header without templates and external dependencies and in one file you have to define a macro to "implement the implementations". See the [stb repo](https://github.com/nothings/stb) and [stb howto](https://github.com/nothings/stb/blob/master/docs/stb_howto.txt) for a more detailed information.
 
-**What does cross platform mean?** It means that currently each commit it built and tested on with both gcc and clang on both linux and osx. It is also tested on windows with visual studio 2017. It may work on others, but those are not tested (ports welcome!).
+**What does cross platform mean?** It means that currently each commit is built and tested with both gcc and clang on linux and osx and visual studio 2017 on windows. It may work on others setups, but those are not tested (ports are welcome!).
 
 ## How to use
 
@@ -25,7 +25,7 @@ JSON parser for humans, or jsonh for short, is designed to be a simple cross-pla
 #include "jsonh.h"
 
 // in other_files.cpp
-#include "json.h"
+#include "jsonh.h"
 ```
 
 3. Use it!
@@ -77,11 +77,10 @@ Other types of values are
 * Number(AsNumber(), Number::number)
 * String (AsString(), String::string)
 
-Numbers in jsonh are either represented as Int or as Number. 0 is a Int, while 0.0 is a Number.
-Since there are scenarios where it is important if it is one and not the other,
-array indices for example.
+Numbers in jsonh are either represented as Int or as Number/double. 5 is a Int, while 5.0 is a Number.
+Since there are scenarios where it is important if it is one and not the other like array indices for example.
 
-jsonh _will not_ do any conversions for you. If you AsNumber a 5 value, you will get nullptr (but you will get a non-null if you AsNumber a 5.0).
+jsonh _will not_ do any conversions for you, so if you AsNumber a 5 value, you will get nullptr (but you will get not get a null if you AsNumber a 5.0).
 
 ```cpp
 // 4. write some important data back
@@ -93,17 +92,16 @@ std::string json_string = Print(root.get(), PrintFlags::Json, PrettyPrinter::Pre
 
 A more complete (and compileable) example can be found in [example.cc](https://github.com/madeso/json/blob/master/example.cc).
 
-## Roadmap
+## Planned roadmap
 
-Some will get done, others might.
-
-* Make faster and less dependent on STL
-* Make usable in non-modern C++ and C?
-* macro arguments to add prefixes or custom names for structs
-* [Relaxed json](https://github.com/Tencent/rapidjson/issues/36)
+* Verify that we path as both a conformant [ecma-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf) and as a [rfc-8259](https://tools.ietf.org/html/rfc8259) parser (the current implementation is based on the ecma spec).
+* [Relaxed json](https://github.com/Tencent/rapidjson/issues/36) (c comments and optionally ending with , in objects and arrays etc.)
 * [s json](https://github.com/Autodesk/sjson) from [autodesk stingray](http://help.autodesk.com/view/Stingray/ENU/?guid=__stingray_help_managing_content_sjson_html)
 * [json 5](https://json5.org)
 * [h json](https://hjson.org/)
+* Make faster and less dependent on STL
+* Make usable in non-modern C++ and C?
+* macro arguments to add prefixes or custom names for structs
 
 ## USP (unique selling points)
 
@@ -119,3 +117,5 @@ MIT
 Currently the array and object parsing is stack based. What does this mean? Given a json file 1.json containing [1] and another 3.json containing [[[3]]] the library currently parses 1000.json without a problem on my test machines but encounters a stack overflow on 1000000.json.
 
 The current implementation of the object uses a std::map for storing the key/values but according to the specification there can be many entries with the same key. A conforming json parser can introduce additional limits so this is one. Currently, all but the last key is ignored.
+
+Currently the root must be either a object or a array. ECMA-404 is a bit unclear if this required.
