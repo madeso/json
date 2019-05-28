@@ -7,24 +7,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# compiler flags
-if(${MSVC})
-  add_definitions(/D _CRT_SECURE_NO_WARNINGS)
-
-  # character set to Not Set=ASCII/SBCS
-  # http://public.kitware.com/Bug/view.php?id=12189
-  add_definitions(/D _SBCS)
-endif()
-
 # enable all warnings
 if(MSVC)
   add_compile_options(/W4)
 else()
   add_compile_options(-Wall -Wextra -Wpedantic)
-
-  # fix the code for this
-  add_compile_options(-Wno-unused-parameter)
-  add_compile_options(-Wno-ignored-qualifiers)
 endif()
 
 # force visual studio and the like to only have debug and release builds
@@ -34,6 +21,9 @@ if(CMAKE_CONFIGURATION_TYPES)
     CACHE STRING "Reset the configurations to what we need" FORCE)
 endif()
 
+
+
+# simple json cli
 set(main_src
   jsonh.h
   main.cc
@@ -41,6 +31,9 @@ set(main_src
 source_group("" FILES ${main_src})
 add_executable(json ${main_src})
 
+
+
+# example
 set(example_src
   jsonh.h
   example.cc
@@ -48,6 +41,9 @@ set(example_src
 source_group("" FILES ${example_src})
 add_executable(example ${example_src})
 
+
+
+# unit tests
 set(tests_src
   jsonh.h
   tests_main.cc
@@ -64,9 +60,3 @@ set(tests_src
 source_group("" FILES ${tests_src})
 include_directories(SYSTEM external/catch/)
 add_executable(tests ${tests_src})
-
-# add_custom_command(TARGET tests POST_BUILD
-# COMMAND tests
-# WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-# COMMENT "Running tests"
-# )
