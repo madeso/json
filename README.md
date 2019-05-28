@@ -103,9 +103,9 @@ MIT
 
 ## Limitations
 
-Currently the array and object parsing is stack based. What does this mean? Given a json file 1.json containing [1] and another 3.json containing [[[3]]] the library currently parses 1000.json without a problem on my test machines but encounters a stack overflow on 1000000.json. (See issue #10)
+Currently the array and object parsing is stack based. What does this mean? Given a json file 1.json containing [1] and another 3.json containing [[[3]]] the library currently parses 1000.json without a problem on my test machines but encounters a stack overflow on 1000000.json. (See issue [#10](https://github.com/madeso/json/issues/10))
 
-The current implementation of the object uses a std::map for storing the key/values but according to the specification there can be many entries with the same key. A conforming json parser can introduce additional limits so this is one. Currently, all but the last key is ignored. (See issue #11)
+The current implementation of the object uses a std::map for storing the key/values but according to the specification there can be many entries with the same key. A conforming json parser can introduce additional limits so this is one. Currently, all but the last key is ignored. (See issue [#11](https://github.com/madeso/json/issues/11))
 
 Currently the root must be either a object or a array. ECMA-404 is a bit unclear if this required.
 
