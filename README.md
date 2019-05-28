@@ -9,9 +9,9 @@ JSON parser for humans, or jsonh for short, is designed to be a simple cross-pla
 
 **What does "written by humans" mean?** It means that given a choice between helpful error messages/syntax and performance, helpfulness will always win. This means that for every json value, there is a corresponding line/column entry so that when you search in your database for the user entered value and don't find it you can let the user know where in the json the value was requested. If this is not what you are looking for, perhaps have a look at [rapidjson](https://github.com/Tencent/rapidjson) instead.
 
-**What does stb style library mean?** It means that it is distributed as a single header without templates and external dependencies and in one file you have to define a macro to "implement the implementations". See the [stb repo](https://github.com/nothings/stb) and [stb howto](https://github.com/nothings/stb/blob/master/docs/stb_howto.txt) for a more detailed information.
+**What does stb style library mean?** It means that it is distributed as a single header without templates and external dependencies and in one file you have to define a macro to "implement the implementations". See the [stb repo](https://github.com/nothings/stb) and [stb howto](https://github.com/nothings/stb/blob/master/docs/stb_howto.txt) for more details.
 
-**What does cross platform mean?** It means that currently each commit is built and tested with both gcc and clang on linux and osx and visual studio 2017 on windows. It may work on others setups, but those are not tested (ports are welcome!).
+**What does cross platform mean?** It means that currently each commit is built and tested with both gcc and clang(c++14) on linux and osx and visual studio 2017 on windows. It may work on others setups, but those are not tested (ports are welcome!).
 
 ## How to use
 
@@ -94,13 +94,13 @@ A more complete (and compileable) example can be found in [example.cc](https://g
 
 ## Planned roadmap
 
-* Verify that we path as both a conformant [ecma-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf) and as a [rfc-8259](https://tools.ietf.org/html/rfc8259) parser (the current implementation is based on the ecma spec).
+* Verify that we pass as both a conformant [ecma-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf) and as a [rfc-8259](https://tools.ietf.org/html/rfc8259) parser (the current implementation is based on the ecma spec).
 * [Relaxed json](https://github.com/Tencent/rapidjson/issues/36) (c comments and optionally ending with , in objects and arrays etc.)
 * [s json](https://github.com/Autodesk/sjson) from [autodesk stingray](http://help.autodesk.com/view/Stingray/ENU/?guid=__stingray_help_managing_content_sjson_html)
 * [json 5](https://json5.org)
 * [h json](https://hjson.org/)
 * Make faster and less dependent on STL
-* Make usable in non-modern C++ and C?
+* Make usable in non-modern C++ (14) and C?
 * macro arguments to add prefixes or custom names for structs
 
 ## USP (unique selling points)
