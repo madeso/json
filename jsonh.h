@@ -1,6 +1,10 @@
 #ifndef JSONH_H
 #define JSONH_H
 
+#ifndef JSON_VERSION
+#define JSON_VERSION "1.0.0"
+#endif
+
 #include <vector>
 #include <map>
 #include <string>
