@@ -57,6 +57,7 @@ set(tests_src
   tests_jsonh.cc
   tests_spec.cc
   tests_utf8.cc
+  tests_print.cc
   tests_roundtrip.cc
   tests_osx.cc
   )
