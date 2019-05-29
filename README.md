@@ -32,7 +32,7 @@ JSON parser for humans, or jsonh for short, is designed to be a simple cross-pla
 
 ```cpp
 // 3a. Parse string into DOM structure
-auto j = Parse(json_string, ParseFlags::Json);
+ParseResult j = Parse(json_string, ParseFlags::Json);
 
 // 3b. Check for errors
 if(!j) { std::cerr << j; return 0; }
