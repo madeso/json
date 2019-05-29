@@ -1,9 +1,9 @@
-# JSON parser for humans
+# JSON parser for files written by humans
 
 [![Build Status](https://www.travis-ci.org/madeso/json.svg?branch=master)](https://www.travis-ci.org/madeso/json)
 [![Coverage Status](https://coveralls.io/repos/github/madeso/json/badge.svg?branch=master)](https://coveralls.io/github/madeso/json?branch=master)
 
-JSON parser for humans, or jsonh for short, is designed to be a simple cross-platform input/output "stb style" library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
+JSON parser for files written by humans, or _jsonh_ for short, is designed to be a simple cross-platform input/output "stb style" library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
 
 **What does simple input/output library mean?** It means there are no extra functions to create json making the library more complex. There is also no custom struct to json functions. If this is not what you are looking for, perhaps have a look at [JSON for Modern C++](https://github.com/nlohmann/json) instead.
 
