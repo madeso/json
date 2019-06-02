@@ -167,6 +167,7 @@ struct Error
     IllegalEscape,
     InvalidCharacterInString,
     UnexpectedEof,
+    DuplicateKey,
     UnknownError
   };
   Type type;
@@ -194,6 +195,7 @@ namespace ParseFlags
   enum Type
   {
     None = 0,
+    DuplicateKeysOnlyLatest = 1 << 1,
 
     Json = None
   };
@@ -469,9 +471,10 @@ struct Parser;
 struct Parser
 {
   std::string str;
+  ParseFlags::Type flags;
   tloc index = 0;
 
-  explicit Parser(const std::string& s) : str(s) {}
+  Parser(const std::string& s, ParseFlags::Type f) : str(s), flags(f) {}
 
   char Peek(tloc advance = 0) const
   {
@@ -772,6 +775,16 @@ std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
     }
     else
     {
+      if( !(parser->flags & ParseFlags::DuplicateKeysOnlyLatest) )
+      {
+        auto found = object->object.find(s->string);
+        if(found != object->object.end())
+        {
+          AddError(result, parser, Error::Type::DuplicateKey, "Duplicate key found " + s->string);
+          AddNote(result, found->second->location, "Previously defined here");
+          return nullptr;
+        }
+      }
       object->object[s->string] = v;
     }
     SkipSpaces(parser);
@@ -1033,9 +1046,9 @@ ParseResult Parse(Parser* parser)
   }
 }
 
-ParseResult Parse(const std::string& str, ParseFlags::Type)
+ParseResult Parse(const std::string& str, ParseFlags::Type flags)
 {
-  Parser parser{ str };
+  Parser parser{ str, flags };
   return Parse(&parser);
 }
 
