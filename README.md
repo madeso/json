@@ -3,13 +3,11 @@
 [![Build Status](https://www.travis-ci.org/madeso/json.svg?branch=master)](https://www.travis-ci.org/madeso/json)
 [![Coverage Status](https://coveralls.io/repos/github/madeso/json/badge.svg?branch=master)](https://coveralls.io/github/madeso/json?branch=master)
 
-JSON parser for files written by humans, or _jsonh_ for short, is designed to be a simple cross-platform input/output "stb style" library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
+JSON parser for files written by humans, or _jsonh_ for short, is designed to be a simple cross-platform input/output library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
 
 **What does simple input/output library mean?** It means there are no extra functions to create json making the library more complex. There is also no custom struct to json functions. If this is not what you are looking for, perhaps have a look at [JSON for Modern C++](https://github.com/nlohmann/json) instead.
 
 **What does "written by humans" mean?** It means that given a choice between helpful error messages/syntax and performance, helpfulness will always win. This means that for every json value, there is a corresponding line/column entry so that when you search in your database for the user entered value and don't find it you can let the user know where in the json the value was requested. If this is not what you are looking for, perhaps have a look at [rapidjson](https://github.com/Tencent/rapidjson) instead.
-
-**What does stb style library mean?** It means that it is distributed as a single header without templates and external dependencies and in one file you have to define a macro to "implement the implementations". See the [stb repo](https://github.com/nothings/stb) and [stb howto](https://github.com/nothings/stb/blob/master/docs/stb_howto.txt) for more details.
 
 **What does cross platform mean?** It means that currently each commit is built and tested with both gcc and clang(c++14) on linux and osx and visual studio 2017 on windows. It may work on others setups, but those are not tested (ports are welcome!).
 
