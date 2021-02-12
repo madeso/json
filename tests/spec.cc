@@ -1,6 +1,9 @@
 #include "catch.hpp"
 #include "jsonh/jsonh.h"
 
+using namespace jsonh;
+
+
 // this comes from the spec http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
 
 TEST_CASE("same-chars", "[spec]")

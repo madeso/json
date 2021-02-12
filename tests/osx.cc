@@ -1,5 +1,6 @@
 #include "catch.hpp"
-#include "jsonh/jsonh.h"
+
+#include <sstream>
 
 // this is ok...
 TEST_CASE("osx-ok", "[osx]")

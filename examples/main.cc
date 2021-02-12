@@ -1,9 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-// place everything in the json namespace
-#define JSONH_NAMESPACE json
-#define JSONH_IMPLEMENTATION
+
 #include "jsonh/jsonh.h"
 
 // todo: time the tests https://github.com/serde-rs/json-benchmark
@@ -100,7 +98,7 @@ int main(int argc, char * const argv[])
       file_data.assign((std::istreambuf_iterator<char>(file_stream)),
         std::istreambuf_iterator<char>());
 
-      const auto parse_result = json::Parse(file_data, json::ParseFlags::Json);
+      const auto parse_result = jsonh::Parse(file_data, jsonh::ParseFlags::Json);
 
       if (parse_result.HasError())
       {
@@ -115,7 +113,7 @@ int main(int argc, char * const argv[])
       {
         if (please_print)
         {
-          std::cout << json::Print(parse_result.value.get(), json::PrintFlags::Json, json::PrettyPrint::Pretty());
+          std::cout << jsonh::Print(parse_result.value.get(), jsonh::PrintFlags::Json, jsonh::PrettyPrint::Pretty());
         }
       }
     }

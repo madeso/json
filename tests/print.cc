@@ -1,6 +1,9 @@
 #include "catch.hpp"
 #include "jsonh/jsonh.h"
 
+using namespace jsonh;
+
+
 TEST_CASE("print-object-one", "[print]")
 {
   const std::string pretty =

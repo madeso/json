@@ -1,6 +1,9 @@
 #include "catch.hpp"
 #include "jsonh/jsonh.h"
 
+using namespace jsonh;
+
+
 // this comes from https://github.com/miloyip/nativejson-benchmark/tree/master/data/roundtrip
 
 TEST_CASE("roundtrip01", "[roundtrip]")

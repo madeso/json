@@ -53,7 +53,6 @@ target_link_libraries(example
 # unit tests
 set(tests_src
     tests/main.cc
-    tests/impl.cc
     tests/checker.cc
     tests/coverage.cc
     tests/jsonh.cc

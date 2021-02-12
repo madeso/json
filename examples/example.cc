@@ -3,12 +3,7 @@
 
 // This is a basic example how to use jsonh
 
-#define JSONH_IMPLEMENTATION
-// since this is the only file, we need to tell json we want the implementation for the json
-// this should only be done once, and before the actual include
-// I tend to have a single impl.cc file only containting the define and the include to make things easier
 
-// only one include
 #include "jsonh/jsonh.h"
 
 
@@ -20,15 +15,15 @@ std::string LoadJson();
 int main()
 {
   // parse the json
-  ParseResult result = Parse(LoadJson(), ParseFlags::Json);
+  jsonh::ParseResult result = jsonh::Parse(LoadJson(), jsonh::ParseFlags::Json);
 
   // check for and print parse errors
   if(!result)
   {
     std::cerr << "Parse error:\n";
-    for(Error err: result.errors)
+    for(const jsonh::Error& err: result.errors)
     {
-      const Location& loc = err.location;
+      const jsonh::Location& loc = err.location;
       std::cerr << "file("
         << loc.line << ":"
         << loc.column << "): "
@@ -40,7 +35,7 @@ int main()
   // the root of a json can either be a array or a object
   // our json in this esxample needs to be a array, so we abort if it's not
 
-  Array* array = result.value->AsArray();
+  jsonh::Array* array = result.value->AsArray();
   if(array == nullptr)
   {
     // one thing that makes this json libary stand out (as far as I can tell)
@@ -48,7 +43,7 @@ int main()
     // proper errors when parsing a json.
     // To make this example shorter, all errors hence further
     // will only return.
-    const Location& loc = result.value->location;
+    const jsonh::Location& loc = result.value->location;
     std::cerr << "file("
       << loc.line << ", "
       << loc.column << "): "
@@ -57,13 +52,13 @@ int main()
   }
 
   // cool, after all that we have our array we can loop all the items
-  for(std::shared_ptr<Value> item: array->array)
+  for(std::shared_ptr<jsonh::Value> item: array->array)
   {
     // now this json example is a little bit cotrived...
     // if the value is a object, we print the member text
     // if the value is a integer we print that many "random" strings
 
-    Object* object = item->AsObject();
+    jsonh::Object* object = item->AsObject();
     if(object)
     {
       auto found = object->object.find("text");
@@ -71,7 +66,7 @@ int main()
       {
         return 3;
       }
-      String* string = found->second->AsString();
+      jsonh::String* string = found->second->AsString();
       if(string == nullptr)
       {
         return 4;
@@ -86,7 +81,7 @@ int main()
     //
     // jsonh doesn't autoconvert from numbers to integers so if you need a double,
     // you should probably autoconvert yourself instead of returning a error
-    Int* integer = item->AsInt();
+    jsonh::Int* integer = item->AsInt();
     if(integer)
     {
       // accept only positive numbers, greater than 0
@@ -113,12 +108,12 @@ int main()
     // one thing that makes this json libary stand out (as far as I know)
     // it the fact that all json values has a location so you can display
     // proper errors when parsing a json.
-    const Location& loc = item->location;
+    const jsonh::Location& loc = item->location;
     std::cerr << "WARNING: file(line: "
       << loc.line << ", column:"
       << loc.column << "): "
       << "Neiter a object nor a integer.\n"
-      << "was: " << Print(item.get(), PrintFlags::Json, PrettyPrint::Compact())
+      << "was: " << Print(item.get(), jsonh::PrintFlags::Json, jsonh::PrettyPrint::Compact())
       << "\n";
   }
 

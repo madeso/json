@@ -1,6 +1,9 @@
 #include "catch.hpp"
 #include "jsonh/jsonh.h"
 
+using namespace jsonh;
+
+
 TEST_CASE("utf8", "[utf8]")
 {
   const std::string src = R"(

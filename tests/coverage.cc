@@ -1,6 +1,9 @@
 #include "catch.hpp"
 #include "jsonh/jsonh.h"
 
+using namespace jsonh;
+
+
 TEST_CASE("cov-object-null", "[coverage]")
 {
   Object v;
