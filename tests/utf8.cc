@@ -3,10 +3,9 @@
 
 using namespace jsonh;
 
-
 TEST_CASE("utf8", "[utf8]")
 {
-  const std::string src = R"(
+    const std::string src = R"(
 {
   "emoji" : {
     "😊":"✨",
@@ -25,13 +24,12 @@ TEST_CASE("utf8", "[utf8]")
   }
 }
 )";
-  auto j1 = Parse(src, ParseFlags::Json);
-  REQUIRE(j1);
+    auto j1 = Parse(src, ParseFlags::Json);
+    REQUIRE(j1);
 
-  const auto dmp = Print(j1.value.get(), PrintFlags::Json, PrettyPrint::Compact());
-  auto j2 = Parse(dmp, ParseFlags::Json);
-  REQUIRE(j2);
+    const auto dmp = Print(j1.value.get(), PrintFlags::Json, PrettyPrint::Compact());
+    auto j2 = Parse(dmp, ParseFlags::Json);
+    REQUIRE(j2);
 
-  // todo: check j1 and j2
+    // todo: check j1 and j2
 }
-
