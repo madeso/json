@@ -4,7 +4,7 @@
 // place everything in the json namespace
 #define JSONH_NAMESPACE json
 #define JSONH_IMPLEMENTATION
-#include "jsonh.h"
+#include "jsonh/jsonh.h"
 
 // todo: time the tests https://github.com/serde-rs/json-benchmark
 

@@ -1,8 +1,8 @@
 #include "catch.hpp"
-#include "jsonh.h"
+#include "jsonh/jsonh.h"
 
 // tests based on http://json.org/JSON_checker/
-// If the JSON_checker is working correctly, it must accept all of the pass*.json files and reject all of the fail*.json files. 
+// If the JSON_checker is working correctly, it must accept all of the pass*.json files and reject all of the fail*.json files.
 
 TEST_CASE("fail1", "[checker]")
 {

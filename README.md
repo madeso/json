@@ -22,10 +22,10 @@ JSON parser for files written by humans, or _jsonh_ for short, is designed to be
 ```cpp
 // in main.cpp
 #define JSONH_IMPLMENENTATION
-#include "jsonh.h"
+#include "jsonh/jsonh.h"
 
 // in other_files.cpp
-#include "jsonh.h"
+#include "jsonh/jsonh.h"
 ```
 
 3. Use it!
@@ -50,10 +50,10 @@ std::shared_ptr<Value> root = j.value;
 Array* arr = root->AsArray();
 Object* obj = root->AsObject();
 
-// Both functions return a nullptr if the root isn't array or a object. 
+// Both functions return a nullptr if the root isn't array or a object.
 
 // Array::array is a std::vector of shared_ptr to Value
-// 
+//
 // struct Array : public Value
 // {
 //   std::vector<std::shared_ptr<Value>> array;
@@ -61,12 +61,12 @@ Object* obj = root->AsObject();
 
 
 // Object::object is a std::map of std::string to shared_ptr to Value
-// 
+//
 // struct Object : public Value
 // {
 //   std::map<std::string, std::shared_ptr<Value>> object;
 // };
- 
+
 ```
 
 Other types of values are
@@ -86,7 +86,7 @@ jsonh _will not_ do any conversions for you, so if you AsNumber a 5 value, you w
 // 4. write some important data back
 auto root = std::make_shared<Object>();
 root->object["meaning_of_life"] = std::make_shared<Int>(42);
-std::string json_string = Print(root.get(), PrintFlags::Json, PrettyPrinter::Pretty()); 
+std::string json_string = Print(root.get(), PrintFlags::Json, PrettyPrinter::Pretty());
 // you may want to use PrettyPrinter::Compact() depending on your needs
 ```
 

@@ -9,7 +9,7 @@
 // I tend to have a single impl.cc file only containting the define and the include to make things easier
 
 // only one include
-#include "jsonh.h"
+#include "jsonh/jsonh.h"
 
 
 // jsonh only parses strings
@@ -45,7 +45,7 @@ int main()
   {
     // one thing that makes this json libary stand out (as far as I can tell)
     // it the fact that all json object has a location so you can display
-    // proper errors when parsing a json. 
+    // proper errors when parsing a json.
     // To make this example shorter, all errors hence further
     // will only return.
     const Location& loc = result.value->location;
@@ -112,7 +112,7 @@ int main()
 
     // one thing that makes this json libary stand out (as far as I know)
     // it the fact that all json values has a location so you can display
-    // proper errors when parsing a json. 
+    // proper errors when parsing a json.
     const Location& loc = item->location;
     std::cerr << "WARNING: file(line: "
       << loc.line << ", column:"

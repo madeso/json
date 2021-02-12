@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "jsonh.h"
+#include "jsonh/jsonh.h"
 
 // this comes from the spec http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
 

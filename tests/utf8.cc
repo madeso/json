@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "jsonh.h"
+#include "jsonh/jsonh.h"
 
 TEST_CASE("utf8", "[utf8]")
 {
