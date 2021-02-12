@@ -15,22 +15,28 @@ JSON parser for files written by humans, or _jsonh_ for short, is designed to be
 
 ## How to use
 
-1. Add jsonh.h to your project in some way.
+1. Add jsonh to your project, either as a git submodule, as a source or as a release.
 
-2. In _one_ file, #define JSONH\_IMPLEMENTATION to get the implementation for the classes and functions.
+```sh
+git submodule add https://github.com/madeso/json.git
+```
 
-```cpp
-// in main.cpp
-#define JSONH_IMPLMENENTATION
-#include "jsonh/jsonh.h"
+2. Let cmake know about it and add it to your target
 
-// in other_files.cpp
-#include "jsonh/jsonh.h"
+```cmake
+add_subdirectory(json)
+
+target_link_libraries(my_cool_project
+    PUBLIC jsonh
+)
 ```
 
 3. Use it!
 
 ```cpp
+#include "jsonh/jsonh.h"
+using namespace jsonh;
+
 // 3a. Parse string into DOM structure
 ParseResult j = Parse(json_string, ParseFlags::Json);
 
@@ -95,11 +101,10 @@ A more complete (and compileable) example can be found in [example.cc](https://g
 ## USP (unique selling points)
 
 * Line numbers are available after json has loaded successfully
-* Single header file
 
 ## License
 
-MIT
+[zlib](https://opensource.org/licenses/Zlib)
 
 ## Limitations
 
