@@ -1,6 +1,5 @@
 # JSON parser for files written by humans
 
-[![Build Status](https://www.travis-ci.org/madeso/json.svg?branch=master)](https://www.travis-ci.org/madeso/json)
 [![Coverage Status](https://coveralls.io/repos/github/madeso/json/badge.svg?branch=master)](https://coveralls.io/github/madeso/json?branch=master)
 
 JSON parser for files written by humans, or _jsonh_ for short, is designed to be a simple cross-platform input/output library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
