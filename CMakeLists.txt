@@ -70,3 +70,10 @@ target_link_libraries(tests
     PUBLIC jsonh
     PRIVATE jsonh_project_options jsonh_project_warnings
 )
+
+
+###############################################################################
+# ctest integration
+include(CTest)
+include(external/catch/Catch.cmake)
+catch_discover_tests(tests)
