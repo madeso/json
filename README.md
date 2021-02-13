@@ -2,6 +2,7 @@
 
 [![windows](https://github.com/madeso/json/workflows/windows/badge.svg?branch=master)](https://github.com/madeso/json/actions?query=workflow%3Awindows)
 [![linux](https://github.com/madeso/json/workflows/linux/badge.svg?branch=master)](https://github.com/madeso/json/actions?query=workflow%3Alinux)
+[![macos](https://github.com/madeso/json/workflows/macos/badge.svg?branch=master)](https://github.com/madeso/json/actions?query=workflow%3Amacos)
 [![Coverage Status](https://coveralls.io/repos/github/madeso/json/badge.svg?branch=master)](https://coveralls.io/github/madeso/json?branch=master)
 
 JSON parser for files written by humans, or _jsonh_ for short, is designed to be a simple cross-platform input/output library to read [JSON](https://json.org/) and JSON-like files written by humans into a DOM like structure.
