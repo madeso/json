@@ -18,9 +18,7 @@ jobs:
     - name: Configure
       shell: bash
       working-directory: ${{github.workspace}}/build
-      env:
-        GCOV_FLAGS: --coverage
-      run: cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="$GCOV_FLAGS" -DCMAKE_EXE_LINKER_FLAGS=$GCOV_FLAGS $GITHUB_WORKSPACE
+      run: cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage" $GITHUB_WORKSPACE
 
     - name: Build
       shell: bash
@@ -30,12 +28,20 @@ jobs:
     - name: Test
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: ctest -C $BUILD_TYPE && tree
+      run: ctest -C $BUILD_TYPE
 
-    - name: Coveralls
+    - name: Generate coverage
+      shell: bash
+      run: |
+          sudo apt install lcov
+          lcov --directory tests --base-directory ../src --capture --output-file coverage.info
+          lcov --remove coverage.info '/usr*' -o coverage.info
+
+    - name: Upload to coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ${{github.workspace}}/build/coverage.info
 
     #- name: Upload
     #  shell: bash
