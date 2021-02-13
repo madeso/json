@@ -35,13 +35,7 @@ jobs:
       run: |
           sudo apt install lcov
           lcov --capture  --base-directory .. --directory src --output-file coverage.info
-          lcov --remove coverage.info '/usr*' -o coverage.info
-    #- name: Upload
-    #  shell: bash
-    #  working-directory: ${{github.workspace}}/build
-    #  run: |
-    #    pip install --user cpp-coveralls
-    #    ~/.local/bin/coveralls -r .. --exclude tests --exclude external --gcov-options '\-lp'
+          lcov --remove coverage.info '/usr/include/*' -o coverage.info
 
     - name: Upload to coveralls
       uses: coverallsapp/github-action@master
