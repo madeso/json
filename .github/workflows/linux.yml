@@ -1,4 +1,4 @@
-name: CMake
+name: linux
 
 on: [push, pull_request]
 
@@ -8,6 +8,7 @@ jobs:
       matrix:
         cxx: [g++-8, g++-9, g++-10, clang++-8, clang++-9, clang++-10]
         build_type: [Debug, Release]
+
     runs-on: ubuntu-20.04
 
     steps:
@@ -18,17 +19,17 @@ jobs:
 
     - name: Configure
       shell: bash
+      working-directory: ${{github.workspace}}/build
       env:
         CXX: ${{matrix.cxx}}
-      working-directory: ${{github.workspace}}/build
       run: cmake -DCMAKE_BUILD_TYPE=${{matrix.build_type}} $GITHUB_WORKSPACE
 
     - name: Build
-      working-directory: ${{github.workspace}}/build
       shell: bash
+      working-directory: ${{github.workspace}}/build
       run: cmake --build . --config ${{matrix.build_type}}
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
       shell: bash
+      working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}}
