@@ -30,7 +30,7 @@ jobs:
     - name: Test
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: ctest -C $BUILD_TYPE && ls
+      run: ctest -C $BUILD_TYPE && tree
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
