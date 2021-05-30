@@ -15,7 +15,7 @@ JSON parser for files written by humans, or _jsonh_ for short, is designed to be
 
 ## How to use
 
-1. Add jsonh to your project, either as a git submodule, as a source or as a release.
+1. Add jsonh to your project, either as a git submodule or the released source.
 
 ```sh
 git submodule add https://github.com/madeso/json.git
