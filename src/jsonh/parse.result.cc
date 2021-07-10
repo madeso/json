@@ -1,6 +1,4 @@
-#include "jsonh/parse.result.h"
-
-#include "jsonh/print.h"
+#include "jsonh/jsonh.h"
 
 namespace jsonh
 {

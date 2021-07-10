@@ -1,4 +1,4 @@
-#include "jsonh/error.h"
+#include "jsonh/jsonh.h"
 
 namespace jsonh
 {

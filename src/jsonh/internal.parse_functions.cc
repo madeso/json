@@ -4,12 +4,7 @@
 #include <sstream>
 
 #include "jsonh/internal.parser.h"
-#include "jsonh/location.h"
-#include "jsonh/parse.h"
-#include "jsonh/value.bool.h"
-#include "jsonh/value.int.h"
-#include "jsonh/value.null.h"
-#include "jsonh/value.number.h"
+#include "jsonh/jsonh.h"
 
 namespace jsonh
 {

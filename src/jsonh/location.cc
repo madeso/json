@@ -1,4 +1,4 @@
-#include "jsonh/location.h"
+#include "jsonh/jsonh.h"
 
 namespace jsonh
 {

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "jsonh/parse.h"
-#include "jsonh/parse.result.h"
+#include "jsonh/jsonh.h"
 
 namespace jsonh
 {

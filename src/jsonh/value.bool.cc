@@ -1,6 +1,4 @@
-#include "jsonh/value.bool.h"
-
-#include "jsonh/visitor.h"
+#include "jsonh/jsonh.h"
 
 namespace jsonh
 {

@@ -3,10 +3,7 @@
 #include <ostream>
 #include <string>
 
-#include "jsonh/error.h"
-#include "jsonh/value.array.h"
-#include "jsonh/value.object.h"
-#include "jsonh/value.string.h"
+#include "jsonh/jsonh.h"
 
 namespace jsonh
 {
