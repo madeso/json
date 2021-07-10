@@ -9,6 +9,9 @@
 
 namespace jsonh
 {
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
     using tloc = size_t;
 
     struct Location
@@ -21,6 +24,9 @@ namespace jsonh
     };
 
     std::ostream& operator<<(std::ostream& s, const Location& location);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     struct Error
     {
@@ -47,6 +53,9 @@ namespace jsonh
 
     std::ostream& operator<<(std::ostream& s, const Error::Type& type);
     std::ostream& operator<<(std::ostream& s, const Error& error);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     struct Visitor;
 
@@ -77,6 +86,9 @@ namespace jsonh
         virtual Int* AsInt();
     };
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
     struct ParseResult
     {
         // contains errors if parsing failed
@@ -91,6 +103,9 @@ namespace jsonh
     };
 
     std::ostream& operator<<(std::ostream& s, const ParseResult& result);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     namespace ParseFlags
     {
@@ -128,6 +143,9 @@ namespace jsonh
 
     std::string Print(Value* value, PrintFlags::Type flags, const PrettyPrint& pp);
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
     struct Array : public Value
     {
         std::vector<std::shared_ptr<Value>> array;
@@ -136,6 +154,9 @@ namespace jsonh
 
         Array* AsArray() override;
     };
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     struct Bool : public Value
     {
@@ -147,6 +168,9 @@ namespace jsonh
 
         explicit Bool(bool b);
     };
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     using tint = int64_t;
 
@@ -161,12 +185,18 @@ namespace jsonh
         explicit Int(tint i);
     };
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
     struct Null : public Value
     {
         void Visit(Visitor* visitor) override;
 
         Null* AsNull() override;
     };
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     using tnum = double;
 
@@ -181,6 +211,9 @@ namespace jsonh
         explicit Number(tnum d);
     };
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
     struct Object : public Value
     {
         std::map<std::string, std::shared_ptr<Value>> object;
@@ -189,6 +222,9 @@ namespace jsonh
 
         Object* AsObject() override;
     };
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     struct String : public Value
     {
@@ -200,6 +236,9 @@ namespace jsonh
 
         explicit String(const std::string& s = "");
     };
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     struct Visitor
     {
