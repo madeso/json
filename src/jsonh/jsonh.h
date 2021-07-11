@@ -13,6 +13,22 @@ namespace jsonh
     //
 
     using tloc = size_t;
+    using tint = int64_t;
+    using tnum = double;
+
+    struct Visitor;
+
+    struct Value;
+    struct Object;
+    struct Array;
+    struct String;
+    struct Number;
+    struct Bool;
+    struct Null;
+    struct Int;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     struct Location
     {
@@ -22,8 +38,6 @@ namespace jsonh
         tloc line;
         tloc column;
     };
-
-    std::ostream& operator<<(std::ostream& s, const Location& location);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -51,22 +65,8 @@ namespace jsonh
         Error(Type t, const std::string& m, const Location& l = Location());
     };
 
-    std::ostream& operator<<(std::ostream& s, const Error::Type& type);
-    std::ostream& operator<<(std::ostream& s, const Error& error);
-
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
-
-    struct Visitor;
-
-    struct Value;
-    struct Object;
-    struct Array;
-    struct String;
-    struct Number;
-    struct Bool;
-    struct Null;
-    struct Int;
 
     struct Value
     {
@@ -102,8 +102,6 @@ namespace jsonh
         operator bool() const;
     };
 
-    std::ostream& operator<<(std::ostream& s, const ParseResult& result);
-
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
@@ -119,8 +117,6 @@ namespace jsonh
     }
 
     ParseResult Parse(const std::string& str, ParseFlags::Type flags);
-
-    struct Value;
 
     struct PrettyPrint
     {
@@ -172,8 +168,6 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    using tint = int64_t;
-
     struct Int : public Value
     {
         tint integer;
@@ -197,8 +191,6 @@ namespace jsonh
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
-
-    using tnum = double;
 
     struct Number : public Value
     {
@@ -252,5 +244,10 @@ namespace jsonh
         virtual void VisitNull(Null* null) = 0;
         virtual void VisitInt(Int* integer) = 0;
     };
+
+    std::ostream& operator<<(std::ostream& s, const Location& location);
+    std::ostream& operator<<(std::ostream& s, const Error::Type& type);
+    std::ostream& operator<<(std::ostream& s, const Error& error);
+    std::ostream& operator<<(std::ostream& s, const ParseResult& result);
 
 }
