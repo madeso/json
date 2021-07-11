@@ -1,12 +1,53 @@
-#include "jsonh/internal.parse_functions.h"
+#include "jsonh/detail.h"
 
 #include <cassert>
 #include <sstream>
 
-#include "jsonh/internal.parser.h"
 #include "jsonh/jsonh.h"
 
-namespace jsonh
+namespace jsonh::detail
+{
+    Parser::Parser(const std::string& s, ParseFlags::Type f)
+        : str(s), flags(f)
+    {
+    }
+
+    char Parser::Peek(tloc advance) const
+    {
+        const tloc i = index + advance;
+        if (index >= str.size())
+            return 0;
+        return str[i];
+    }
+
+    bool Parser::HasMoreChar() const
+    {
+        return index < str.size();
+    }
+
+    Location Parser::GetLocation() const
+    {
+        return {line, column};
+    }
+
+    char Parser::Read()
+    {
+        const char c = str[index];
+        if (c == '\n')
+        {
+            line += 1;
+            column = 0;
+        }
+        else
+        {
+            column += 1;
+        }
+        index += 1;
+        return c;
+    }
+}
+
+namespace jsonh::detail
 {
     bool IsSpace(char c)
     {

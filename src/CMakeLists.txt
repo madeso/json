@@ -1,9 +1,6 @@
 set(src
-  jsonh/jsonh.h
-  jsonh/internal.parse_functions.h jsonh/internal.parse_functions.cc
-  jsonh/internal.parser.h jsonh/internal.parser.cc
-
-  jsonh/jsonh.cc
+    jsonh/jsonh.cc jsonh/jsonh.h
+    jsonh/detail.cc jsonh/detail.h
 )
 add_library(jsonh STATIC ${src})
 target_link_libraries(jsonh

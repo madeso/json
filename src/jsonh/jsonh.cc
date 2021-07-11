@@ -2,8 +2,7 @@
 
 #include <sstream>
 
-#include "internal.parse_functions.h"
-#include "internal.parser.h"
+#include "jsonh/detail.h"
 
 namespace jsonh
 {
@@ -113,8 +112,8 @@ namespace jsonh
 
     ParseResult Parse(const std::string& str, ParseFlags::Type flags)
     {
-        Parser parser{str, flags};
-        return Parse(&parser);
+        detail::Parser parser{str, flags};
+        return detail::Parse(&parser);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
