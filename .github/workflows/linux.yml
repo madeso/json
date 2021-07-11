@@ -12,24 +12,24 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
 
-    - name: Configure
-      shell: bash
-      working-directory: ${{github.workspace}}/build
-      env:
-        CXX: ${{matrix.cxx}}
-      run: cmake -DCMAKE_BUILD_TYPE=${{matrix.build_type}} $GITHUB_WORKSPACE
+      - name: Configure
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        env:
+          CXX: ${{matrix.cxx}}
+        run: cmake -DCMAKE_BUILD_TYPE=${{matrix.build_type}} $GITHUB_WORKSPACE
 
-    - name: Build
-      shell: bash
-      working-directory: ${{github.workspace}}/build
-      run: cmake --build . --config ${{matrix.build_type}}
+      - name: Build
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        run: cmake --build . --config ${{matrix.build_type}}
 
-    - name: Test
-      shell: bash
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{matrix.build_type}}
+      - name: Test
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        run: ctest -C ${{matrix.build_type}}
