@@ -1,8 +1,7 @@
-#include "jsonh/detail.h"
-
 #include <cassert>
 #include <sstream>
 
+#include "jsonh/detail.h"
 #include "jsonh/jsonh.h"
 
 namespace jsonh::detail
