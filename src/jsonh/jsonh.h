@@ -251,3 +251,10 @@ namespace jsonh
     std::ostream& operator<<(std::ostream& s, const ParseResult& result);
 
 }
+
+#ifdef JSONH_IMPLEMENTATION
+
+#include "jsonh/detail.inl"
+#include "jsonh/jsonh.inl"
+
+#endif
