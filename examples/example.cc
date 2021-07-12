@@ -50,7 +50,7 @@ int main()
     }
 
     // cool, after all that we have our array we can loop all the items
-    for (std::shared_ptr<jsonh::Value> item : array->array)
+    for (std::unique_ptr<jsonh::Value>& item : array->array)
     {
         // now this json example is a little bit cotrived...
         // if the value is a object, we print the member text

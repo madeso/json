@@ -11,8 +11,8 @@ TEST_CASE("print-object-one", "[print]")
         "}\n";
     const std::string compact = "{\"prop\":5}";
 
-    auto root = std::make_shared<Object>();
-    root->object["prop"] = std::make_shared<Int>(5);
+    auto root = std::make_unique<Object>();
+    root->object["prop"] = std::make_unique<Int>(5);
 
     const auto print_compact = Print(root.get(), PrintFlags::Json, PrettyPrint::Compact());
     const auto print_pretty = Print(root.get(), PrintFlags::Json, PrettyPrint::Pretty());
@@ -33,9 +33,9 @@ TEST_CASE("print-object-two", "[print]")
         "}\n";
     const std::string compact = "{\"cat\":4,\"dog\":2}";
 
-    auto root = std::make_shared<Object>();
-    root->object["cat"] = std::make_shared<Int>(4);
-    root->object["dog"] = std::make_shared<Int>(2);
+    auto root = std::make_unique<Object>();
+    root->object["cat"] = std::make_unique<Int>(4);
+    root->object["dog"] = std::make_unique<Int>(2);
 
     const auto print_compact = Print(root.get(), PrintFlags::Json, PrettyPrint::Compact());
     const auto print_pretty = Print(root.get(), PrintFlags::Json, PrettyPrint::Pretty());
@@ -55,8 +55,8 @@ TEST_CASE("print-array-one", "[print]")
         "]\n";
     const std::string compact = "[5]";
 
-    auto root = std::make_shared<Array>();
-    root->array.push_back(std::make_shared<Int>(5));
+    auto root = std::make_unique<Array>();
+    root->array.push_back(std::make_unique<Int>(5));
 
     const auto print_compact = Print(root.get(), PrintFlags::Json, PrettyPrint::Compact());
     const auto print_pretty = Print(root.get(), PrintFlags::Json, PrettyPrint::Pretty());
@@ -77,9 +77,9 @@ TEST_CASE("print-array-two", "[print]")
         "]\n";
     const std::string compact = "[4,2]";
 
-    auto root = std::make_shared<Array>();
-    root->array.push_back(std::make_shared<Int>(4));
-    root->array.push_back(std::make_shared<Int>(2));
+    auto root = std::make_unique<Array>();
+    root->array.push_back(std::make_unique<Int>(4));
+    root->array.push_back(std::make_unique<Int>(2));
 
     const auto print_compact = Print(root.get(), PrintFlags::Json, PrettyPrint::Compact());
     const auto print_pretty = Print(root.get(), PrintFlags::Json, PrettyPrint::Pretty());

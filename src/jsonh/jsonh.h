@@ -95,7 +95,7 @@ namespace jsonh
         std::vector<Error> errors;
 
         // is non-null is parsing succeeded
-        std::shared_ptr<Value> value;
+        std::unique_ptr<Value> value;
 
         bool HasError() const;
 
@@ -144,7 +144,7 @@ namespace jsonh
 
     struct Array : public Value
     {
-        std::vector<std::shared_ptr<Value>> array;
+        std::vector<std::unique_ptr<Value>> array;
 
         void Visit(Visitor* visitor) override;
 
@@ -208,7 +208,7 @@ namespace jsonh
 
     struct Object : public Value
     {
-        std::map<std::string, std::shared_ptr<Value>> object;
+        std::map<std::string, std::unique_ptr<Value>> object;
 
         void Visit(Visitor* visitor) override;
 

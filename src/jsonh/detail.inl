@@ -131,7 +131,7 @@ namespace jsonh::detail
         return IsDigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     }
 
-    std::shared_ptr<Value> ParseValue(ParseResult* result, Parser* parser)
+    std::unique_ptr<Value> ParseValue(ParseResult* result, Parser* parser)
     {
         if (parser->Peek() == '[')
         {
@@ -154,7 +154,7 @@ namespace jsonh::detail
             parser->Peek(2) == 'u' &&
             parser->Peek(3) == 'e')
         {
-            auto ret = std::make_shared<Bool>(true);
+            auto ret = std::make_unique<Bool>(true);
             ret->location = parser->GetLocation();
             parser->Read();  // t
             parser->Read();  // r
@@ -171,7 +171,7 @@ namespace jsonh::detail
             parser->Peek(3) == 's' &&
             parser->Peek(4) == 'e')
         {
-            auto ret = std::make_shared<Bool>(false);
+            auto ret = std::make_unique<Bool>(false);
             ret->location = parser->GetLocation();
             parser->Read();  // f
             parser->Read();  // a
@@ -188,7 +188,7 @@ namespace jsonh::detail
             parser->Peek(2) == 'l' &&
             parser->Peek(3) == 'l')
         {
-            auto ret = std::make_shared<Null>();
+            auto ret = std::make_unique<Null>();
             ret->location = parser->GetLocation();
             parser->Read();  // n
             parser->Read();  // u
@@ -207,9 +207,9 @@ namespace jsonh::detail
         return nullptr;
     }
 
-    std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
+    std::unique_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
     {
-        auto array = std::make_shared<Array>();
+        auto array = std::make_unique<Array>();
         array->location = parser->GetLocation();
 
         EXPECT(Error::Type::InvalidCharacter, '[');
@@ -237,7 +237,7 @@ namespace jsonh::detail
             }
             else
             {
-                array->array.push_back(v);
+                array->array.emplace_back(std::move(v));
             }
             SkipSpaces(parser);
 
@@ -267,10 +267,10 @@ namespace jsonh::detail
         return array;
     }
 
-    std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
+    std::unique_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
     {
         EXPECT(Error::Type::InvalidCharacter, '{');
-        auto object = std::make_shared<Object>();
+        auto object = std::make_unique<Object>();
         object->location = parser->GetLocation();
         SkipSpaces(parser);
 
@@ -311,7 +311,7 @@ namespace jsonh::detail
                         return nullptr;
                     }
                 }
-                object->object[s->string] = v;
+                object->object[s->string] = std::move(v);
             }
             SkipSpaces(parser);
         }
@@ -377,7 +377,7 @@ namespace jsonh::detail
         return true;
     }
 
-    std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser)
+    std::unique_ptr<String> ParseString(ParseResult* result, Parser* parser)
     {
         const auto loc = parser->GetLocation();
         EXPECT(Error::Type::InvalidCharacter, '\"');
@@ -418,12 +418,12 @@ namespace jsonh::detail
         EXPECT(Error::Type::InvalidCharacter, '\"');
         SkipSpaces(parser);
 
-        auto ret = std::make_shared<String>(string_buffer.str());
+        auto ret = std::make_unique<String>(string_buffer.str());
         ret->location = loc;
         return ret;
     }
 
-    std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
+    std::unique_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
     {
         std::ostringstream o;
 
@@ -507,7 +507,7 @@ namespace jsonh::detail
                 AddError(result, parser, Error::Type::UnknownError, "Failed to parse integer: " + o.str());
                 return nullptr;
             }
-            auto ret = std::make_shared<Int>(d);
+            auto ret = std::make_unique<Int>(d);
             ret->location = loc;
             return ret;
         }
@@ -521,7 +521,7 @@ namespace jsonh::detail
             // AddError(result, parser, Error::Type::UnknownError, "Failed to parse number: " + o.str());
             // return nullptr;
             // }
-            auto ret = std::make_shared<Number>(d);
+            auto ret = std::make_unique<Number>(d);
             ret->location = loc;
             return ret;
         }

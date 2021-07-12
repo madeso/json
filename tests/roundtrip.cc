@@ -282,14 +282,14 @@ TEST_CASE("roundtrip09", "[roundtrip]")
     REQUIRE(oj1->object.size() == 1);
     REQUIRE(oj2->object.size() == 1);
 
-    auto f1 = oj1->object["foo"];
-    auto f2 = oj2->object["foo"];
+    const auto& f1 = oj1->object["foo"];
+    const auto& f2 = oj2->object["foo"];
 
     REQUIRE(f1);
     REQUIRE(f2);
 
-    auto v1 = f1->AsString();
-    auto v2 = f2->AsString();
+    const auto& v1 = f1->AsString();
+    const auto& v2 = f2->AsString();
 
     REQUIRE(v1);
     REQUIRE(v2);
@@ -319,8 +319,8 @@ TEST_CASE("roundtrip10", "[roundtrip]")
     REQUIRE(oj1->object.size() == 2);
     REQUIRE(oj2->object.size() == 2);
 
-    auto f1 = oj1->object["foo"];
-    auto f2 = oj2->object["foo"];
+    const auto& f1 = oj1->object["foo"];
+    const auto& f2 = oj2->object["foo"];
 
     REQUIRE(f1);
     REQUIRE(f2);
@@ -334,8 +334,8 @@ TEST_CASE("roundtrip10", "[roundtrip]")
     REQUIRE(v1->string == "bar");
     REQUIRE(v2->string == "bar");
 
-    auto a1 = oj1->object["a"];
-    auto a2 = oj2->object["a"];
+    const auto& a1 = oj1->object["a"];
+    const auto& a2 = oj2->object["a"];
 
     REQUIRE(a1);
     REQUIRE(a2);

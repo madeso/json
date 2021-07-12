@@ -40,11 +40,11 @@ namespace jsonh::detail
     void AddError(ParseResult* result, Parser* parser, Error::Type type, const std::string& err);
     void AddNote(ParseResult* result, const Location& loc, const std::string& note);
 
-    std::shared_ptr<Value> ParseValue(ParseResult* result, Parser* parser);
-    std::shared_ptr<Object> ParseObject(ParseResult* result, Parser* parser);
-    std::shared_ptr<Array> ParseArray(ParseResult* result, Parser* parser);
-    std::shared_ptr<String> ParseString(ParseResult* result, Parser* parser);
-    std::shared_ptr<Value> ParseNumber(ParseResult* result, Parser* parser);
+    std::unique_ptr<Value> ParseValue(ParseResult* result, Parser* parser);
+    std::unique_ptr<Object> ParseObject(ParseResult* result, Parser* parser);
+    std::unique_ptr<Array> ParseArray(ParseResult* result, Parser* parser);
+    std::unique_ptr<String> ParseString(ParseResult* result, Parser* parser);
+    std::unique_ptr<Value> ParseNumber(ParseResult* result, Parser* parser);
 
     bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss);
 

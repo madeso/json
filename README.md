@@ -50,7 +50,7 @@ if(!j.errors.empty()) { std::cerr << j; return 0; };
 if(j.value == nullptr) { std::cerr << j; return 0; };
 
 // 3c. Use j.value
-std::shared_ptr<Value> root = j.value;
+std::unique_ptr<Value> root = j.value;
 
 // the root of a json can eiter be a array or a object.
 Array* arr = root->AsArray();
@@ -62,7 +62,7 @@ Object* obj = root->AsObject();
 //
 // struct Array : public Value
 // {
-//   std::vector<std::shared_ptr<Value>> array;
+//   std::vector<std::unique_ptr<Value>> array;
 // };
 
 
@@ -70,7 +70,7 @@ Object* obj = root->AsObject();
 //
 // struct Object : public Value
 // {
-//   std::map<std::string, std::shared_ptr<Value>> object;
+//   std::map<std::string, std::unique_ptr<Value>> object;
 // };
 
 ```
@@ -90,8 +90,8 @@ jsonh _will not_ do any conversions for you, so if you AsNumber a 5 value, you w
 
 ```cpp
 // 4. write some important data back
-auto root = std::make_shared<Object>();
-root->object["meaning_of_life"] = std::make_shared<Int>(42);
+auto root = std::make_unique<Object>();
+root->object["meaning_of_life"] = std::make_unique<Int>(42);
 std::string json_string = Print(root.get(), PrintFlags::Json, PrettyPrinter::Pretty());
 // you may want to use PrettyPrinter::Compact() depending on your needs
 ```
