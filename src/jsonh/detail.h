@@ -27,11 +27,39 @@ namespace jsonh::detail
         char Read();
     };
 
-    bool IsSpace(char c);
-    bool IsDigit(char c);
-    bool IsHex(char c);
-    bool IsValidFirstDigit(char c);
     char CharToHex(char c);
     void SkipSpaces(Parser* parser);
     void AppendChar(std::ostream& s, char c);
+
+    constexpr bool IsSpace(char c)
+    {
+        if (c == ' ')
+            return true;
+        if (c == '\t')
+            return true;
+        if (c == '\n')
+            return true;
+        if (c == '\r')
+            return true;
+        return false;
+    }
+
+    constexpr bool IsDigit(char c)
+    {
+        return c >= '0' && c <= '9';
+    }
+
+    constexpr bool IsHex(char c)
+    {
+        return IsDigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    constexpr bool IsValidFirstDigit(char c)
+    {
+        if (c == '-')
+            return true;
+        if (IsDigit(c))
+            return true;
+        return false;
+    }
 }

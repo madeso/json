@@ -45,19 +45,6 @@ namespace jsonh::detail
         return c;
     }
 
-    bool IsSpace(char c)
-    {
-        if (c == ' ')
-            return true;
-        if (c == '\t')
-            return true;
-        if (c == '\n')
-            return true;
-        if (c == '\r')
-            return true;
-        return false;
-    }
-
     void SkipSpaces(Parser* parser)
     {
         while (IsSpace(parser->Peek()))
@@ -91,16 +78,6 @@ namespace jsonh::detail
         }
     }
 
-    bool IsDigit(char c)
-    {
-        return c >= '0' && c <= '9';
-    }
-
-    bool IsHex(char c)
-    {
-        return IsDigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-    }
-
     char CharToHex(char c)
     {
         if (c >= '0' && c <= '9')
@@ -120,14 +97,5 @@ namespace jsonh::detail
             assert(false && "Invalid hex code");
             return 0;
         }
-    }
-
-    bool IsValidFirstDigit(char c)
-    {
-        if (c == '-')
-            return true;
-        if (IsDigit(c))
-            return true;
-        return false;
     }
 }
