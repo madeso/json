@@ -23,52 +23,65 @@ namespace jsonh
     //
 
     template <typename tint, typename tnum>
-    struct Visitor;
+    struct TVisitor;
 
     template <typename tint, typename tnum>
-    struct Value;
+    struct TValue;
 
     template <typename tint, typename tnum>
-    struct Object;
+    struct TObject;
 
     template <typename tint, typename tnum>
-    struct Array;
+    struct TArray;
 
     template <typename tint, typename tnum>
-    struct String;
+    struct TString;
 
     template <typename tint, typename tnum>
-    struct Number;
+    struct TNumber;
 
     template <typename tint, typename tnum>
-    struct Bool;
+    struct TBool;
 
     template <typename tint, typename tnum>
-    struct Null;
+    struct TNull;
 
     template <typename tint, typename tnum>
-    struct Int;
+    struct TInt;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
+    using Visitor = TVisitor<default_tint, default_tnum>;
+    using Value = TValue<default_tint, default_tnum>;
+    using Object = TObject<default_tint, default_tnum>;
+    using Array = TArray<default_tint, default_tnum>;
+    using String = TString<default_tint, default_tnum>;
+    using Number = TNumber<default_tint, default_tnum>;
+    using Bool = TBool<default_tint, default_tnum>;
+    using Null = TNull<default_tint, default_tnum>;
+    using Int = TInt<default_tint, default_tnum>;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
     template <typename tint, typename tnum>
-    struct Value
+    struct TValue
     {
         Location location;
 
-        virtual ~Value() = default;
+        virtual ~TValue() = default;
 
-        virtual void Visit(Visitor<tint, tnum>* visitor) = 0;
+        virtual void Visit(TVisitor<tint, tnum>* visitor) = 0;
 
         // only exact matches
-        virtual Object<tint, tnum>* AsObject() { return nullptr; }
-        virtual Array<tint, tnum>* AsArray() { return nullptr; }
-        virtual String<tint, tnum>* AsString() { return nullptr; }
-        virtual Number<tint, tnum>* AsNumber() { return nullptr; }
-        virtual Bool<tint, tnum>* AsBool() { return nullptr; }
-        virtual Null<tint, tnum>* AsNull() { return nullptr; }
-        virtual Int<tint, tnum>* AsInt() { return nullptr; }
+        virtual TObject<tint, tnum>* AsObject() { return nullptr; }
+        virtual TArray<tint, tnum>* AsArray() { return nullptr; }
+        virtual TString<tint, tnum>* AsString() { return nullptr; }
+        virtual TNumber<tint, tnum>* AsNumber() { return nullptr; }
+        virtual TBool<tint, tnum>* AsBool() { return nullptr; }
+        virtual TNull<tint, tnum>* AsNull() { return nullptr; }
+        virtual TInt<tint, tnum>* AsInt() { return nullptr; }
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +94,7 @@ namespace jsonh
         std::vector<Error> errors;
 
         // is non-null is parsing succeeded
-        std::unique_ptr<Value<tint, tnum>> value;
+        std::unique_ptr<TValue<tint, tnum>> value;
 
         bool HasError() const { return value == nullptr; }
         operator bool() const { return !HasError(); }
@@ -104,120 +117,120 @@ namespace jsonh
     };
 
     template <typename tint, typename tnum>
-    std::string Print(Value<tint, tnum>* value, PrintFlags::Type flags, const PrettyPrint& pp);
+    std::string Print(TValue<tint, tnum>* value, PrintFlags::Type flags, const PrettyPrint& pp);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
     template <typename tint, typename tnum>
-    struct Array : public Value<tint, tnum>
+    struct TArray : public TValue<tint, tnum>
     {
-        std::vector<std::unique_ptr<Value<tint, tnum>>> array;
+        std::vector<std::unique_ptr<TValue<tint, tnum>>> array;
 
-        void Visit(Visitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum>* visitor) override;
 
-        Array<tint, tnum>* AsArray() override;
+        TArray<tint, tnum>* AsArray() override;
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
     template <typename tint, typename tnum>
-    struct Bool : public Value<tint, tnum>
+    struct TBool : public TValue<tint, tnum>
     {
         bool boolean;
 
-        void Visit(Visitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum>* visitor) override;
 
-        Bool<tint, tnum>* AsBool() override;
+        TBool<tint, tnum>* AsBool() override;
 
-        explicit Bool(bool b);
+        explicit TBool(bool b);
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
     template <typename tint, typename tnum>
-    struct Int : public Value<tint, tnum>
+    struct TInt : public TValue<tint, tnum>
     {
         tint integer;
 
-        void Visit(Visitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum>* visitor) override;
 
-        Int<tint, tnum>* AsInt() override;
+        TInt<tint, tnum>* AsInt() override;
 
-        explicit Int(tint i);
+        explicit TInt(tint i);
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
     template <typename tint, typename tnum>
-    struct Null : public Value<tint, tnum>
+    struct TNull : public TValue<tint, tnum>
     {
-        void Visit(Visitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum>* visitor) override;
 
-        Null* AsNull() override;
+        TNull* AsNull() override;
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
     template <typename tint, typename tnum>
-    struct Number : public Value<tint, tnum>
+    struct TNumber : public TValue<tint, tnum>
     {
         tnum number;
 
-        void Visit(Visitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum>* visitor) override;
 
-        Number<tint, tnum>* AsNumber() override;
+        TNumber<tint, tnum>* AsNumber() override;
 
-        explicit Number(tnum d);
+        explicit TNumber(tnum d);
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
     template <typename tint, typename tnum>
-    struct Object : public Value<tint, tnum>
+    struct TObject : public TValue<tint, tnum>
     {
-        std::map<std::string, std::unique_ptr<Value<tint, tnum>>> object;
+        std::map<std::string, std::unique_ptr<TValue<tint, tnum>>> object;
 
-        void Visit(Visitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum>* visitor) override;
 
-        Object<tint, tnum>* AsObject() override;
+        TObject<tint, tnum>* AsObject() override;
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
     template <typename tint, typename tnum>
-    struct String : public Value<tint, tnum>
+    struct TString : public TValue<tint, tnum>
     {
         std::string string;
 
-        void Visit(Visitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum>* visitor) override;
 
-        String<tint, tnum>* AsString() override;
+        TString<tint, tnum>* AsString() override;
 
-        explicit String(const std::string& s = "");
+        explicit TString(const std::string& s = "");
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
     template <typename tint, typename tnum>
-    struct Visitor
+    struct TVisitor
     {
         // will not recurse, if you want to visit the children, you have to keep calling Visit
-        virtual void VisitObject(Object<tint, tnum>* object) = 0;
-        virtual void VisitArray(Array<tint, tnum>* array) = 0;
+        virtual void VisitObject(TObject<tint, tnum>* object) = 0;
+        virtual void VisitArray(TArray<tint, tnum>* array) = 0;
 
-        virtual void VisitString(String<tint, tnum>* string) = 0;
-        virtual void VisitNumber(Number<tint, tnum>* number) = 0;
-        virtual void VisitBool(Bool<tint, tnum>* boolean) = 0;
-        virtual void VisitNull(Null<tint, tnum>* null) = 0;
-        virtual void VisitInt(Int<tint, tnum>* integer) = 0;
+        virtual void VisitString(TString<tint, tnum>* string) = 0;
+        virtual void VisitNumber(TNumber<tint, tnum>* number) = 0;
+        virtual void VisitBool(TBool<tint, tnum>* boolean) = 0;
+        virtual void VisitNull(TNull<tint, tnum>* null) = 0;
+        virtual void VisitInt(TInt<tint, tnum>* integer) = 0;
     };
 
     std::ostream& operator<<(std::ostream& s, const Location& location);
@@ -249,7 +262,7 @@ namespace jsonh
 namespace jsonh
 {
     template <typename tint, typename tnum>
-    struct PrettyPrintVisitor : public Visitor<tint, tnum>
+    struct PrettyPrintVisitor : public TVisitor<tint, tnum>
     {
         PrettyPrint settings;
         std::ostream* stream;
@@ -297,7 +310,7 @@ namespace jsonh
             }
         }
 
-        void VisitObject(Object<tint, tnum>* object) override
+        void VisitObject(TObject<tint, tnum>* object) override
         {
             *stream << '{' << settings.newline;
             indent += 1;
@@ -317,7 +330,7 @@ namespace jsonh
             Indent();
             *stream << '}';
         }
-        void VisitArray(Array<tint, tnum>* array) override
+        void VisitArray(TArray<tint, tnum>* array) override
         {
             *stream << '[' << settings.newline;
             indent += 1;
@@ -336,11 +349,11 @@ namespace jsonh
             *stream << ']';
         }
 
-        void VisitString(String<tint, tnum>* string) override
+        void VisitString(TString<tint, tnum>* string) override
         {
             StreamString(string->string);
         }
-        void VisitNumber(Number<tint, tnum>* number) override
+        void VisitNumber(TNumber<tint, tnum>* number) override
         {
             // can't really detect if it is -0 or 0, should we? does it have a special value?
             // https://stackoverflow.com/questions/45795397/behaviour-of-negative-zero-0-0-in-comparison-with-positive-zero-0-0/45795465
@@ -349,22 +362,22 @@ namespace jsonh
             else
                 *stream << number->number;
         }
-        void VisitBool(Bool<tint, tnum>* boolean) override
+        void VisitBool(TBool<tint, tnum>* boolean) override
         {
             *stream << (boolean->boolean ? "true" : "false");
         }
-        void VisitNull(Null<tint, tnum>*) override
+        void VisitNull(TNull<tint, tnum>*) override
         {
             *stream << "null";
         }
-        void VisitInt(Int<tint, tnum>* integer) override
+        void VisitInt(TInt<tint, tnum>* integer) override
         {
             *stream << integer->integer;
         }
     };
 
     template <typename tint, typename tnum>
-    std::string Print(Value<tint, tnum>* value, PrintFlags::Type, const PrettyPrint& pp)
+    std::string Print(TValue<tint, tnum>* value, PrintFlags::Type, const PrettyPrint& pp)
     {
         std::ostringstream ss;
         PrettyPrintVisitor<tint, tnum> vis;
@@ -379,13 +392,13 @@ namespace jsonh
     //
 
     template <typename tint, typename tnum>
-    void Array<tint, tnum>::Visit(Visitor<tint, tnum>* visitor)
+    void TArray<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
     {
         visitor->VisitArray(this);
     }
 
     template <typename tint, typename tnum>
-    Array<tint, tnum>* Array<tint, tnum>::AsArray()
+    TArray<tint, tnum>* TArray<tint, tnum>::AsArray()
     {
         return this;
     }
@@ -394,19 +407,19 @@ namespace jsonh
     //
 
     template <typename tint, typename tnum>
-    void Bool<tint, tnum>::Visit(Visitor<tint, tnum>* visitor)
+    void TBool<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
     {
         visitor->VisitBool(this);
     }
 
     template <typename tint, typename tnum>
-    Bool<tint, tnum>* Bool<tint, tnum>::AsBool()
+    TBool<tint, tnum>* TBool<tint, tnum>::AsBool()
     {
         return this;
     }
 
     template <typename tint, typename tnum>
-    Bool<tint, tnum>::Bool(bool b)
+    TBool<tint, tnum>::TBool(bool b)
         : boolean(b)
     {
     }
@@ -415,19 +428,19 @@ namespace jsonh
     //
 
     template <typename tint, typename tnum>
-    void Int<tint, tnum>::Visit(Visitor<tint, tnum>* visitor)
+    void TInt<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
     {
         visitor->VisitInt(this);
     }
 
     template <typename tint, typename tnum>
-    Int<tint, tnum>* Int<tint, tnum>::AsInt()
+    TInt<tint, tnum>* TInt<tint, tnum>::AsInt()
     {
         return this;
     }
 
     template <typename tint, typename tnum>
-    Int<tint, tnum>::Int(tint i)
+    TInt<tint, tnum>::TInt(tint i)
         : integer(i)
     {
     }
@@ -436,13 +449,13 @@ namespace jsonh
     //
 
     template <typename tint, typename tnum>
-    void Null<tint, tnum>::Visit(Visitor<tint, tnum>* visitor)
+    void TNull<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
     {
         visitor->VisitNull(this);
     }
 
     template <typename tint, typename tnum>
-    Null<tint, tnum>* Null<tint, tnum>::AsNull()
+    TNull<tint, tnum>* TNull<tint, tnum>::AsNull()
     {
         return this;
     }
@@ -451,19 +464,19 @@ namespace jsonh
     //
 
     template <typename tint, typename tnum>
-    void Number<tint, tnum>::Visit(Visitor<tint, tnum>* visitor)
+    void TNumber<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
     {
         visitor->VisitNumber(this);
     }
 
     template <typename tint, typename tnum>
-    Number<tint, tnum>* Number<tint, tnum>::AsNumber()
+    TNumber<tint, tnum>* TNumber<tint, tnum>::AsNumber()
     {
         return this;
     }
 
     template <typename tint, typename tnum>
-    Number<tint, tnum>::Number(tnum d)
+    TNumber<tint, tnum>::TNumber(tnum d)
         : number(d)
     {
     }
@@ -472,13 +485,13 @@ namespace jsonh
     //
 
     template <typename tint, typename tnum>
-    void Object<tint, tnum>::Visit(Visitor<tint, tnum>* visitor)
+    void TObject<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
     {
         visitor->VisitObject(this);
     }
 
     template <typename tint, typename tnum>
-    Object<tint, tnum>* Object<tint, tnum>::AsObject()
+    TObject<tint, tnum>* TObject<tint, tnum>::AsObject()
     {
         return this;
     }
@@ -487,19 +500,19 @@ namespace jsonh
     //
 
     template <typename tint, typename tnum>
-    void String<tint, tnum>::Visit(Visitor<tint, tnum>* visitor)
+    void TString<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
     {
         visitor->VisitString(this);
     }
 
     template <typename tint, typename tnum>
-    String<tint, tnum>* String<tint, tnum>::AsString()
+    TString<tint, tnum>* TString<tint, tnum>::AsString()
     {
         return this;
     }
 
     template <typename tint, typename tnum>
-    String<tint, tnum>::String(const std::string& s)
+    TString<tint, tnum>::TString(const std::string& s)
         : string(s)
     {
     }
@@ -520,19 +533,19 @@ namespace jsonh::detail
     void AddNote(ParseResult<tint, tnum>* result, const Location& loc, const std::string& note);
 
     template <typename tint, typename tnum>
-    std::unique_ptr<Value<tint, tnum>> ParseValue(ParseResult<tint, tnum>* result, Parser* parser);
+    std::unique_ptr<TValue<tint, tnum>> ParseValue(ParseResult<tint, tnum>* result, Parser* parser);
 
     template <typename tint, typename tnum>
-    std::unique_ptr<Object<tint, tnum>> ParseObject(ParseResult<tint, tnum>* result, Parser* parser);
+    std::unique_ptr<TObject<tint, tnum>> ParseObject(ParseResult<tint, tnum>* result, Parser* parser);
 
     template <typename tint, typename tnum>
-    std::unique_ptr<Array<tint, tnum>> ParseArray(ParseResult<tint, tnum>* result, Parser* parser);
+    std::unique_ptr<TArray<tint, tnum>> ParseArray(ParseResult<tint, tnum>* result, Parser* parser);
 
     template <typename tint, typename tnum>
-    std::unique_ptr<String<tint, tnum>> ParseString(ParseResult<tint, tnum>* result, Parser* parser);
+    std::unique_ptr<TString<tint, tnum>> ParseString(ParseResult<tint, tnum>* result, Parser* parser);
 
     template <typename tint, typename tnum>
-    std::unique_ptr<Value<tint, tnum>> ParseNumber(ParseResult<tint, tnum>* result, Parser* parser);
+    std::unique_ptr<TValue<tint, tnum>> ParseNumber(ParseResult<tint, tnum>* result, Parser* parser);
 
     template <typename tint, typename tnum>
     bool ParseEscapeCode(ParseResult<tint, tnum>* result, Parser* parser, std::ostringstream& ss);
@@ -585,7 +598,7 @@ namespace jsonh::detail
     }
 
     template <typename tint, typename tnum>
-    std::unique_ptr<Value<tint, tnum>> ParseValue(ParseResult<tint, tnum>* result, Parser* parser)
+    std::unique_ptr<TValue<tint, tnum>> ParseValue(ParseResult<tint, tnum>* result, Parser* parser)
     {
         if (parser->Peek() == '[')
         {
@@ -608,7 +621,7 @@ namespace jsonh::detail
             parser->Peek(2) == 'u' &&
             parser->Peek(3) == 'e')
         {
-            auto ret = std::make_unique<Bool<tint, tnum>>(true);
+            auto ret = std::make_unique<TBool<tint, tnum>>(true);
             ret->location = parser->GetLocation();
             parser->Read();  // t
             parser->Read();  // r
@@ -625,7 +638,7 @@ namespace jsonh::detail
             parser->Peek(3) == 's' &&
             parser->Peek(4) == 'e')
         {
-            auto ret = std::make_unique<Bool<tint, tnum>>(false);
+            auto ret = std::make_unique<TBool<tint, tnum>>(false);
             ret->location = parser->GetLocation();
             parser->Read();  // f
             parser->Read();  // a
@@ -642,7 +655,7 @@ namespace jsonh::detail
             parser->Peek(2) == 'l' &&
             parser->Peek(3) == 'l')
         {
-            auto ret = std::make_unique<Null<tint, tnum>>();
+            auto ret = std::make_unique<TNull<tint, tnum>>();
             ret->location = parser->GetLocation();
             parser->Read();  // n
             parser->Read();  // u
@@ -662,9 +675,9 @@ namespace jsonh::detail
     }
 
     template <typename tint, typename tnum>
-    std::unique_ptr<Array<tint, tnum>> ParseArray(ParseResult<tint, tnum>* result, Parser* parser)
+    std::unique_ptr<TArray<tint, tnum>> ParseArray(ParseResult<tint, tnum>* result, Parser* parser)
     {
-        auto array = std::make_unique<Array<tint, tnum>>();
+        auto array = std::make_unique<TArray<tint, tnum>>();
         array->location = parser->GetLocation();
 
         EXPECT(ErrorType::InvalidCharacter, '[');
@@ -704,7 +717,7 @@ namespace jsonh::detail
                 return nullptr;
             case '}':
                 AddError(result, parser, ErrorType::UnclosedArray, "Found }. A square bracket ] closes the array.");
-                AddNote(result, start_of_array, "Array started here");
+                AddNote(result, start_of_array, "TArray started here");
                 return nullptr;
             }
         }
@@ -716,17 +729,17 @@ namespace jsonh::detail
             ss << "Expected end of array but found ";
             AppendChar(ss, end);
             AddError(result, parser, ErrorType::UnclosedArray, ss.str());
-            AddNote(result, start_of_array, "Array started here");
+            AddNote(result, start_of_array, "TArray started here");
             return nullptr;
         }
         return array;
     }
 
     template <typename tint, typename tnum>
-    std::unique_ptr<Object<tint, tnum>> ParseObject(ParseResult<tint, tnum>* result, Parser* parser)
+    std::unique_ptr<TObject<tint, tnum>> ParseObject(ParseResult<tint, tnum>* result, Parser* parser)
     {
         EXPECT(ErrorType::InvalidCharacter, '{');
-        auto object = std::make_unique<Object<tint, tnum>>();
+        auto object = std::make_unique<TObject<tint, tnum>>();
         object->location = parser->GetLocation();
         SkipSpaces(parser);
 
@@ -814,7 +827,7 @@ namespace jsonh::detail
     }
 
     template <typename tint, typename tnum>
-    std::unique_ptr<String<tint, tnum>> ParseString(ParseResult<tint, tnum>* result, Parser* parser)
+    std::unique_ptr<TString<tint, tnum>> ParseString(ParseResult<tint, tnum>* result, Parser* parser)
     {
         const auto loc = parser->GetLocation();
         EXPECT(ErrorType::InvalidCharacter, '\"');
@@ -855,13 +868,13 @@ namespace jsonh::detail
         EXPECT(ErrorType::InvalidCharacter, '\"');
         SkipSpaces(parser);
 
-        auto ret = std::make_unique<String<tint, tnum>>(string_buffer.str());
+        auto ret = std::make_unique<TString<tint, tnum>>(string_buffer.str());
         ret->location = loc;
         return ret;
     }
 
     template <typename tint, typename tnum>
-    std::unique_ptr<Value<tint, tnum>> ParseNumber(ParseResult<tint, tnum>* result, Parser* parser)
+    std::unique_ptr<TValue<tint, tnum>> ParseNumber(ParseResult<tint, tnum>* result, Parser* parser)
     {
         std::ostringstream o;
 
@@ -945,7 +958,7 @@ namespace jsonh::detail
                 AddError(result, parser, ErrorType::UnknownError, "Failed to parse integer: " + o.str());
                 return nullptr;
             }
-            auto ret = std::make_unique<Int<tint, tnum>>(d);
+            auto ret = std::make_unique<TInt<tint, tnum>>(d);
             ret->location = loc;
             return ret;
         }
@@ -959,7 +972,7 @@ namespace jsonh::detail
             // AddError(result, parser, ErrorType::UnknownError, "Failed to parse number: " + o.str());
             // return nullptr;
             // }
-            auto ret = std::make_unique<Number<tint, tnum>>(d);
+            auto ret = std::make_unique<TNumber<tint, tnum>>(d);
             ret->location = loc;
             return ret;
         }
