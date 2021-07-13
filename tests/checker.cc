@@ -11,7 +11,7 @@ TEST_CASE("fail1", "[checker]")
     auto j = Parse(R"("A JSON payload should be an object or array, not a string.")", ParseFlags::Json);
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail2", "[checker]")
@@ -20,7 +20,7 @@ TEST_CASE("fail2", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::UnclosedArray);
+    REQUIRE(j.errors[0].type == ErrorType::UnclosedArray);
 }
 
 TEST_CASE("fail3", "[checker]")
@@ -29,7 +29,7 @@ TEST_CASE("fail3", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail4", "[checker]")
@@ -38,7 +38,7 @@ TEST_CASE("fail4", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail5", "[checker]")
@@ -47,7 +47,7 @@ TEST_CASE("fail5", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail6", "[checker]")
@@ -56,7 +56,7 @@ TEST_CASE("fail6", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail7", "[checker]")
@@ -65,7 +65,7 @@ TEST_CASE("fail7", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::NotEof);
+    REQUIRE(j.errors[0].type == ErrorType::NotEof);
 }
 
 TEST_CASE("fail8", "[checker]")
@@ -74,7 +74,7 @@ TEST_CASE("fail8", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::NotEof);
+    REQUIRE(j.errors[0].type == ErrorType::NotEof);
 }
 
 TEST_CASE("fail9", "[checker]")
@@ -83,7 +83,7 @@ TEST_CASE("fail9", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail10", "[checker]")
@@ -92,7 +92,7 @@ TEST_CASE("fail10", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::NotEof);
+    REQUIRE(j.errors[0].type == ErrorType::NotEof);
 }
 
 TEST_CASE("fail11", "[checker]")
@@ -101,7 +101,7 @@ TEST_CASE("fail11", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail12", "[checker]")
@@ -110,7 +110,7 @@ TEST_CASE("fail12", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail13", "[checker]")
@@ -119,7 +119,7 @@ TEST_CASE("fail13", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidNumber);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidNumber);
 }
 
 TEST_CASE("fail14", "[checker]")
@@ -128,7 +128,7 @@ TEST_CASE("fail14", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail15", "[checker]")
@@ -137,7 +137,7 @@ TEST_CASE("fail15", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::IllegalEscape);
+    REQUIRE(j.errors[0].type == ErrorType::IllegalEscape);
 }
 
 TEST_CASE("fail16", "[checker]")
@@ -146,7 +146,7 @@ TEST_CASE("fail16", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail17", "[checker]")
@@ -155,7 +155,7 @@ TEST_CASE("fail17", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::IllegalEscape);
+    REQUIRE(j.errors[0].type == ErrorType::IllegalEscape);
 }
 /*
 
@@ -173,7 +173,7 @@ TEST_CASE("fail19", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail20", "[checker]")
@@ -182,7 +182,7 @@ TEST_CASE("fail20", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail21", "[checker]")
@@ -191,7 +191,7 @@ TEST_CASE("fail21", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail22", "[checker]")
@@ -200,7 +200,7 @@ TEST_CASE("fail22", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail23", "[checker]")
@@ -209,7 +209,7 @@ TEST_CASE("fail23", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail24", "[checker]")
@@ -218,7 +218,7 @@ TEST_CASE("fail24", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail25", "[checker]")
@@ -227,7 +227,7 @@ TEST_CASE("fail25", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacterInString);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacterInString);
 }
 
 TEST_CASE("fail26", "[checker]")
@@ -236,7 +236,7 @@ TEST_CASE("fail26", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::IllegalEscape);
+    REQUIRE(j.errors[0].type == ErrorType::IllegalEscape);
 }
 
 TEST_CASE("fail27", "[checker]")
@@ -247,7 +247,7 @@ break"])",
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacterInString);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacterInString);
 }
 
 TEST_CASE("fail28", "[checker]")
@@ -258,7 +258,7 @@ break"])",
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::IllegalEscape);
+    REQUIRE(j.errors[0].type == ErrorType::IllegalEscape);
 }
 
 TEST_CASE("fail29", "[checker]")
@@ -267,7 +267,7 @@ TEST_CASE("fail29", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail30", "[checker]")
@@ -276,7 +276,7 @@ TEST_CASE("fail30", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail31", "[checker]")
@@ -285,7 +285,7 @@ TEST_CASE("fail31", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::InvalidCharacter);
+    REQUIRE(j.errors[0].type == ErrorType::InvalidCharacter);
 }
 
 TEST_CASE("fail32", "[checker]")
@@ -294,7 +294,7 @@ TEST_CASE("fail32", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::UnexpectedEof);
+    REQUIRE(j.errors[0].type == ErrorType::UnexpectedEof);
 }
 
 TEST_CASE("fail33", "[checker]")
@@ -303,7 +303,7 @@ TEST_CASE("fail33", "[checker]")
     REQUIRE_FALSE(j);
     REQUIRE_FALSE(j.errors.empty());
     INFO(j);
-    REQUIRE(j.errors[0].type == Error::Type::UnclosedArray);
+    REQUIRE(j.errors[0].type == ErrorType::UnclosedArray);
 }
 
 //////////////////////////////////////////////////////////////////////////
