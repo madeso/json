@@ -29,7 +29,32 @@ namespace jsonh::detail
 
     char CharToHex(char c);
     void SkipSpaces(Parser* parser);
-    void AppendChar(std::ostream& s, char c);
+
+    template <typename Stream>
+    void AppendChar(Stream& s, char c)
+    {
+        switch (c)
+        {
+        case '\n':
+            s << "<newline>";
+            break;
+        case '\r':
+            s << "<linefeed>";
+            break;
+        case 0:
+            s << "<EOF>";
+            break;
+        case '\t':
+            s << "<tab>";
+            break;
+        case ' ':
+            s << "<space>";
+            break;
+        default:
+            s << c << "(" << static_cast<int>(static_cast<unsigned char>(c)) << ")";
+            break;
+        }
+    }
 
     constexpr bool IsSpace(char c)
     {
