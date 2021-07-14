@@ -10,7 +10,7 @@ TEST_CASE("dup-err", "[dup]")
   "a": 4, "a": 3
 }
 )";
-    auto j1 = Parse(src, ParseFlags::Json);
+    auto j1 = Parse(src, parse_flags::Json);
     REQUIRE_FALSE(j1);
 }
 
@@ -21,7 +21,7 @@ TEST_CASE("dup-ok", "[dup]")
   "a": 4, "a": 3
 }
 )";
-    auto j1 = Parse(src, ParseFlags::DuplicateKeysOnlyLatest);
+    auto j1 = Parse(src, parse_flags::DuplicateKeysOnlyLatest);
     REQUIRE(j1);
     CHECK(j1.value->AsObject()->object["a"]->AsInt()->integer == 3);
 }

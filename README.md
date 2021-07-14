@@ -38,7 +38,7 @@ target_link_libraries(my_cool_project
 using namespace jsonh;
 
 // 3a. Parse string into DOM structure
-ParseResult j = Parse(json_string, ParseFlags::Json);
+ParseResult j = Parse(json_string, parse_flags::Json);
 
 // 3b. Check for errors
 if(!j) { std::cerr << j; return 0; }
@@ -77,11 +77,11 @@ Object* obj = root->AsObject();
 
 Other types of values are
 
-* Null (AsNull)
-* Bool(AsBool, Bool::boolean)
-* Int(AsInt(), Int::integer)
-* Number(AsNumber(), Number::number)
-* String (AsString(), String::string)
+-   Null (AsNull)
+-   Bool(AsBool, Bool::boolean)
+-   Int(AsInt(), Int::integer)
+-   Number(AsNumber(), Number::number)
+-   String (AsString(), String::string)
 
 Numbers in jsonh are either represented as Int or as Number/double. 5 is a Int, while 5.0 is a Number.
 Since there are scenarios where it is important if it is one and not the other like array indices for example.
@@ -92,7 +92,7 @@ jsonh _will not_ do any conversions for you, so if you AsNumber a 5 value, you w
 // 4. write some important data back
 auto root = std::make_unique<Object>();
 root->object["meaning_of_life"] = std::make_unique<Int>(42);
-std::string json_string = Print(root.get(), PrintFlags::Json, PrettyPrinter::Pretty());
+std::string json_string = Print(root.get(), print_flags::Json, PrettyPrinter::Pretty());
 // you may want to use PrettyPrinter::Compact() depending on your needs
 ```
 
@@ -100,7 +100,7 @@ A more complete (and compileable) example can be found in [example.cc](https://g
 
 ## USP (unique selling points)
 
-* Line numbers are available after json has loaded successfully
+-   Line numbers are available after json has loaded successfully
 
 ## License
 
@@ -113,4 +113,3 @@ Currently the array and object parsing is stack based. What does this mean? Give
 The current implementation of the object uses a std::map for storing the key/values but according to the specification there can be many entries with the same key. A conforming json parser can introduce additional limits so this is one. Currently, all but the last key is ignored. (See issue [#11](https://github.com/madeso/json/issues/11))
 
 Currently the root must be either a object or a array. ECMA-404 is a bit unclear if this required.
-

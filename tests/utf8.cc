@@ -24,11 +24,11 @@ TEST_CASE("utf8", "[utf8]")
   }
 }
 )";
-    auto j1 = Parse(src, ParseFlags::Json);
+    auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), PrintFlags::Json, Compact);
-    auto j2 = Parse(dmp, ParseFlags::Json);
+    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
     // todo: check j1 and j2

@@ -90,21 +90,21 @@ TEST_CASE("cov-int-null", "[coverage]")
 TEST_CASE("cov-stringending-r", "[coverage]")
 {
     const std::string src = R"([\r])";
-    auto j1 = Parse(src, ParseFlags::Json);
+    auto j1 = Parse(src, parse_flags::Json);
     REQUIRE_FALSE(j1);
 }
 
 TEST_CASE("cov-stringending-n", "[coverage]")
 {
     const std::string src = R"([a])";
-    auto j1 = Parse(src, ParseFlags::Json);
+    auto j1 = Parse(src, parse_flags::Json);
     REQUIRE_FALSE(j1);
 }
 
 TEST_CASE("cov-stringending-eof", "[coverage]")
 {
     const std::string src = R"([a])";
-    auto j1 = Parse(src, ParseFlags::Json);
+    auto j1 = Parse(src, parse_flags::Json);
     REQUIRE_FALSE(j1);
 }
 
@@ -112,13 +112,13 @@ TEST_CASE("cov-string-escapes", "[coverage]")
 {
     const std::string src = "[\" \\\\ \\b \\f \\n \\r \\t \"]";
     const std::string actual = " \\ \b \f \n \r \t ";
-    auto j1 = Parse(src, ParseFlags::Json);
+    auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), PrintFlags::Json, Compact);
+    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
-    auto j2 = Parse(dmp, ParseFlags::Json);
+    auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
     auto aj1 = j1.value->AsArray();

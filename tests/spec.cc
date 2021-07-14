@@ -7,7 +7,7 @@ using namespace jsonh;
 
 TEST_CASE("same-chars", "[spec]")
 {
-    auto j = Parse(R"(["\u002F", "\u002f", "\/", "/"])", ParseFlags::Json);
+    auto j = Parse(R"(["\u002F", "\u002f", "\/", "/"])", parse_flags::Json);
     REQUIRE(j);
     REQUIRE(j.value->AsArray() != nullptr);
     const auto& array = j.value->AsArray()->array;

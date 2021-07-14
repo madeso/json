@@ -13,7 +13,7 @@ std::string LoadJson();
 int main()
 {
     // parse the json
-    auto result = jsonh::Parse(LoadJson(), jsonh::ParseFlags::Json);
+    auto result = jsonh::Parse(LoadJson(), jsonh::parse_flags::Json);
 
     // check for and print parse errors
     if (!result)
@@ -122,7 +122,7 @@ int main()
                   << loc.line << ", column:"
                   << loc.column << "): "
                   << "Neiter a object nor a integer.\n"
-                  << "was: " << Print(item.get(), jsonh::PrintFlags::Json, jsonh::Compact)
+                  << "was: " << Print(item.get(), jsonh::print_flags::Json, jsonh::Compact)
                   << "\n";
     }
 

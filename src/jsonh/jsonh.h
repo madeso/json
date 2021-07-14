@@ -31,7 +31,7 @@ namespace jsonh
 
     std::ostream& operator<<(std::ostream& s, const ErrorType& type);
 
-    namespace ParseFlags
+    namespace parse_flags
     {
         enum Type
         {
@@ -42,7 +42,7 @@ namespace jsonh
         };
     }
 
-    namespace PrintFlags
+    namespace print_flags
     {
         enum Type
         {
@@ -135,14 +135,14 @@ namespace jsonh::detail
     struct Parser
     {
         std::string str;
-        ParseFlags::Type flags;
+        parse_flags::Type flags;
         tloc index = 0;
 
-        Parser(const std::string& s, ParseFlags::Type f);
+        Parser(const std::string& s, parse_flags::Type f);
 
         char Peek(tloc advance = 0) const;
 
-        bool HasMoreChar() const;
+        [[nodiscard]] bool HasMoreChar() const;
 
         tloc line = 1;
         tloc column = 0;
@@ -153,7 +153,7 @@ namespace jsonh::detail
     };
 
     template <typename tloc>
-    Parser<tloc>::Parser(const std::string& s, ParseFlags::Type f)
+    Parser<tloc>::Parser(const std::string& s, parse_flags::Type f)
         : str(s)
         , flags(f)
     {
@@ -164,7 +164,9 @@ namespace jsonh::detail
     {
         const tloc i = index + advance;
         if (index >= str.size())
+        {
             return 0;
+        }
         return str[i];
     }
 
@@ -200,13 +202,21 @@ namespace jsonh::detail
     constexpr bool IsSpace(char c)
     {
         if (c == ' ')
+        {
             return true;
+        }
         if (c == '\t')
+        {
             return true;
+        }
         if (c == '\n')
+        {
             return true;
+        }
         if (c == '\r')
+        {
             return true;
+        }
         return false;
     }
 
@@ -234,9 +244,13 @@ namespace jsonh::detail
     constexpr bool IsValidFirstDigit(char c)
     {
         if (c == '-')
+        {
             return true;
+        }
         if (IsDigit(c))
+        {
             return true;
+        }
         return false;
     }
 }
@@ -327,7 +341,7 @@ namespace jsonh
         // is non-null is parsing succeeded
         std::unique_ptr<TValue<tint, tnum, tloc>> value;
 
-        bool HasError() const { return value == nullptr; }
+        [[nodiscard]] bool HasError() const { return value == nullptr; }
         operator bool() const { return !HasError(); }
     };
 
@@ -335,7 +349,7 @@ namespace jsonh
     //
 
     template <typename tint = default_tint, typename tnum = default_tnum, typename tloc = default_tloc>
-    ParseResult<tint, tnum, tloc> Parse(const std::string& str, ParseFlags::Type flags);
+    ParseResult<tint, tnum, tloc> Parse(const std::string& str, parse_flags::Type flags);
 
     struct PrintStyle
     {
@@ -348,7 +362,7 @@ namespace jsonh
     constexpr PrintStyle Compact = PrintStyle{};
 
     template <typename tint, typename tnum, typename tloc>
-    std::string Print(TValue<tint, tnum, tloc>* value, PrintFlags::Type flags, const PrintStyle& pp);
+    std::string Print(TValue<tint, tnum, tloc>* value, print_flags::Type flags, const PrintStyle& pp);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -477,7 +491,7 @@ namespace jsonh
         }
         else
         {
-            s << Print(result.value.get(), PrintFlags::Json, Compact);
+            s << Print(result.value.get(), print_flags::Json, Compact);
         }
         return s;
     }
@@ -492,7 +506,7 @@ namespace jsonh
     struct PrettyPrintVisitor : public TVisitor<tint, tnum, tloc>
     {
         PrintStyle settings;
-        std::ostream* stream;
+        std::ostream* stream{};
         int indent = 0;
 
         void StreamString(const std::string& str)
@@ -585,9 +599,13 @@ namespace jsonh
             // can't really detect if it is -0 or 0, should we? does it have a special value?
             // https://stackoverflow.com/questions/45795397/behaviour-of-negative-zero-0-0-in-comparison-with-positive-zero-0-0/45795465
             if (number->number == 0)
+            {
                 *stream << "0.0";
+            }
             else
+            {
                 *stream << number->number;
+            }
         }
         void VisitBool(TBool<tint, tnum, tloc>* boolean) override
         {
@@ -604,7 +622,7 @@ namespace jsonh
     };
 
     template <typename tint, typename tnum, typename tloc>
-    std::string Print(TValue<tint, tnum, tloc>* value, PrintFlags::Type, const PrintStyle& pp)
+    std::string Print(TValue<tint, tnum, tloc>* value, print_flags::Type, const PrintStyle& pp)
     {
         std::ostringstream ss;
         PrettyPrintVisitor<tint, tnum, tloc> vis;
@@ -784,7 +802,7 @@ namespace jsonh::detail
 namespace jsonh
 {
     template <typename tint, typename tnum, typename tloc>
-    ParseResult<tint, tnum, tloc> Parse(const std::string& str, ParseFlags::Type flags)
+    ParseResult<tint, tnum, tloc> Parse(const std::string& str, parse_flags::Type flags)
     {
         detail::Parser<tloc> parser{str, flags};
         return detail::Parse<tint, tnum, tloc>(&parser);
@@ -997,7 +1015,7 @@ namespace jsonh::detail
             }
             else
             {
-                if (!(parser->flags & ParseFlags::DuplicateKeysOnlyLatest))
+                if (!(parser->flags & parse_flags::DuplicateKeysOnlyLatest))
                 {
                     auto found = object->object.find(s->string);
                     if (found != object->object.end())
