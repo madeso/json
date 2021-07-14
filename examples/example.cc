@@ -13,15 +13,15 @@ std::string LoadJson();
 int main()
 {
     // parse the json
-    jsonh::ParseResult result = jsonh::Parse(LoadJson(), jsonh::ParseFlags::Json);
+    auto result = jsonh::Parse(LoadJson(), jsonh::ParseFlags::Json);
 
     // check for and print parse errors
     if (!result)
     {
         std::cerr << "Parse error:\n";
-        for (const jsonh::Error& err : result.errors)
+        for (const auto& err : result.errors)
         {
-            const jsonh::Location& loc = err.location;
+            const auto& loc = err.location;
             std::cerr << "file("
                       << loc.line << ":"
                       << loc.column << "): "
@@ -33,7 +33,7 @@ int main()
     // the root of a json can either be a array or a object
     // our json in this esxample needs to be a array, so we abort if it's not
 
-    jsonh::Array* array = result.value->AsArray();
+    auto* array = result.value->AsArray();
     if (array == nullptr)
     {
         // one thing that makes this json libary stand out (as far as I can tell)
@@ -41,7 +41,7 @@ int main()
         // proper errors when parsing a json.
         // To make this example shorter, all errors hence further
         // will only return.
-        const jsonh::Location& loc = result.value->location;
+        const auto& loc = result.value->location;
         std::cerr << "file("
                   << loc.line << ", "
                   << loc.column << "): "
@@ -117,12 +117,12 @@ int main()
         // one thing that makes this json libary stand out (as far as I know)
         // it the fact that all json values has a location so you can display
         // proper errors when parsing a json.
-        const jsonh::Location& loc = item->location;
+        const auto& loc = item->location;
         std::cerr << "WARNING: file(line: "
                   << loc.line << ", column:"
                   << loc.column << "): "
                   << "Neiter a object nor a integer.\n"
-                  << "was: " << Print(item.get(), jsonh::PrintFlags::Json, jsonh::PrettyPrint::Compact())
+                  << "was: " << Print(item.get(), jsonh::PrintFlags::Json, jsonh::Compact)
                   << "\n";
     }
 

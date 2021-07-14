@@ -124,7 +124,7 @@ int main(int argc, char* const argv[])
             {
                 if (please_print)
                 {
-                    std::cout << jsonh::Print(parse_result.value.get(), jsonh::PrintFlags::Json, jsonh::PrettyPrint::Pretty());
+                    std::cout << jsonh::Print(parse_result.value.get(), jsonh::PrintFlags::Json, jsonh::Pretty);
                 }
             }
         }

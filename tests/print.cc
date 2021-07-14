@@ -14,8 +14,8 @@ TEST_CASE("print-object-one", "[print]")
     auto root = std::make_unique<Object>();
     root->object["prop"] = std::make_unique<Int>(5);
 
-    const auto print_compact = Print(root.get(), PrintFlags::Json, PrettyPrint::Compact());
-    const auto print_pretty = Print(root.get(), PrintFlags::Json, PrettyPrint::Pretty());
+    const auto print_compact = Print(root.get(), PrintFlags::Json, Compact);
+    const auto print_pretty = Print(root.get(), PrintFlags::Json, Pretty);
 
     CHECK(compact == print_compact);
     CHECK(pretty == print_pretty);
@@ -37,8 +37,8 @@ TEST_CASE("print-object-two", "[print]")
     root->object["cat"] = std::make_unique<Int>(4);
     root->object["dog"] = std::make_unique<Int>(2);
 
-    const auto print_compact = Print(root.get(), PrintFlags::Json, PrettyPrint::Compact());
-    const auto print_pretty = Print(root.get(), PrintFlags::Json, PrettyPrint::Pretty());
+    const auto print_compact = Print(root.get(), PrintFlags::Json, Compact);
+    const auto print_pretty = Print(root.get(), PrintFlags::Json, Pretty);
 
     CHECK(compact == print_compact);
     CHECK(pretty == print_pretty);
@@ -58,8 +58,8 @@ TEST_CASE("print-array-one", "[print]")
     auto root = std::make_unique<Array>();
     root->array.push_back(std::make_unique<Int>(5));
 
-    const auto print_compact = Print(root.get(), PrintFlags::Json, PrettyPrint::Compact());
-    const auto print_pretty = Print(root.get(), PrintFlags::Json, PrettyPrint::Pretty());
+    const auto print_compact = Print(root.get(), PrintFlags::Json, Compact);
+    const auto print_pretty = Print(root.get(), PrintFlags::Json, Pretty);
 
     CHECK(compact == print_compact);
     CHECK(pretty == print_pretty);
@@ -81,8 +81,8 @@ TEST_CASE("print-array-two", "[print]")
     root->array.push_back(std::make_unique<Int>(4));
     root->array.push_back(std::make_unique<Int>(2));
 
-    const auto print_compact = Print(root.get(), PrintFlags::Json, PrettyPrint::Compact());
-    const auto print_pretty = Print(root.get(), PrintFlags::Json, PrettyPrint::Pretty());
+    const auto print_compact = Print(root.get(), PrintFlags::Json, Compact);
+    const auto print_pretty = Print(root.get(), PrintFlags::Json, Pretty);
 
     CHECK(compact == print_compact);
     CHECK(pretty == print_pretty);

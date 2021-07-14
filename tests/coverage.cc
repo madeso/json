@@ -115,7 +115,7 @@ TEST_CASE("cov-string-escapes", "[coverage]")
     auto j1 = Parse(src, ParseFlags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), PrintFlags::Json, PrettyPrint::Compact());
+    const auto dmp = Print(j1.value.get(), PrintFlags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, ParseFlags::Json);

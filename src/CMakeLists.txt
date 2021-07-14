@@ -1,7 +1,6 @@
 set(src
     jsonh/jsonh.cc
-    jsonh/jsonh.inl jsonh/jsonh.h
-    jsonh/detail.inl jsonh/detail.h
+    jsonh/jsonh.h
 )
 add_library(jsonh STATIC ${src})
 target_link_libraries(jsonh

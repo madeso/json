@@ -6,10 +6,235 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 
-#include "jsonh/detail.h"
-#include "jsonh/enums.h"
+#ifdef JSONH_IMPLEMENTATION
+#endif
+
+namespace jsonh
+{
+    enum class ErrorType
+    {
+        Note,
+        InvalidCharacter,
+        UnclosedArray,
+        UnclosedObject,
+        NotEof,
+        InvalidNumber,
+        IllegalEscape,
+        InvalidCharacterInString,
+        UnexpectedEof,
+        DuplicateKey,
+        UnknownError
+    };
+
+    std::ostream& operator<<(std::ostream& s, const ErrorType& type);
+
+    namespace ParseFlags
+    {
+        enum Type
+        {
+            None = 0,
+            DuplicateKeysOnlyLatest = 1 << 1,
+
+            Json = None
+        };
+    }
+
+    namespace PrintFlags
+    {
+        enum Type
+        {
+            None = 0,
+
+            Json = None
+        };
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
+    template <typename tloc>
+    struct Location
+    {
+        Location()
+            : line(0), column(0)
+        {
+        }
+
+        Location(tloc l, tloc c)
+            : line(l), column(c)
+        {
+        }
+
+        tloc line;
+        tloc column;
+    };
+
+    template <typename tloc>
+    std::ostream& operator<<(std::ostream& s, const Location<tloc>& location)
+    {
+        s << "(" << location.line << ", " << location.column << ")";
+        return s;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
+    template <typename tloc>
+    struct Error
+    {
+        ErrorType type;
+        std::string message;
+        Location<tloc> location;
+
+        Error(ErrorType t, const std::string& m, const Location<tloc>& l = Location<tloc>())
+            : type(t), message(m), location(l)
+        {
+        }
+    };
+
+    template <typename tloc>
+    std::ostream& operator<<(std::ostream& s, const Error<tloc>& error)
+    {
+        s << error.type << error.location << ": " << error.message;
+        return s;
+    }
+
+}
+
+namespace jsonh::detail
+{
+    constexpr char CharToHex(char c)
+    {
+        if (c >= '0' && c <= '9')
+        {
+            return c - '0';
+        }
+        else if (c >= 'a' && c <= 'f')
+        {
+            return 10 + (c - 'a');
+        }
+        else if (c >= 'A' && c <= 'F')
+        {
+            return 10 + (c - 'A');
+        }
+        else
+        {
+            // "Invalid hex code"
+            return 0;
+        }
+    }
+
+    template <typename tloc>
+    struct Parser
+    {
+        std::string str;
+        ParseFlags::Type flags;
+        tloc index = 0;
+
+        Parser(const std::string& s, ParseFlags::Type f);
+
+        char Peek(tloc advance = 0) const;
+
+        bool HasMoreChar() const;
+
+        tloc line = 1;
+        tloc column = 0;
+
+        Location<tloc> GetLocation() const;
+
+        char Read();
+    };
+
+    template <typename tloc>
+    Parser<tloc>::Parser(const std::string& s, ParseFlags::Type f)
+        : str(s), flags(f)
+    {
+    }
+
+    template <typename tloc>
+    char Parser<tloc>::Peek(tloc advance) const
+    {
+        const tloc i = index + advance;
+        if (index >= str.size())
+            return 0;
+        return str[i];
+    }
+
+    template <typename tloc>
+    bool Parser<tloc>::HasMoreChar() const
+    {
+        return index < str.size();
+    }
+
+    template <typename tloc>
+    Location<tloc> Parser<tloc>::GetLocation() const
+    {
+        return {line, column};
+    }
+
+    template <typename tloc>
+    char Parser<tloc>::Read()
+    {
+        const char c = str[index];
+        if (c == '\n')
+        {
+            line += 1;
+            column = 0;
+        }
+        else
+        {
+            column += 1;
+        }
+        index += 1;
+        return c;
+    }
+
+    constexpr bool IsSpace(char c)
+    {
+        if (c == ' ')
+            return true;
+        if (c == '\t')
+            return true;
+        if (c == '\n')
+            return true;
+        if (c == '\r')
+            return true;
+        return false;
+    }
+
+    template <typename tloc>
+    void SkipSpaces(Parser<tloc>* parser)
+    {
+        while (IsSpace(parser->Peek()))
+        {
+            parser->Read();
+        }
+    }
+
+    void AppendChar(std::ostream& s, char c);
+
+    constexpr bool IsDigit(char c)
+    {
+        return c >= '0' && c <= '9';
+    }
+
+    constexpr bool IsHex(char c)
+    {
+        return IsDigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    constexpr bool IsValidFirstDigit(char c)
+    {
+        if (c == '-')
+            return true;
+        if (IsDigit(c))
+            return true;
+        return false;
+    }
+}
 
 namespace jsonh
 {
@@ -18,83 +243,84 @@ namespace jsonh
 
     using default_tint = int64_t;
     using default_tnum = double;
+    using default_tloc = std::size_t;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TVisitor;
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TValue;
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TObject;
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TArray;
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TString;
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TNumber;
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TBool;
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TNull;
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TInt;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    using Visitor = TVisitor<default_tint, default_tnum>;
-    using Value = TValue<default_tint, default_tnum>;
-    using Object = TObject<default_tint, default_tnum>;
-    using Array = TArray<default_tint, default_tnum>;
-    using String = TString<default_tint, default_tnum>;
-    using Number = TNumber<default_tint, default_tnum>;
-    using Bool = TBool<default_tint, default_tnum>;
-    using Null = TNull<default_tint, default_tnum>;
-    using Int = TInt<default_tint, default_tnum>;
+    using Visitor = TVisitor<default_tint, default_tnum, default_tloc>;
+    using Value = TValue<default_tint, default_tnum, default_tloc>;
+    using Object = TObject<default_tint, default_tnum, default_tloc>;
+    using Array = TArray<default_tint, default_tnum, default_tloc>;
+    using String = TString<default_tint, default_tnum, default_tloc>;
+    using Number = TNumber<default_tint, default_tnum, default_tloc>;
+    using Bool = TBool<default_tint, default_tnum, default_tloc>;
+    using Null = TNull<default_tint, default_tnum, default_tloc>;
+    using Int = TInt<default_tint, default_tnum, default_tloc>;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TValue
     {
-        Location location;
+        Location<tloc> location;
 
         virtual ~TValue() = default;
 
-        virtual void Visit(TVisitor<tint, tnum>* visitor) = 0;
+        virtual void Visit(TVisitor<tint, tnum, tloc>* visitor) = 0;
 
         // only exact matches
-        virtual TObject<tint, tnum>* AsObject() { return nullptr; }
-        virtual TArray<tint, tnum>* AsArray() { return nullptr; }
-        virtual TString<tint, tnum>* AsString() { return nullptr; }
-        virtual TNumber<tint, tnum>* AsNumber() { return nullptr; }
-        virtual TBool<tint, tnum>* AsBool() { return nullptr; }
-        virtual TNull<tint, tnum>* AsNull() { return nullptr; }
-        virtual TInt<tint, tnum>* AsInt() { return nullptr; }
+        virtual TObject<tint, tnum, tloc>* AsObject() { return nullptr; }
+        virtual TArray<tint, tnum, tloc>* AsArray() { return nullptr; }
+        virtual TString<tint, tnum, tloc>* AsString() { return nullptr; }
+        virtual TNumber<tint, tnum, tloc>* AsNumber() { return nullptr; }
+        virtual TBool<tint, tnum, tloc>* AsBool() { return nullptr; }
+        virtual TNull<tint, tnum, tloc>* AsNull() { return nullptr; }
+        virtual TInt<tint, tnum, tloc>* AsInt() { return nullptr; }
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct ParseResult
     {
         // contains errors if parsing failed
-        std::vector<Error> errors;
+        std::vector<Error<tloc>> errors;
 
         // is non-null is parsing succeeded
-        std::unique_ptr<TValue<tint, tnum>> value;
+        std::unique_ptr<TValue<tint, tnum, tloc>> value;
 
         bool HasError() const { return value == nullptr; }
         operator bool() const { return !HasError(); }
@@ -103,46 +329,46 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint = default_tint, typename tnum = default_tnum>
-    ParseResult<tint, tnum> Parse(const std::string& str, ParseFlags::Type flags);
+    template <typename tint = default_tint, typename tnum = default_tnum, typename tloc = default_tloc>
+    ParseResult<tint, tnum, tloc> Parse(const std::string& str, ParseFlags::Type flags);
 
-    // todo(Gustav): rename to PrintStyle
-    struct PrettyPrint
+    struct PrintStyle
     {
-        std::string indent;
-        std::string space;
-        std::string newline;
-        static PrettyPrint Pretty();
-        static PrettyPrint Compact();
+        std::string_view indent;
+        std::string_view space;
+        std::string_view newline;
     };
 
-    template <typename tint, typename tnum>
-    std::string Print(TValue<tint, tnum>* value, PrintFlags::Type flags, const PrettyPrint& pp);
+    constexpr PrintStyle Pretty = PrintStyle{"  ", " ", "\n"};
+    constexpr PrintStyle Compact = PrintStyle{};
+
+    template <typename tint, typename tnum, typename tloc>
+    std::string Print(TValue<tint, tnum, tloc>* value, PrintFlags::Type flags, const PrintStyle& pp);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    struct TArray : public TValue<tint, tnum>
+    template <typename tint, typename tnum, typename tloc>
+    struct TArray : public TValue<tint, tnum, tloc>
     {
-        std::vector<std::unique_ptr<TValue<tint, tnum>>> array;
+        std::vector<std::unique_ptr<TValue<tint, tnum, tloc>>> array;
 
-        void Visit(TVisitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum, tloc>* visitor) override;
 
-        TArray<tint, tnum>* AsArray() override;
+        TArray<tint, tnum, tloc>* AsArray() override;
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    struct TBool : public TValue<tint, tnum>
+    template <typename tint, typename tnum, typename tloc>
+    struct TBool : public TValue<tint, tnum, tloc>
     {
         bool boolean;
 
-        void Visit(TVisitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum, tloc>* visitor) override;
 
-        TBool<tint, tnum>* AsBool() override;
+        TBool<tint, tnum, tloc>* AsBool() override;
 
         explicit TBool(bool b);
     };
@@ -150,14 +376,14 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    struct TInt : public TValue<tint, tnum>
+    template <typename tint, typename tnum, typename tloc>
+    struct TInt : public TValue<tint, tnum, tloc>
     {
         tint integer;
 
-        void Visit(TVisitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum, tloc>* visitor) override;
 
-        TInt<tint, tnum>* AsInt() override;
+        TInt<tint, tnum, tloc>* AsInt() override;
 
         explicit TInt(tint i);
     };
@@ -165,10 +391,10 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    struct TNull : public TValue<tint, tnum>
+    template <typename tint, typename tnum, typename tloc>
+    struct TNull : public TValue<tint, tnum, tloc>
     {
-        void Visit(TVisitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum, tloc>* visitor) override;
 
         TNull* AsNull() override;
     };
@@ -176,14 +402,14 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    struct TNumber : public TValue<tint, tnum>
+    template <typename tint, typename tnum, typename tloc>
+    struct TNumber : public TValue<tint, tnum, tloc>
     {
         tnum number;
 
-        void Visit(TVisitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum, tloc>* visitor) override;
 
-        TNumber<tint, tnum>* AsNumber() override;
+        TNumber<tint, tnum, tloc>* AsNumber() override;
 
         explicit TNumber(tnum d);
     };
@@ -191,27 +417,27 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    struct TObject : public TValue<tint, tnum>
+    template <typename tint, typename tnum, typename tloc>
+    struct TObject : public TValue<tint, tnum, tloc>
     {
-        std::map<std::string, std::unique_ptr<TValue<tint, tnum>>> object;
+        std::map<std::string, std::unique_ptr<TValue<tint, tnum, tloc>>> object;
 
-        void Visit(TVisitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum, tloc>* visitor) override;
 
-        TObject<tint, tnum>* AsObject() override;
+        TObject<tint, tnum, tloc>* AsObject() override;
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    struct TString : public TValue<tint, tnum>
+    template <typename tint, typename tnum, typename tloc>
+    struct TString : public TValue<tint, tnum, tloc>
     {
         std::string string;
 
-        void Visit(TVisitor<tint, tnum>* visitor) override;
+        void Visit(TVisitor<tint, tnum, tloc>* visitor) override;
 
-        TString<tint, tnum>* AsString() override;
+        TString<tint, tnum, tloc>* AsString() override;
 
         explicit TString(const std::string& s = "");
     };
@@ -219,26 +445,22 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
+    template <typename tint, typename tnum, typename tloc>
     struct TVisitor
     {
         // will not recurse, if you want to visit the children, you have to keep calling Visit
-        virtual void VisitObject(TObject<tint, tnum>* object) = 0;
-        virtual void VisitArray(TArray<tint, tnum>* array) = 0;
+        virtual void VisitObject(TObject<tint, tnum, tloc>* object) = 0;
+        virtual void VisitArray(TArray<tint, tnum, tloc>* array) = 0;
 
-        virtual void VisitString(TString<tint, tnum>* string) = 0;
-        virtual void VisitNumber(TNumber<tint, tnum>* number) = 0;
-        virtual void VisitBool(TBool<tint, tnum>* boolean) = 0;
-        virtual void VisitNull(TNull<tint, tnum>* null) = 0;
-        virtual void VisitInt(TInt<tint, tnum>* integer) = 0;
+        virtual void VisitString(TString<tint, tnum, tloc>* string) = 0;
+        virtual void VisitNumber(TNumber<tint, tnum, tloc>* number) = 0;
+        virtual void VisitBool(TBool<tint, tnum, tloc>* boolean) = 0;
+        virtual void VisitNull(TNull<tint, tnum, tloc>* null) = 0;
+        virtual void VisitInt(TInt<tint, tnum, tloc>* integer) = 0;
     };
 
-    std::ostream& operator<<(std::ostream& s, const Location& location);
-    std::ostream& operator<<(std::ostream& s, const ErrorType& type);
-    std::ostream& operator<<(std::ostream& s, const Error& error);
-
-    template <typename tint, typename tnum>
-    std::ostream& operator<<(std::ostream& s, const ParseResult<tint, tnum>& result)
+    template <typename tint, typename tnum, typename tloc>
+    std::ostream& operator<<(std::ostream& s, const ParseResult<tint, tnum, tloc>& result)
     {
         if (result.HasError())
         {
@@ -250,7 +472,7 @@ namespace jsonh
         }
         else
         {
-            s << Print(result.value.get(), PrintFlags::Json, PrettyPrint::Compact());
+            s << Print(result.value.get(), PrintFlags::Json, Compact);
         }
         return s;
     }
@@ -261,10 +483,10 @@ namespace jsonh
 
 namespace jsonh
 {
-    template <typename tint, typename tnum>
-    struct PrettyPrintVisitor : public TVisitor<tint, tnum>
+    template <typename tint, typename tnum, typename tloc>
+    struct PrettyPrintVisitor : public TVisitor<tint, tnum, tloc>
     {
-        PrettyPrint settings;
+        PrintStyle settings;
         std::ostream* stream;
         int indent = 0;
 
@@ -310,7 +532,7 @@ namespace jsonh
             }
         }
 
-        void VisitObject(TObject<tint, tnum>* object) override
+        void VisitObject(TObject<tint, tnum, tloc>* object) override
         {
             *stream << '{' << settings.newline;
             indent += 1;
@@ -330,7 +552,7 @@ namespace jsonh
             Indent();
             *stream << '}';
         }
-        void VisitArray(TArray<tint, tnum>* array) override
+        void VisitArray(TArray<tint, tnum, tloc>* array) override
         {
             *stream << '[' << settings.newline;
             indent += 1;
@@ -349,11 +571,11 @@ namespace jsonh
             *stream << ']';
         }
 
-        void VisitString(TString<tint, tnum>* string) override
+        void VisitString(TString<tint, tnum, tloc>* string) override
         {
             StreamString(string->string);
         }
-        void VisitNumber(TNumber<tint, tnum>* number) override
+        void VisitNumber(TNumber<tint, tnum, tloc>* number) override
         {
             // can't really detect if it is -0 or 0, should we? does it have a special value?
             // https://stackoverflow.com/questions/45795397/behaviour-of-negative-zero-0-0-in-comparison-with-positive-zero-0-0/45795465
@@ -362,25 +584,25 @@ namespace jsonh
             else
                 *stream << number->number;
         }
-        void VisitBool(TBool<tint, tnum>* boolean) override
+        void VisitBool(TBool<tint, tnum, tloc>* boolean) override
         {
             *stream << (boolean->boolean ? "true" : "false");
         }
-        void VisitNull(TNull<tint, tnum>*) override
+        void VisitNull(TNull<tint, tnum, tloc>*) override
         {
             *stream << "null";
         }
-        void VisitInt(TInt<tint, tnum>* integer) override
+        void VisitInt(TInt<tint, tnum, tloc>* integer) override
         {
             *stream << integer->integer;
         }
     };
 
-    template <typename tint, typename tnum>
-    std::string Print(TValue<tint, tnum>* value, PrintFlags::Type, const PrettyPrint& pp)
+    template <typename tint, typename tnum, typename tloc>
+    std::string Print(TValue<tint, tnum, tloc>* value, PrintFlags::Type, const PrintStyle& pp)
     {
         std::ostringstream ss;
-        PrettyPrintVisitor<tint, tnum> vis;
+        PrettyPrintVisitor<tint, tnum, tloc> vis;
         vis.settings = pp;
         vis.stream = &ss;
         value->Visit(&vis);
@@ -391,14 +613,14 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    void TArray<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
+    template <typename tint, typename tnum, typename tloc>
+    void TArray<tint, tnum, tloc>::Visit(TVisitor<tint, tnum, tloc>* visitor)
     {
         visitor->VisitArray(this);
     }
 
-    template <typename tint, typename tnum>
-    TArray<tint, tnum>* TArray<tint, tnum>::AsArray()
+    template <typename tint, typename tnum, typename tloc>
+    TArray<tint, tnum, tloc>* TArray<tint, tnum, tloc>::AsArray()
     {
         return this;
     }
@@ -406,20 +628,20 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    void TBool<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
+    template <typename tint, typename tnum, typename tloc>
+    void TBool<tint, tnum, tloc>::Visit(TVisitor<tint, tnum, tloc>* visitor)
     {
         visitor->VisitBool(this);
     }
 
-    template <typename tint, typename tnum>
-    TBool<tint, tnum>* TBool<tint, tnum>::AsBool()
+    template <typename tint, typename tnum, typename tloc>
+    TBool<tint, tnum, tloc>* TBool<tint, tnum, tloc>::AsBool()
     {
         return this;
     }
 
-    template <typename tint, typename tnum>
-    TBool<tint, tnum>::TBool(bool b)
+    template <typename tint, typename tnum, typename tloc>
+    TBool<tint, tnum, tloc>::TBool(bool b)
         : boolean(b)
     {
     }
@@ -427,20 +649,20 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    void TInt<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
+    template <typename tint, typename tnum, typename tloc>
+    void TInt<tint, tnum, tloc>::Visit(TVisitor<tint, tnum, tloc>* visitor)
     {
         visitor->VisitInt(this);
     }
 
-    template <typename tint, typename tnum>
-    TInt<tint, tnum>* TInt<tint, tnum>::AsInt()
+    template <typename tint, typename tnum, typename tloc>
+    TInt<tint, tnum, tloc>* TInt<tint, tnum, tloc>::AsInt()
     {
         return this;
     }
 
-    template <typename tint, typename tnum>
-    TInt<tint, tnum>::TInt(tint i)
+    template <typename tint, typename tnum, typename tloc>
+    TInt<tint, tnum, tloc>::TInt(tint i)
         : integer(i)
     {
     }
@@ -448,14 +670,14 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    void TNull<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
+    template <typename tint, typename tnum, typename tloc>
+    void TNull<tint, tnum, tloc>::Visit(TVisitor<tint, tnum, tloc>* visitor)
     {
         visitor->VisitNull(this);
     }
 
-    template <typename tint, typename tnum>
-    TNull<tint, tnum>* TNull<tint, tnum>::AsNull()
+    template <typename tint, typename tnum, typename tloc>
+    TNull<tint, tnum, tloc>* TNull<tint, tnum, tloc>::AsNull()
     {
         return this;
     }
@@ -463,20 +685,20 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    void TNumber<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
+    template <typename tint, typename tnum, typename tloc>
+    void TNumber<tint, tnum, tloc>::Visit(TVisitor<tint, tnum, tloc>* visitor)
     {
         visitor->VisitNumber(this);
     }
 
-    template <typename tint, typename tnum>
-    TNumber<tint, tnum>* TNumber<tint, tnum>::AsNumber()
+    template <typename tint, typename tnum, typename tloc>
+    TNumber<tint, tnum, tloc>* TNumber<tint, tnum, tloc>::AsNumber()
     {
         return this;
     }
 
-    template <typename tint, typename tnum>
-    TNumber<tint, tnum>::TNumber(tnum d)
+    template <typename tint, typename tnum, typename tloc>
+    TNumber<tint, tnum, tloc>::TNumber(tnum d)
         : number(d)
     {
     }
@@ -484,14 +706,14 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    void TObject<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
+    template <typename tint, typename tnum, typename tloc>
+    void TObject<tint, tnum, tloc>::Visit(TVisitor<tint, tnum, tloc>* visitor)
     {
         visitor->VisitObject(this);
     }
 
-    template <typename tint, typename tnum>
-    TObject<tint, tnum>* TObject<tint, tnum>::AsObject()
+    template <typename tint, typename tnum, typename tloc>
+    TObject<tint, tnum, tloc>* TObject<tint, tnum, tloc>::AsObject()
     {
         return this;
     }
@@ -499,20 +721,20 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    template <typename tint, typename tnum>
-    void TString<tint, tnum>::Visit(TVisitor<tint, tnum>* visitor)
+    template <typename tint, typename tnum, typename tloc>
+    void TString<tint, tnum, tloc>::Visit(TVisitor<tint, tnum, tloc>* visitor)
     {
         visitor->VisitString(this);
     }
 
-    template <typename tint, typename tnum>
-    TString<tint, tnum>* TString<tint, tnum>::AsString()
+    template <typename tint, typename tnum, typename tloc>
+    TString<tint, tnum, tloc>* TString<tint, tnum, tloc>::AsString()
     {
         return this;
     }
 
-    template <typename tint, typename tnum>
-    TString<tint, tnum>::TString(const std::string& s)
+    template <typename tint, typename tnum, typename tloc>
+    TString<tint, tnum, tloc>::TString(const std::string& s)
         : string(s)
     {
     }
@@ -526,41 +748,41 @@ namespace jsonh::detail
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // template header
 
-    template <typename tint, typename tnum>
-    void AddError(ParseResult<tint, tnum>* result, Parser* parser, ErrorType type, const std::string& err);
+    template <typename tint, typename tnum, typename tloc>
+    void AddError(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser, ErrorType type, const std::string& err);
 
-    template <typename tint, typename tnum>
-    void AddNote(ParseResult<tint, tnum>* result, const Location& loc, const std::string& note);
+    template <typename tint, typename tnum, typename tloc>
+    void AddNote(ParseResult<tint, tnum, tloc>* result, const Location<tloc>& loc, const std::string& note);
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TValue<tint, tnum>> ParseValue(ParseResult<tint, tnum>* result, Parser* parser);
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TValue<tint, tnum, tloc>> ParseValue(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser);
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TObject<tint, tnum>> ParseObject(ParseResult<tint, tnum>* result, Parser* parser);
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TObject<tint, tnum, tloc>> ParseObject(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser);
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TArray<tint, tnum>> ParseArray(ParseResult<tint, tnum>* result, Parser* parser);
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TArray<tint, tnum, tloc>> ParseArray(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser);
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TString<tint, tnum>> ParseString(ParseResult<tint, tnum>* result, Parser* parser);
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TString<tint, tnum, tloc>> ParseString(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser);
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TValue<tint, tnum>> ParseNumber(ParseResult<tint, tnum>* result, Parser* parser);
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TValue<tint, tnum, tloc>> ParseNumber(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser);
 
-    template <typename tint, typename tnum>
-    bool ParseEscapeCode(ParseResult<tint, tnum>* result, Parser* parser, std::ostringstream& ss);
+    template <typename tint, typename tnum, typename tloc>
+    bool ParseEscapeCode(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser, std::ostringstream& ss);
 
-    template <typename tint, typename tnum>
-    ParseResult<tint, tnum> Parse(Parser* parser);
+    template <typename tint, typename tnum, typename tloc>
+    ParseResult<tint, tnum, tloc> Parse(Parser<tloc>* parser);
 }
 
 namespace jsonh
 {
-    template <typename tint, typename tnum>
-    ParseResult<tint, tnum> Parse(const std::string& str, ParseFlags::Type flags)
+    template <typename tint, typename tnum, typename tloc>
+    ParseResult<tint, tnum, tloc> Parse(const std::string& str, ParseFlags::Type flags)
     {
-        detail::Parser parser{str, flags};
-        return detail::Parse<tint, tnum>(&parser);
+        detail::Parser<tloc> parser{str, flags};
+        return detail::Parse<tint, tnum, tloc>(&parser);
     }
 }
 
@@ -583,22 +805,22 @@ namespace jsonh::detail
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // template implementation
 
-    template <typename tint, typename tnum>
-    void AddError(ParseResult<tint, tnum>* result, Parser* parser, ErrorType type, const std::string& err)
+    template <typename tint, typename tnum, typename tloc>
+    void AddError(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser, ErrorType type, const std::string& err)
     {
         result->errors.push_back(Error{type, err, Location{parser->line, parser->column}});
         // todo: assert here instead of assigning, since the value shouldn't be set anyway...
         result->value = nullptr;
     }
 
-    template <typename tint, typename tnum>
-    void AddNote(ParseResult<tint, tnum>* result, const Location& loc, const std::string& note)
+    template <typename tint, typename tnum, typename tloc>
+    void AddNote(ParseResult<tint, tnum, tloc>* result, const Location<tloc>& loc, const std::string& note)
     {
         result->errors.push_back(Error{ErrorType::Note, note, loc});
     }
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TValue<tint, tnum>> ParseValue(ParseResult<tint, tnum>* result, Parser* parser)
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TValue<tint, tnum, tloc>> ParseValue(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser)
     {
         if (parser->Peek() == '[')
         {
@@ -621,7 +843,7 @@ namespace jsonh::detail
             parser->Peek(2) == 'u' &&
             parser->Peek(3) == 'e')
         {
-            auto ret = std::make_unique<TBool<tint, tnum>>(true);
+            auto ret = std::make_unique<TBool<tint, tnum, tloc>>(true);
             ret->location = parser->GetLocation();
             parser->Read();  // t
             parser->Read();  // r
@@ -638,7 +860,7 @@ namespace jsonh::detail
             parser->Peek(3) == 's' &&
             parser->Peek(4) == 'e')
         {
-            auto ret = std::make_unique<TBool<tint, tnum>>(false);
+            auto ret = std::make_unique<TBool<tint, tnum, tloc>>(false);
             ret->location = parser->GetLocation();
             parser->Read();  // f
             parser->Read();  // a
@@ -655,7 +877,7 @@ namespace jsonh::detail
             parser->Peek(2) == 'l' &&
             parser->Peek(3) == 'l')
         {
-            auto ret = std::make_unique<TNull<tint, tnum>>();
+            auto ret = std::make_unique<TNull<tint, tnum, tloc>>();
             ret->location = parser->GetLocation();
             parser->Read();  // n
             parser->Read();  // u
@@ -674,10 +896,10 @@ namespace jsonh::detail
         return nullptr;
     }
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TArray<tint, tnum>> ParseArray(ParseResult<tint, tnum>* result, Parser* parser)
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TArray<tint, tnum, tloc>> ParseArray(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser)
     {
-        auto array = std::make_unique<TArray<tint, tnum>>();
+        auto array = std::make_unique<TArray<tint, tnum, tloc>>();
         array->location = parser->GetLocation();
 
         EXPECT(ErrorType::InvalidCharacter, '[');
@@ -735,11 +957,11 @@ namespace jsonh::detail
         return array;
     }
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TObject<tint, tnum>> ParseObject(ParseResult<tint, tnum>* result, Parser* parser)
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TObject<tint, tnum, tloc>> ParseObject(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser)
     {
         EXPECT(ErrorType::InvalidCharacter, '{');
-        auto object = std::make_unique<TObject<tint, tnum>>();
+        auto object = std::make_unique<TObject<tint, tnum, tloc>>();
         object->location = parser->GetLocation();
         SkipSpaces(parser);
 
@@ -791,8 +1013,8 @@ namespace jsonh::detail
         return object;
     }
 
-    template <typename tint, typename tnum>
-    bool ParseEscapeCode(ParseResult<tint, tnum>* result, Parser* parser, std::ostringstream& ss)
+    template <typename tint, typename tnum, typename tloc>
+    bool ParseEscapeCode(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser, std::ostringstream& ss)
     {
 #define ESCAPE(c, r)         \
     if (parser->Peek() == c) \
@@ -826,8 +1048,8 @@ namespace jsonh::detail
         return true;
     }
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TString<tint, tnum>> ParseString(ParseResult<tint, tnum>* result, Parser* parser)
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TString<tint, tnum, tloc>> ParseString(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser)
     {
         const auto loc = parser->GetLocation();
         EXPECT(ErrorType::InvalidCharacter, '\"');
@@ -868,13 +1090,13 @@ namespace jsonh::detail
         EXPECT(ErrorType::InvalidCharacter, '\"');
         SkipSpaces(parser);
 
-        auto ret = std::make_unique<TString<tint, tnum>>(string_buffer.str());
+        auto ret = std::make_unique<TString<tint, tnum, tloc>>(string_buffer.str());
         ret->location = loc;
         return ret;
     }
 
-    template <typename tint, typename tnum>
-    std::unique_ptr<TValue<tint, tnum>> ParseNumber(ParseResult<tint, tnum>* result, Parser* parser)
+    template <typename tint, typename tnum, typename tloc>
+    std::unique_ptr<TValue<tint, tnum, tloc>> ParseNumber(ParseResult<tint, tnum, tloc>* result, Parser<tloc>* parser)
     {
         std::ostringstream o;
 
@@ -958,7 +1180,7 @@ namespace jsonh::detail
                 AddError(result, parser, ErrorType::UnknownError, "Failed to parse integer: " + o.str());
                 return nullptr;
             }
-            auto ret = std::make_unique<TInt<tint, tnum>>(d);
+            auto ret = std::make_unique<TInt<tint, tnum, tloc>>(d);
             ret->location = loc;
             return ret;
         }
@@ -972,16 +1194,16 @@ namespace jsonh::detail
             // AddError(result, parser, ErrorType::UnknownError, "Failed to parse number: " + o.str());
             // return nullptr;
             // }
-            auto ret = std::make_unique<TNumber<tint, tnum>>(d);
+            auto ret = std::make_unique<TNumber<tint, tnum, tloc>>(d);
             ret->location = loc;
             return ret;
         }
     }
 
-    template <typename tint, typename tnum>
-    ParseResult<tint, tnum> Parse(Parser* parser)
+    template <typename tint, typename tnum, typename tloc>
+    ParseResult<tint, tnum, tloc> Parse(Parser<tloc>* parser)
     {
-        ParseResult<tint, tnum> res;
+        ParseResult<tint, tnum, tloc> res;
         SkipSpaces(parser);
 
         if (parser->Peek() == '[')
@@ -1014,7 +1236,78 @@ namespace jsonh::detail
 
 #ifdef JSONH_IMPLEMENTATION
 
-#include "jsonh/detail.inl"
-#include "jsonh/jsonh.inl"
+namespace jsonh
+{
+    std::ostream& operator<<(std::ostream& s, const ErrorType& type)
+    {
+        switch (type)
+        {
+        case ErrorType::Note:
+            s << "Note";
+            return s;
+        case ErrorType::InvalidCharacter:
+            s << "InvalidCharacter";
+            return s;
+        case ErrorType::UnclosedArray:
+            s << "UnclosedArray";
+            return s;
+        case ErrorType::UnclosedObject:
+            s << "UnclosedObject";
+            return s;
+        case ErrorType::NotEof:
+            s << "NotEof";
+            return s;
+        case ErrorType::InvalidNumber:
+            s << "InvalidNumber";
+            return s;
+        case ErrorType::IllegalEscape:
+            s << "IllegalEscape";
+            return s;
+        case ErrorType::InvalidCharacterInString:
+            s << "InvalidCharacterInString";
+            return s;
+        case ErrorType::UnexpectedEof:
+            s << "UnexpectedEof";
+            return s;
+        case ErrorType::DuplicateKey:
+            s << "DuplicateKey";
+            return s;
+        case ErrorType::UnknownError:
+            s << "UnknownError";
+            return s;
+        default:
+            s << "<unknown error>";
+            return s;
+        }
+    }
+}
+
+namespace jsonh::detail
+{
+    void AppendChar(std::ostream& s, char c)
+    {
+        switch (c)
+        {
+        case '\n':
+            s << "<newline>";
+            break;
+        case '\r':
+            s << "<linefeed>";
+            break;
+        case 0:
+            s << "<EOF>";
+            break;
+        case '\t':
+            s << "<tab>";
+            break;
+        case ' ':
+            s << "<space>";
+            break;
+        default:
+            s << c << "(" << static_cast<int>(static_cast<unsigned char>(c)) << ")";
+            break;
+        }
+    }
+}
 
 #endif
