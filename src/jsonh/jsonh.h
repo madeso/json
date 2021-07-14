@@ -59,12 +59,14 @@ namespace jsonh
     struct Location
     {
         Location()
-            : line(0), column(0)
+            : line(0)
+            , column(0)
         {
         }
 
         Location(tloc l, tloc c)
-            : line(l), column(c)
+            : line(l)
+            , column(c)
         {
         }
 
@@ -90,7 +92,9 @@ namespace jsonh
         Location<tloc> location;
 
         Error(ErrorType t, const std::string& m, const Location<tloc>& l = Location<tloc>())
-            : type(t), message(m), location(l)
+            : type(t)
+            , message(m)
+            , location(l)
         {
         }
     };
@@ -150,7 +154,8 @@ namespace jsonh::detail
 
     template <typename tloc>
     Parser<tloc>::Parser(const std::string& s, ParseFlags::Type f)
-        : str(s), flags(f)
+        : str(s)
+        , flags(f)
     {
     }
 
