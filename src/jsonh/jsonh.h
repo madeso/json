@@ -187,8 +187,8 @@ namespace jsonh
         // is non-null is parsing succeeded
         std::unique_ptr<Value> value;
 
-        [[nodiscard]] constexpr bool HasError() const { return value == nullptr; }
-        constexpr operator bool() const { return !HasError(); }
+        [[nodiscard]] bool HasError() const;
+        operator bool() const;
     };
 
     struct PrintStyle

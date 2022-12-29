@@ -830,6 +830,9 @@ namespace jsonh
     Null* Value::AsNull() { return nullptr; }
     Int* Value::AsInt() { return nullptr; }
 
+    [[nodiscard]] bool ParseResult::HasError() const { return value == nullptr; }
+    ParseResult::operator bool() const { return !HasError(); }
+
     std::string Print(Value* value, print_flags::Type, const PrintStyle& pp)
     {
         std::ostringstream ss;
