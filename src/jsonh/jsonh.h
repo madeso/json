@@ -11,9 +11,15 @@
 
 namespace jsonh
 {
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
     using tint = int64_t;
     using tnum = double;
     using tloc = std::size_t;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
 
     enum class ErrorType
     {
@@ -29,8 +35,6 @@ namespace jsonh
         DuplicateKey,
         UnknownError
     };
-
-    std::ostream& operator<<(std::ostream& s, const ErrorType& type);
 
     namespace parse_flags
     {
@@ -74,11 +78,6 @@ namespace jsonh
         tloc column;
     };
 
-    std::ostream& operator<<(std::ostream& s, const Location& location);
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
     struct Error
     {
         ErrorType type;
@@ -88,44 +87,97 @@ namespace jsonh
         Error(ErrorType t, const std::string& m, const Location& l = Location{});
     };
 
-    std::ostream& operator<<(std::ostream& s, const Error& error);
-
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
+    // actual JSON types
 
     struct Visitor;
+
     struct Value;
     struct Object;
     struct Array;
     struct String;
     struct Number;
+    struct Int;
     struct Bool;
     struct Null;
-    struct Int;
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
 
     struct Value
     {
         Location location;
-
-        virtual ~Value() = default;
-
-        virtual void Visit(Visitor* visitor) = 0;
 
         // only exact matches
         virtual Object* AsObject();
         virtual Array* AsArray();
         virtual String* AsString();
         virtual Number* AsNumber();
+        virtual Int* AsInt();
         virtual Bool* AsBool();
         virtual Null* AsNull();
-        virtual Int* AsInt();
+
+        virtual void Visit(Visitor* visitor) = 0;
+        virtual ~Value() = default;
+    };
+
+    struct Object : public Value
+    {
+        std::map<std::string, std::unique_ptr<Value>> object;
+
+        void Visit(Visitor* visitor) override;
+        Object* AsObject() override;
+    };
+
+    struct Array : public Value
+    {
+        std::vector<std::unique_ptr<Value>> array;
+
+        void Visit(Visitor* visitor) override;
+        Array* AsArray() override;
+    };
+
+    struct String : public Value
+    {
+        std::string string;
+
+        void Visit(Visitor* visitor) override;
+        String* AsString() override;
+        explicit String(const std::string& s = "");
+    };
+
+    struct Number : public Value
+    {
+        tnum number;
+
+        void Visit(Visitor* visitor) override;
+        Number* AsNumber() override;
+        explicit Number(tnum d);
+    };
+
+    struct Int : public Value
+    {
+        tint integer;
+
+        void Visit(Visitor* visitor) override;
+        Int* AsInt() override;
+        explicit Int(tint i);
+    };
+
+    struct Bool : public Value
+    {
+        bool boolean;
+
+        void Visit(Visitor* visitor) override;
+        Bool* AsBool() override;
+        explicit Bool(bool b);
+    };
+
+    struct Null : public Value
+    {
+        void Visit(Visitor* visitor) override;
+        Null* AsNull() override;
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
+    // Parse/print types
 
     struct ParseResult
     {
@@ -139,11 +191,6 @@ namespace jsonh
         constexpr operator bool() const { return !HasError(); }
     };
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    ParseResult Parse(const std::string& str, parse_flags::Type flags);
-
     struct PrintStyle
     {
         std::string_view indent;
@@ -154,97 +201,11 @@ namespace jsonh
     constexpr PrintStyle Pretty = PrintStyle{"  ", " ", "\n"};
     constexpr PrintStyle Compact = PrintStyle{"", "", ""};
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Parse and print functions
+
+    ParseResult Parse(const std::string& str, parse_flags::Type flags);
     std::string Print(Value* value, print_flags::Type flags, const PrintStyle& pp);
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    struct Array : public Value
-    {
-        std::vector<std::unique_ptr<Value>> array;
-
-        void Visit(Visitor* visitor) override;
-
-        Array* AsArray() override;
-    };
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    struct Bool : public Value
-    {
-        bool boolean;
-
-        void Visit(Visitor* visitor) override;
-
-        Bool* AsBool() override;
-
-        explicit Bool(bool b);
-    };
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    struct Int : public Value
-    {
-        tint integer;
-
-        void Visit(Visitor* visitor) override;
-
-        Int* AsInt() override;
-
-        explicit Int(tint i);
-    };
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    struct Null : public Value
-    {
-        void Visit(Visitor* visitor) override;
-
-        Null* AsNull() override;
-    };
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    struct Number : public Value
-    {
-        tnum number;
-
-        void Visit(Visitor* visitor) override;
-
-        Number* AsNumber() override;
-
-        explicit Number(tnum d);
-    };
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    struct Object : public Value
-    {
-        std::map<std::string, std::unique_ptr<Value>> object;
-
-        void Visit(Visitor* visitor) override;
-
-        Object* AsObject() override;
-    };
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    struct String : public Value
-    {
-        std::string string;
-
-        void Visit(Visitor* visitor) override;
-
-        String* AsString() override;
-
-        explicit String(const std::string& s = "");
-    };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -262,9 +223,11 @@ namespace jsonh
         virtual void VisitInt(Int* integer) = 0;
     };
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // streams
+
+    std::ostream& operator<<(std::ostream& s, const ErrorType& type);
+    std::ostream& operator<<(std::ostream& s, const Location& location);
+    std::ostream& operator<<(std::ostream& s, const Error& error);
     std::ostream& operator<<(std::ostream& s, const ParseResult& result);
-
-    std::string Print(Value* value, print_flags::Type, const PrintStyle& pp);
-
-    ParseResult Parse(const std::string& str, parse_flags::Type flags);
 }
