@@ -4,8 +4,11 @@ set(src
 )
 add_library(jsonh STATIC ${src})
 target_link_libraries(jsonh
-    PRIVATE jsonh_project_options jsonh_project_warnings
+    PRIVATE
+        jsonh::project_options
+        jsonh::project_warnings
 )
 target_include_directories(jsonh
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
+add_library(jsonh::jsonh ALIAS jsonh)
