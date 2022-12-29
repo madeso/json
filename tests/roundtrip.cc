@@ -443,8 +443,8 @@ TEST_CASE("roundtrip13", "[roundtrip]")
 TEST_CASE("roundtrip14", "[roundtrip]")
 {
     const auto value = GENERATE(
-        std::numeric_limits<default_tint>::min(),
-        std::numeric_limits<default_tint>::max());
+        std::numeric_limits<tint>::min(),
+        std::numeric_limits<tint>::max());
     std::ostringstream source;
     source << "([" << value << "])";
 
