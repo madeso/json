@@ -709,7 +709,9 @@ namespace jsonh::detail
         }
         else
         {
-            AddError(&res, parser, ErrorType::InvalidCharacter, "Invalid character");
+            std::ostringstream ss;
+            ss << "Invalid character: " << parser->Peek();
+            AddError(&res, parser, ErrorType::InvalidCharacter, ss.str());
             return res;
         }
     }
