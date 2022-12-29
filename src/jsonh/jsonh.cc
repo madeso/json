@@ -207,6 +207,7 @@ namespace jsonh::detail
             Indent();
             *stream << '}';
         }
+
         void VisitArray(Array* array) override
         {
             *stream << '[' << settings.newline;
@@ -230,6 +231,7 @@ namespace jsonh::detail
         {
             StreamString(string->string);
         }
+
         void VisitNumber(Number* number) override
         {
             // can't really detect if it is -0 or 0, should we? does it have a special value?
@@ -243,14 +245,17 @@ namespace jsonh::detail
                 *stream << number->number;
             }
         }
+
         void VisitBool(Bool* boolean) override
         {
             *stream << (boolean->boolean ? "true" : "false");
         }
+
         void VisitNull(Null*) override
         {
             *stream << "null";
         }
+
         void VisitInt(Int* integer) override
         {
             *stream << integer->integer;
@@ -260,23 +265,11 @@ namespace jsonh::detail
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    void AddError(ParseResult* result, Parser* parser, ErrorType type, const std::string& err);
-
-    void AddNote(ParseResult* result, const Location& loc, const std::string& note);
-
     std::unique_ptr<Value> ParseValue(ParseResult* result, Parser* parser);
-
     std::unique_ptr<Object> ParseObject(ParseResult* result, Parser* parser);
-
     std::unique_ptr<Array> ParseArray(ParseResult* result, Parser* parser);
-
     std::unique_ptr<String> ParseString(ParseResult* result, Parser* parser);
-
     std::unique_ptr<Value> ParseNumber(ParseResult* result, Parser* parser);
-
-    bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss);
-
-    ParseResult Parse(Parser* parser);
 
 #define EXPECT(error_type, expected_char)                                                         \
     do                                                                                            \
