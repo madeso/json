@@ -446,10 +446,12 @@ TEST_CASE("roundtrip14", "[roundtrip]")
         std::numeric_limits<tint>::min(),
         std::numeric_limits<tint>::max());
     std::ostringstream source;
-    source << "([" << value << "])";
+    source << "[" << value << "]";
 
     const std::string src = source.str();
     auto j1 = Parse(src, parse_flags::Json);
+
+    INFO(src);
     REQUIRE(j1);
 
     const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
