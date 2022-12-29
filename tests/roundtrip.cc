@@ -442,7 +442,13 @@ TEST_CASE("roundtrip13", "[roundtrip]")
 
 TEST_CASE("roundtrip14", "[roundtrip]")
 {
-    const std::string src = R"([-9223372036854775808])";
+    const auto value = GENERATE(
+        std::numeric_limits<default_tint>::min(),
+        std::numeric_limits<default_tint>::max());
+    std::ostringstream source;
+    source << "([" << value << "])";
+
+    const std::string src = source.str();
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
@@ -467,11 +473,8 @@ TEST_CASE("roundtrip14", "[roundtrip]")
     REQUIRE(i1);
     REQUIRE(i2);
 
-    // osx gets a compiler warning here...
-    // this should be fine since this is the lowest a signed 64bit can go
-    // use INT64_C() macro?
-    REQUIRE(i1->integer == -9223372036854775808LL);
-    REQUIRE(i2->integer == -9223372036854775808LL);
+    REQUIRE(i1->integer == value);
+    REQUIRE(i2->integer == value);
 }
 
 TEST_CASE("roundtrip15", "[roundtrip]")
