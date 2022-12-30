@@ -16,6 +16,10 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          echo "*** gcc ***"
+          ls -l /usr/bin/gcc*
+          echo "*** clang ***"
+          ls -l /usr/bin/clang*
           sudo apt update
 
       - name: Create Build Environment
