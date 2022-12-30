@@ -6,29 +6,28 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-2016, windows-2019]
         platform: [Win32, x64]
         build_type: [Debug, Release]
 
-    runs-on: ${{matrix.os}}
+    runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
 
-    - name: Configure
-      shell: bash
-      working-directory: ${{github.workspace}}/build
-      run: cmake -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -A ${{matrix.platform}} $GITHUB_WORKSPACE
+      - name: Configure
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        run: cmake -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -A ${{matrix.platform}} $GITHUB_WORKSPACE
 
-    - name: Build
-      shell: bash
-      working-directory: ${{github.workspace}}/build
-      run: cmake --build . --config ${{matrix.build_type}}
+      - name: Build
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        run: cmake --build . --config ${{matrix.build_type}}
 
-    - name: Test
-      shell: bash
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{matrix.build_type}}
+      - name: Test
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        run: ctest -C ${{matrix.build_type}}
