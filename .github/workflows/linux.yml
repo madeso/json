@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        cxx: [g++-10, clang++-10]
+        cxx: [gcc, clang]
         build_type: [Debug, Release]
 
     runs-on: ubuntu-latest
@@ -16,11 +16,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          echo "*** gcc ***"
-          ls -l /usr/bin/gcc*
-          echo "*** clang ***"
-          ls -l /usr/bin/clang*
           sudo apt update
+          which ${{matrix.cxx}}
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
