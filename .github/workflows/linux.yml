@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        cxx: [g++, clang]
+        cxx: [g++, clang++]
         build_type: [Debug, Release]
 
     runs-on: ubuntu-latest
