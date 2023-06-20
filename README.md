@@ -88,8 +88,10 @@ Since there are scenarios where it is important if it is one and not the other l
 
 jsonh _will not_ do any conversions for you, so if you AsNumber a 5 value, you will get nullptr (but you will get not get a null if you AsNumber a 5.0).
 
+
+4. Write some important data back
+
 ```cpp
-// 4. write some important data back
 auto root = std::make_unique<Object>();
 root->object["meaning_of_life"] = std::make_unique<Int>(42);
 std::string json_string = Print(root.get(), print_flags::Json, PrettyPrinter::Pretty());
