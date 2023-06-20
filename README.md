@@ -77,16 +77,16 @@ Object* obj = root->AsObject();
 
 Other types of values are
 
--   Null (AsNull)
--   Bool(AsBool, Bool::boolean)
--   Int(AsInt(), Int::integer)
--   Number(AsNumber(), Number::number)
--   String (AsString(), String::string)
+-   `Null` (`AsNull()`)
+-   `Bool` (`AsBool()`, `Bool::boolean`)
+-   `Int` (`AsInt()`, `Int::integer`)
+-   `Number` (`AsNumber()`, `Number::number`)
+-   `String` (`AsString()`, `String::string`)
 
-Numbers in jsonh are either represented as Int or as Number/double. 5 is a Int, while 5.0 is a Number.
-Since there are scenarios where it is important if it is one and not the other like array indices for example.
+Numbers in jsonh are either represented as `Int` or as `Number`/double. 5 is a `Int`, while 5.0 is a `Number`.
+Since there are scenarios where it is important if it is one and not the other, like array indices for example.
 
-jsonh _will not_ do any conversions for you, so if you AsNumber a 5 value, you will get nullptr (but you will get not get a null if you AsNumber a 5.0).
+jsonh _will not_ do any conversions for you, so if you `AsNumber()` a `5` value, you will get `nullptr` (but you will get not get a `nullptr` if you `AsNumber()` a `5.0`).
 
 
 4. Write some important data back
