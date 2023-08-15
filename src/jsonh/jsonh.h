@@ -41,7 +41,13 @@ namespace jsonh
         enum Type
         {
             None = 0,
+
+            /// if set duplicate keys are handled by ignoring all but the latest
+            /// if not set, duplicate keys are considered a error
             DuplicateKeysOnlyLatest = 1 << 1,
+
+            // if set, all commas are optional
+            IgnoreAllCommas = 1 << 2,
 
             Json = None
         };
@@ -184,7 +190,7 @@ namespace jsonh
         // contains errors if parsing failed
         std::vector<Error> errors;
 
-        // is non-null is parsing succeeded
+        // is non-null if parsing succeeded
         std::unique_ptr<Value> value;
 
         [[nodiscard]] bool HasError() const;

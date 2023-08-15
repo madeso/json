@@ -2,6 +2,7 @@ set(tests_src main.cc
     checker.cc
     coverage.cc
     dup.cc
+    extra.cc
     jsonh.cc
     osx.cc
     print.cc

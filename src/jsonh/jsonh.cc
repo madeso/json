@@ -41,6 +41,11 @@ namespace jsonh::detail
         Location GetLocation() const;
 
         char Read();
+
+        bool has_flag(const parse_flags::Type f) const
+        {
+            return flags & f;
+        }
     };
 
     Parser::Parser(const std::string& s, parse_flags::Type f)
@@ -108,7 +113,9 @@ namespace jsonh::detail
 
     void SkipSpaces(Parser* parser)
     {
-        while (IsSpace(parser->Peek()))
+        while (
+            IsSpace(parser->Peek()) ||
+            (parser->has_flag(parse_flags::IgnoreAllCommas) && parser->Peek() == ','))
         {
             parser->Read();
         }
@@ -395,7 +402,10 @@ namespace jsonh::detail
             }
             else
             {
-                EXPECT(ErrorType::InvalidCharacter, ',');
+                if (!parser->has_flag(parse_flags::IgnoreAllCommas))
+                {
+                    EXPECT(ErrorType::InvalidCharacter, ',');
+                }
                 SkipSpaces(parser);
             }
 
@@ -452,7 +462,10 @@ namespace jsonh::detail
             }
             else
             {
-                EXPECT(ErrorType::InvalidCharacter, ',');
+                if (!parser->has_flag(parse_flags::IgnoreAllCommas))
+                {
+                    EXPECT(ErrorType::InvalidCharacter, ',');
+                }
                 SkipSpaces(parser);
             }
 
@@ -470,7 +483,7 @@ namespace jsonh::detail
             }
             else
             {
-                if (!(parser->flags & parse_flags::DuplicateKeysOnlyLatest))
+                if (!parser->has_flag(parse_flags::DuplicateKeysOnlyLatest))
                 {
                     auto found = object->object.find(s->string);
                     if (found != object->object.end())
