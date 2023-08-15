@@ -31,7 +31,7 @@ target_link_libraries(my_cool_project
 )
 ```
 
-3. Use it!
+3. Parse and inspect some json data
 
 ```cpp
 #include "jsonh/jsonh.h"
