@@ -9,11 +9,16 @@ void print_help(const std::string& name)
 {
     const std::string i = "  ";
     std::cout
-        << name << " -sSpP filename\n"
-        << i << "s - make silent\n"
-        << i << "S - make not silent\n"
-        << i << "p - print input (ignored by silent mode)\n"
-        << i << "P - don't print input\n";
+        << name << " -s -S -p -P -i[] -o[] filename\n"
+        << i << "-s   make silent\n"
+        << i << "-S   make not silent\n"
+        << i << "-p   print input (ignored by silent mode)\n"
+        << i << "-P   don't print input\n"
+        << i << "-i   INPUT flags\n"
+        << i << i << "d   use the last duplicate key instead of error\n"
+        << i << i << "C   ignore commas\n"
+        << i << i << "I   parse identifiers as strings\n"
+        << i << "-o   OUTPUT flags\n";
 }
 
 std::string th(int i)
@@ -41,7 +46,8 @@ int main(int argc, char* const argv[])
 
     int status = 0;
     bool is_silent = false;
-    bool please_print = false;
+    bool please_print = true;
+    auto input_flags = jsonh::parse_flags::None;
 
     for (int argvi = 1; argvi < argc; argvi += 1)
     {
@@ -49,7 +55,7 @@ int main(int argc, char* const argv[])
         if (cmd.empty())
             continue;
 
-        if (cmd[0] == '-' || cmd[0] == '/')
+        if (cmd[0] == '-')
         {
             const auto cmdsize = cmd.size();
             if (cmdsize == 1)
@@ -58,9 +64,9 @@ int main(int argc, char* const argv[])
                 print_help(appname);
                 return -1;
             }
-            for (size_t cmdi = 1; cmdi < cmdsize; cmdi += 1)
+            else if (cmdsize == 2)
             {
-                const char c = cmd[cmdi];
+                const char c = cmd[1];
                 switch (c)
                 {
                 case 'h':
@@ -83,6 +89,44 @@ int main(int argc, char* const argv[])
                     std::cerr << "Unknown option " << cmd << "\n";
                     print_help(appname);
                     return -1;
+                }
+            }
+            else
+            {
+                const bool is_input = cmd[1] == 'i';
+                if (is_input == false && cmd[1] != 'o')
+                {
+                    std::cerr << "Unknown I/O option " << cmd << "\n";
+                    print_help(appname);
+                    return -1;
+                }
+
+                for (size_t cmdi = 2; cmdi < cmdsize; cmdi += 1)
+                {
+                    const char c = cmd[cmdi];
+                    if (is_input)
+                    {
+                        switch (c)
+                        {
+                        case 'd': input_flags = static_cast<jsonh::parse_flags::Type>(input_flags | jsonh::parse_flags::DuplicateKeysOnlyLatest); break;
+                        case 'C': input_flags = static_cast<jsonh::parse_flags::Type>(input_flags | jsonh::parse_flags::IgnoreAllCommas); break;
+                        case 'I': input_flags = static_cast<jsonh::parse_flags::Type>(input_flags | jsonh::parse_flags::IdentifierAsString); break;
+                        default:
+                            std::cerr << "Unknown Input option " << c << " in " << cmd << "\n";
+                            print_help(appname);
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        switch (c)
+                        {
+                        default:
+                            std::cerr << "Unknown output option " << c << " in " << cmd << "\n";
+                            print_help(appname);
+                            return -1;
+                        }
+                    }
                 }
             }
         }
@@ -109,7 +153,7 @@ int main(int argc, char* const argv[])
             file_data.assign((std::istreambuf_iterator<char>(file_stream)),
                              std::istreambuf_iterator<char>());
 
-            const auto parse_result = jsonh::Parse(file_data, jsonh::parse_flags::Json);
+            const auto parse_result = jsonh::Parse(file_data, input_flags);
 
             if (parse_result.HasError())
             {
