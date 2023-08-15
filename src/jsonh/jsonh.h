@@ -49,6 +49,9 @@ namespace jsonh
             // if set, all commas are optional
             IgnoreAllCommas = 1 << 2,
 
+            // if set, identifiers (including names with -) are considered strings
+            IdentifierAsString = 1 << 3,
+
             Json = None
         };
     }

@@ -20,3 +20,16 @@ TEST_CASE("extra-commas", "[extra]")
     CHECK(j);
     CHECK(j.errors.empty());
 }
+
+TEST_CASE("extra-id-as-string", "[extra]")
+{
+    auto j = Parse(R"(
+        {
+            hello: world42,
+            world_dog: hello-world
+        }
+    )",
+                   parse_flags::IdentifierAsString);
+    CHECK(j);
+    CHECK(j.errors.empty());
+}

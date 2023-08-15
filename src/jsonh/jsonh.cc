@@ -123,14 +123,23 @@ namespace jsonh::detail
 
     void AppendChar(std::ostream& s, char c);
 
-    constexpr bool IsDigit(char c)
+    constexpr bool IsNumberChar(char c)
     {
         return c >= '0' && c <= '9';
     }
 
     constexpr bool IsHex(char c)
     {
-        return IsDigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+        return IsNumberChar(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    constexpr bool IsIdentifierChar(char c, bool first)
+    {
+        if (first == false && IsNumberChar(c))
+        {
+            return true;
+        }
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '-';
     }
 
     constexpr bool IsValidFirstDigit(char c)
@@ -139,7 +148,7 @@ namespace jsonh::detail
         {
             return true;
         }
-        if (IsDigit(c))
+        if (IsNumberChar(c))
         {
             return true;
         }
@@ -276,6 +285,7 @@ namespace jsonh::detail
     std::unique_ptr<Object> ParseObject(ParseResult* result, Parser* parser);
     std::unique_ptr<Array> ParseArray(ParseResult* result, Parser* parser);
     std::unique_ptr<String> ParseString(ParseResult* result, Parser* parser);
+    std::unique_ptr<String> ParseIdentifierAsString(ParseResult* result, Parser* parser);
     std::unique_ptr<Value> ParseNumber(ParseResult* result, Parser* parser);
 
 #define EXPECT(error_type, expected_char)                                                         \
@@ -379,7 +389,14 @@ namespace jsonh::detail
             return ParseNumber(result, parser);
         }
 
-        AddError(result, parser, ErrorType::InvalidCharacter, "Unexpected character found");
+        if (parser->has_flag(parse_flags::IdentifierAsString) && IsIdentifierChar(parser->Peek(), true))
+        {
+            return ParseIdentifierAsString(result, parser);
+        }
+
+        std::ostringstream str;
+        str << "Unexpected character found: " << parser->Peek();
+        AddError(result, parser, ErrorType::InvalidCharacter, str.str());
         return nullptr;
     }
 
@@ -469,7 +486,10 @@ namespace jsonh::detail
                 SkipSpaces(parser);
             }
 
-            auto s = ParseString(result, parser);
+            auto s =
+                parser->has_flag(parse_flags::IdentifierAsString) && IsIdentifierChar(parser->Peek(), true)
+                    ? ParseIdentifierAsString(result, parser)
+                    : ParseString(result, parser);
             if (s == nullptr)
             {
                 return nullptr;
@@ -584,6 +604,23 @@ namespace jsonh::detail
         return ret;
     }
 
+    std::unique_ptr<String> ParseIdentifierAsString(ParseResult* result, Parser* parser)
+    {
+        std::ostringstream string_buffer;
+        const auto loc = parser->GetLocation();
+        bool first = true;
+
+        while (IsIdentifierChar(parser->Peek(), first))
+        {
+            string_buffer << parser->Read();
+            first = false;
+        }
+
+        auto ret = std::make_unique<String>(string_buffer.str());
+        ret->location = loc;
+        return ret;
+    }
+
     std::unique_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
     {
         std::ostringstream o;
@@ -598,7 +635,7 @@ namespace jsonh::detail
         if (parser->Peek() == '0')
         {
             o << parser->Read();
-            if (IsDigit(parser->Peek()))
+            if (IsNumberChar(parser->Peek()))
             {
                 AddError(result, parser, ErrorType::InvalidNumber, "Numbers can't have leading zeroes");
                 return nullptr;
@@ -606,13 +643,13 @@ namespace jsonh::detail
         }
         else
         {
-            if (!IsDigit(parser->Peek()))
+            if (!IsNumberChar(parser->Peek()))
             {
                 AddError(result, parser, ErrorType::InvalidCharacter, "Invalid first character as a number");
                 return nullptr;
             }
             o << parser->Read();
-            while (IsDigit(parser->Peek()))
+            while (IsNumberChar(parser->Peek()))
             {
                 o << parser->Read();
             }
@@ -624,13 +661,13 @@ namespace jsonh::detail
         {
             is_integer = false;
             o << parser->Read();
-            if (!IsDigit(parser->Peek()))
+            if (!IsNumberChar(parser->Peek()))
             {
                 AddError(result, parser, ErrorType::InvalidCharacter, "Invalid first character in a fractional number");
                 return nullptr;
             }
             o << parser->Read();
-            while (IsDigit(parser->Peek()))
+            while (IsNumberChar(parser->Peek()))
             {
                 o << parser->Read();
             }
@@ -645,13 +682,13 @@ namespace jsonh::detail
                 o << parser->Read();
             }
 
-            if (!IsDigit(parser->Peek()))
+            if (!IsNumberChar(parser->Peek()))
             {
                 AddError(result, parser, ErrorType::InvalidCharacter, "Invalid first character in a exponent");
                 return nullptr;
             }
             o << parser->Read();
-            while (IsDigit(parser->Peek()))
+            while (IsNumberChar(parser->Peek()))
             {
                 o << parser->Read();
             }
