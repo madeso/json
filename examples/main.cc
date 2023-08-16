@@ -19,7 +19,8 @@ void print_help(const std::string& name)
         << i << i << "c   ignore commas\n"
         << i << i << "i   parse identifiers as strings\n"
         << i << "-o   OUTPUT flags\n"
-        << i << i << "c   don't write commas\n";
+        << i << i << "c   don't write commas\n"
+        << i << i << "i   don't quote strings if they are identifiers\n";
 }
 
 std::string th(int i)
@@ -127,6 +128,7 @@ int main(int argc, char* const argv[])
                         case 'P': pretty_print = jsonh::Pretty; break;
                         case 'C': pretty_print = jsonh::Compact; break;
                         case 'c': output_flags = static_cast<jsonh::print_flags::Type>(output_flags | jsonh::print_flags::SkipCommas); break;
+                        case 'i': output_flags = static_cast<jsonh::print_flags::Type>(output_flags | jsonh::print_flags::StringAsIdent); break;
                         default:
                             std::cerr << "Unknown output option " << c << " in " << cmd << "\n";
                             print_help(appname);

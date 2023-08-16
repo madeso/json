@@ -142,6 +142,20 @@ namespace jsonh::detail
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '-';
     }
 
+    bool IsIdentifierString(const std::string& str)
+    {
+        bool first = true;
+        for (char c : str)
+        {
+            if (IsIdentifierChar(c, first) == false)
+            {
+                return false;
+            }
+            first = false;
+        }
+        return true;
+    }
+
     constexpr bool IsValidFirstDigit(char c)
     {
         if (c == '-')
@@ -169,6 +183,12 @@ namespace jsonh::detail
 
         void StreamString(const std::string& str)
         {
+            if (has_flag(print_flags::StringAsIdent) && IsIdentifierString(str))
+            {
+                *stream << str;
+                return;
+            }
+
             *stream << '\"';
             for (char c : str)
             {

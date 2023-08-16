@@ -65,6 +65,9 @@ namespace jsonh
             // don't write commas
             SkipCommas = 1 << 1,
 
+            // if string is a "identifier", don't add quotes
+            StringAsIdent = 1 << 2,
+
             Json = None
         };
     }

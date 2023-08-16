@@ -50,4 +50,13 @@ TEST_CASE("extra-id-as-string", "[extra]")
                    parse_flags::IdentifierAsString);
     CHECK(j);
     CHECK(j.errors.empty());
+
+    CHECK(Print(j.value.get(), print_flags::StringAsIdent, Compact) ==
+          "{hello:world42,world_dog:hello-world}");
+
+    CHECK(Print(j.value.get(), print_flags::StringAsIdent, Pretty) ==
+          "{\n"
+          "  hello: world42,\n"
+          "  world_dog: hello-world\n"
+          "}\n");
 }
