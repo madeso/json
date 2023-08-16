@@ -62,6 +62,9 @@ namespace jsonh
         {
             None = 0,
 
+            // don't write commas
+            SkipCommas = 1 << 1,
+
             Json = None
         };
     }

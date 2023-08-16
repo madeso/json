@@ -19,6 +19,24 @@ TEST_CASE("extra-commas", "[extra]")
                    parse_flags::IgnoreAllCommas);
     CHECK(j);
     CHECK(j.errors.empty());
+
+    CHECK(Print(j.value.get(), print_flags::SkipCommas, Compact) ==
+          "{\"array\":[1 2 3 4 5]\"empty\":[]\"hello\":\"world\"\"world\":\"hello\"}");
+
+    CHECK(Print(j.value.get(), print_flags::SkipCommas, Pretty) ==
+          "{\n"
+          "  \"array\": [\n"
+          "    1\n"
+          "    2\n"
+          "    3\n"
+          "    4\n"
+          "    5\n"
+          "  ]\n"
+          "  \"empty\": [\n"
+          "  ]\n"
+          "  \"hello\": \"world\"\n"
+          "  \"world\": \"hello\"\n"
+          "}\n");
 }
 
 TEST_CASE("extra-id-as-string", "[extra]")

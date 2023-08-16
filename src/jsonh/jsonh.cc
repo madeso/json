@@ -157,9 +157,15 @@ namespace jsonh::detail
 
     struct PrettyPrintVisitor : public Visitor
     {
+        print_flags::Type flags;
         PrintStyle settings;
         std::ostream* stream{};
         int indent = 0;
+
+        bool has_flag(const print_flags::Type f) const
+        {
+            return flags & f;
+        }
 
         void StreamString(const std::string& str)
         {
@@ -213,7 +219,7 @@ namespace jsonh::detail
                 StreamString(o->first);
                 *stream << ':' << settings.space;
                 o->second->Visit(this);
-                if (std::next(o) != object->object.end())
+                if (std::next(o) != object->object.end() && !has_flag(print_flags::SkipCommas))
                 {
                     *stream << ',';
                 }
@@ -234,7 +240,17 @@ namespace jsonh::detail
                 (*o)->Visit(this);
                 if (std::next(o) != array->array.end())
                 {
-                    *stream << ',';
+                    if (has_flag(print_flags::SkipCommas))
+                    {
+                        if (settings.newline == "")
+                        {
+                            *stream << ' ';
+                        }
+                    }
+                    else
+                    {
+                        *stream << ',';
+                    }
                 }
                 *stream << settings.newline;
             }
@@ -883,10 +899,11 @@ namespace jsonh
     [[nodiscard]] bool ParseResult::HasError() const { return value == nullptr; }
     ParseResult::operator bool() const { return !HasError(); }
 
-    std::string Print(Value* value, print_flags::Type, const PrintStyle& pp)
+    std::string Print(Value* value, print_flags::Type flags, const PrintStyle& pp)
     {
         std::ostringstream ss;
         detail::PrettyPrintVisitor vis;
+        vis.flags = flags;
         vis.settings = pp;
         vis.stream = &ss;
         value->Visit(&vis);

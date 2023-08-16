@@ -16,9 +16,10 @@ void print_help(const std::string& name)
         << i << "-P   don't print input\n"
         << i << "-i   INPUT flags\n"
         << i << i << "d   use the last duplicate key instead of error\n"
-        << i << i << "C   ignore commas\n"
-        << i << i << "I   parse identifiers as strings\n"
-        << i << "-o   OUTPUT flags\n";
+        << i << i << "c   ignore commas\n"
+        << i << i << "i   parse identifiers as strings\n"
+        << i << "-o   OUTPUT flags\n"
+        << i << i << "c   don't write commas\n";
 }
 
 std::string th(int i)
@@ -48,6 +49,8 @@ int main(int argc, char* const argv[])
     bool is_silent = false;
     bool please_print = true;
     auto input_flags = jsonh::parse_flags::None;
+    auto output_flags = jsonh::print_flags::Json;
+    auto pretty_print = jsonh::Pretty;
 
     for (int argvi = 1; argvi < argc; argvi += 1)
     {
@@ -109,8 +112,8 @@ int main(int argc, char* const argv[])
                         switch (c)
                         {
                         case 'd': input_flags = static_cast<jsonh::parse_flags::Type>(input_flags | jsonh::parse_flags::DuplicateKeysOnlyLatest); break;
-                        case 'C': input_flags = static_cast<jsonh::parse_flags::Type>(input_flags | jsonh::parse_flags::IgnoreAllCommas); break;
-                        case 'I': input_flags = static_cast<jsonh::parse_flags::Type>(input_flags | jsonh::parse_flags::IdentifierAsString); break;
+                        case 'i': input_flags = static_cast<jsonh::parse_flags::Type>(input_flags | jsonh::parse_flags::IgnoreAllCommas); break;
+                        case 'c': input_flags = static_cast<jsonh::parse_flags::Type>(input_flags | jsonh::parse_flags::IdentifierAsString); break;
                         default:
                             std::cerr << "Unknown Input option " << c << " in " << cmd << "\n";
                             print_help(appname);
@@ -121,6 +124,9 @@ int main(int argc, char* const argv[])
                     {
                         switch (c)
                         {
+                        case 'P': pretty_print = jsonh::Pretty; break;
+                        case 'C': pretty_print = jsonh::Compact; break;
+                        case 'c': output_flags = static_cast<jsonh::print_flags::Type>(output_flags | jsonh::print_flags::SkipCommas); break;
                         default:
                             std::cerr << "Unknown output option " << c << " in " << cmd << "\n";
                             print_help(appname);
@@ -168,7 +174,7 @@ int main(int argc, char* const argv[])
             {
                 if (please_print)
                 {
-                    std::cout << jsonh::Print(parse_result.value.get(), jsonh::print_flags::Json, jsonh::Pretty);
+                    std::cout << jsonh::Print(parse_result.value.get(), output_flags, pretty_print);
                 }
             }
         }
