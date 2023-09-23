@@ -2,12 +2,12 @@
 
 #include <cstdint>
 #include <map>
-#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
+#include <optional>
 
 namespace jsonh
 {
@@ -105,7 +105,7 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // actual JSON types
 
-    struct Visitor;
+    struct Document;
 
     struct Value;
     struct Object;
@@ -116,80 +116,109 @@ namespace jsonh
     struct Bool;
     struct Null;
 
+    enum class ValueType
+    {
+        Invalid,
+        Object,
+        Array,
+        String,
+        Number,
+        Int,
+        Bool,
+        Null
+    };
+
     struct Value
     {
-        Location location;
+        ValueType type;
+        std::size_t index;
+
+        Value();
+        Value(ValueType vt, std::size_t i);
+
+        bool is_valid() const;
+        operator bool() const;
+        bool operator!() const;
 
         // only exact matches
-        virtual Object* AsObject();
-        virtual Array* AsArray();
-        virtual String* AsString();
-        virtual Number* AsNumber();
-        virtual Int* AsInt();
-        virtual Bool* AsBool();
-        virtual Null* AsNull();
+        Object* AsObject(Document* d);
+        Array* AsArray(Document* d);
+        String* AsString(Document* d);
+        Number* AsNumber(Document* d);
+        Int* AsInt(Document* d);
+        Bool* AsBool(Document* d);
+        Null* AsNull(Document* d);
 
-        virtual void Visit(Visitor* visitor) = 0;
-        virtual ~Value() = default;
+        const Object* AsObject(const Document* d) const;
+        const Array* AsArray(const Document* d) const;
+        const String* AsString(const Document* d) const;
+        const Number* AsNumber(const Document* d) const;
+        const Int* AsInt(const Document* d) const;
+        const Bool* AsBool(const Document* d) const;
+        const Null* AsNull(const Document* d) const;
     };
 
-    struct Object : public Value
+    struct Object
     {
-        std::map<std::string, std::unique_ptr<Value>> object;
-
-        void Visit(Visitor* visitor) override;
-        Object* AsObject() override;
+        Location location;
+        std::map<std::string, Value> object;
     };
 
-    struct Array : public Value
+    struct Array
     {
-        std::vector<std::unique_ptr<Value>> array;
-
-        void Visit(Visitor* visitor) override;
-        Array* AsArray() override;
+        Location location;
+        std::vector<Value> array;
     };
 
-    struct String : public Value
+    struct String
     {
-        std::string string;
-
-        void Visit(Visitor* visitor) override;
-        String* AsString() override;
-        explicit String(const std::string& s = "");
+        Location location;
+        std::string value;
     };
 
-    struct Number : public Value
+    struct Number
     {
-        tnum number;
-
-        void Visit(Visitor* visitor) override;
-        Number* AsNumber() override;
-        explicit Number(tnum d);
+        Location location;
+        tnum value;
     };
 
-    struct Int : public Value
+    struct Int
     {
-        tint integer;
-
-        void Visit(Visitor* visitor) override;
-        Int* AsInt() override;
-        explicit Int(tint i);
+        Location location;
+        tint value;
     };
 
-    struct Bool : public Value
+    struct Bool
     {
-        bool boolean;
-
-        void Visit(Visitor* visitor) override;
-        Bool* AsBool() override;
-        explicit Bool(bool b);
+        Location location;
+        bool value;
     };
 
-    struct Null : public Value
+    struct Null
     {
-        void Visit(Visitor* visitor) override;
-        Null* AsNull() override;
+        Location location;
     };
+
+    struct Document
+    {
+        std::vector<Object> objects;
+        std::vector<Array> arrays;
+        std::vector<String> strings;
+        std::vector<Number> numbers;
+        std::vector<Int> ints;
+        std::vector<Bool> bools;
+        std::vector<Null> nulls;
+
+        Value add(Object);
+        Value add(Array);
+        Value add(String);
+        Value add(Number);
+        Value add(Int);
+        Value add(Bool);
+        Value add(Null);
+    };
+
+    Location GetLocation(const Document* d, const Value& val);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Parse/print types
@@ -200,7 +229,10 @@ namespace jsonh
         std::vector<Error> errors;
 
         // is non-null if parsing succeeded
-        std::unique_ptr<Value> value;
+        std::optional<Value> root;
+
+        // the document
+        Document doc;
 
         [[nodiscard]] bool HasError() const;
         operator bool() const;
@@ -220,23 +252,8 @@ namespace jsonh
     // Parse and print functions
 
     ParseResult Parse(const std::string& str, parse_flags::Type flags);
-    std::string Print(Value* value, print_flags::Type flags, const PrintStyle& pp);
+    std::string Print(const Value& value, const Document* doc, print_flags::Type flags, const PrintStyle& pp);
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    struct Visitor
-    {
-        // will not recurse, if you want to visit the children, you have to keep calling Visit
-        virtual void VisitObject(Object* object) = 0;
-        virtual void VisitArray(Array* array) = 0;
-
-        virtual void VisitString(String* string) = 0;
-        virtual void VisitNumber(Number* number) = 0;
-        virtual void VisitBool(Bool* boolean) = 0;
-        virtual void VisitNull(Null* null) = 0;
-        virtual void VisitInt(Int* integer) = 0;
-    };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // streams

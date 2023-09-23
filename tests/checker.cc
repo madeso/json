@@ -382,13 +382,13 @@ TEST_CASE("pass2", "[checker]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -398,8 +398,8 @@ TEST_CASE("pass2", "[checker]")
         REQUIRE(aj1->array.size() == 1);
         REQUIRE(aj2->array.size() == 1);
 
-        aj1 = aj1->array[0]->AsArray();
-        aj2 = aj2->array[0]->AsArray();
+        aj1 = aj1->array[0].AsArray(&j1.doc);
+        aj2 = aj2->array[0].AsArray(&j2.doc);
 
         REQUIRE(aj1);
         REQUIRE(aj2);
@@ -408,14 +408,14 @@ TEST_CASE("pass2", "[checker]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto s1 = aj1->array[0]->AsString();
-    auto s2 = aj2->array[0]->AsString();
+    auto s1 = aj1->array[0].AsString(&j1.doc);
+    auto s2 = aj2->array[0].AsString(&j2.doc);
 
     REQUIRE(s1);
     REQUIRE(s2);
 
-    REQUIRE(s1->string == "Not too deep");
-    REQUIRE(s2->string == "Not too deep");
+    REQUIRE(s1->value == "Not too deep");
+    REQUIRE(s2->value == "Not too deep");
 }
 
 TEST_CASE("pass3", "[checker]")
@@ -431,12 +431,12 @@ TEST_CASE("pass3", "[checker]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto oj1 = j1.value->AsObject();
-    auto oj2 = j2.value->AsObject();
+    auto oj1 = j1.root->AsObject(&j1.doc);
+    auto oj2 = j2.root->AsObject(&j2.doc);
 
     REQUIRE(oj1);
     REQUIRE(oj2);
@@ -444,8 +444,8 @@ TEST_CASE("pass3", "[checker]")
     REQUIRE(oj1->object.size() == 1);
     REQUIRE(oj2->object.size() == 1);
 
-    auto c1 = oj1->object["JSON Test Pattern pass3"]->AsObject();
-    auto c2 = oj2->object["JSON Test Pattern pass3"]->AsObject();
+    auto c1 = oj1->object["JSON Test Pattern pass3"].AsObject(&j1.doc);
+    auto c2 = oj2->object["JSON Test Pattern pass3"].AsObject(&j2.doc);
 
     REQUIRE(c1);
     REQUIRE(c2);
@@ -453,21 +453,21 @@ TEST_CASE("pass3", "[checker]")
     REQUIRE(c1->object.size() == 2);
     REQUIRE(c2->object.size() == 2);
 
-    auto sa1 = c1->object["The outermost value"]->AsString();
-    auto sa2 = c2->object["The outermost value"]->AsString();
+    auto sa1 = c1->object["The outermost value"].AsString(&j1.doc);
+    auto sa2 = c2->object["The outermost value"].AsString(&j2.doc);
 
     REQUIRE(sa1);
     REQUIRE(sa2);
 
-    REQUIRE(sa1->string == "must be an object or array.");
-    REQUIRE(sa2->string == "must be an object or array.");
+    REQUIRE(sa1->value == "must be an object or array.");
+    REQUIRE(sa2->value == "must be an object or array.");
 
-    auto sb1 = c1->object["In this test"]->AsString();
-    auto sb2 = c2->object["In this test"]->AsString();
+    auto sb1 = c1->object["In this test"].AsString(&j1.doc);
+    auto sb2 = c2->object["In this test"].AsString(&j2.doc);
 
     REQUIRE(sb1);
     REQUIRE(sb2);
 
-    REQUIRE(sb1->string == "It is an object.");
-    REQUIRE(sb2->string == "It is an object.");
+    REQUIRE(sb1->value == "It is an object.");
+    REQUIRE(sb2->value == "It is an object.");
 }

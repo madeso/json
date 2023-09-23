@@ -20,10 +20,10 @@ TEST_CASE("extra-commas", "[extra]")
     CHECK(j);
     CHECK(j.errors.empty());
 
-    CHECK(Print(j.value.get(), print_flags::SkipCommas, Compact) ==
+    CHECK(Print(*j.root, &j.doc, print_flags::SkipCommas, Compact) ==
           "{\"array\":[1 2 3 4 5]\"empty\":[]\"hello\":\"world\"\"world\":\"hello\"}");
 
-    CHECK(Print(j.value.get(), print_flags::SkipCommas, Pretty) ==
+    CHECK(Print(*j.root, &j.doc, print_flags::SkipCommas, Pretty) ==
           "{\n"
           "  \"array\": [\n"
           "    1\n"
@@ -49,12 +49,12 @@ TEST_CASE("extra-id-as-string", "[extra]")
     )",
                    parse_flags::IdentifierAsString);
     CHECK(j);
-    CHECK(j.errors.empty());
+    REQUIRE(j.errors.empty());
 
-    CHECK(Print(j.value.get(), print_flags::StringAsIdent, Compact) ==
+    CHECK(Print(*j.root, &j.doc, print_flags::StringAsIdent, Compact) ==
           "{hello:world42,world_dog:hello-world}");
 
-    CHECK(Print(j.value.get(), print_flags::StringAsIdent, Pretty) ==
+    CHECK(Print(*j.root, &j.doc, print_flags::StringAsIdent, Pretty) ==
           "{\n"
           "  hello: world42,\n"
           "  world_dog: hello-world\n"

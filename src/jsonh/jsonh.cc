@@ -1,5 +1,8 @@
 #include "jsonh/jsonh.h"
 
+#include <cassert>
+
+
 namespace jsonh::detail
 {
     constexpr char CharToHex(char c)
@@ -169,7 +172,7 @@ namespace jsonh::detail
         return false;
     }
 
-    struct PrettyPrintVisitor : public Visitor
+    struct PrettyPrintVisitor
     {
         print_flags::Type flags;
         PrintStyle settings;
@@ -179,6 +182,22 @@ namespace jsonh::detail
         bool has_flag(const print_flags::Type f) const
         {
             return flags & f;
+        }
+
+        void Visit(const Value& val, const Document* d)
+        {
+            switch (val.type)
+            {
+            case ValueType::Object: return VisitObject(val.AsObject(d), d);
+            case ValueType::Array: return VisitArray(val.AsArray(d), d);
+            case ValueType::String: return VisitString(val.AsString(d));
+            case ValueType::Number: return VisitNumber(val.AsNumber(d));
+            case ValueType::Int: return VisitInt(val.AsInt(d));
+            case ValueType::Bool: return VisitBool(val.AsBool(d));
+            case ValueType::Null: return VisitNull(val.AsNull(d));
+            default:
+                assert(false);
+            }
         }
 
         void StreamString(const std::string& str)
@@ -229,7 +248,7 @@ namespace jsonh::detail
             }
         }
 
-        void VisitObject(Object* object) override
+        void VisitObject(const Object* object, const Document* doc)
         {
             *stream << '{' << settings.newline;
             indent += 1;
@@ -238,7 +257,7 @@ namespace jsonh::detail
                 Indent();
                 StreamString(o->first);
                 *stream << ':' << settings.space;
-                o->second->Visit(this);
+                Visit(o->second, doc);
                 if (std::next(o) != object->object.end() && !has_flag(print_flags::SkipCommas))
                 {
                     *stream << ',';
@@ -250,14 +269,14 @@ namespace jsonh::detail
             *stream << '}';
         }
 
-        void VisitArray(Array* array) override
+        void VisitArray(const Array* array, const Document* doc)
         {
             *stream << '[' << settings.newline;
             indent += 1;
             for (auto o = array->array.begin(); o != array->array.end(); ++o)
             {
                 Indent();
-                (*o)->Visit(this);
+                Visit(*o, doc);
                 if (std::next(o) != array->array.end())
                 {
                     if (has_flag(print_flags::SkipCommas))
@@ -279,50 +298,50 @@ namespace jsonh::detail
             *stream << ']';
         }
 
-        void VisitString(String* string) override
+        void VisitString(const String* string)
         {
-            StreamString(string->string);
+            StreamString(string->value);
         }
 
-        void VisitNumber(Number* number) override
+        void VisitNumber(const Number* number)
         {
             // can't really detect if it is -0 or 0, should we? does it have a special value?
             // https://stackoverflow.com/questions/45795397/behaviour-of-negative-zero-0-0-in-comparison-with-positive-zero-0-0/45795465
-            if (number->number == 0)
+            if (number->value == 0)
             {
                 *stream << "0.0";
             }
             else
             {
-                *stream << number->number;
+                *stream << number->value;
             }
         }
 
-        void VisitBool(Bool* boolean) override
+        void VisitBool(const Bool* boolean)
         {
-            *stream << (boolean->boolean ? "true" : "false");
+            *stream << (boolean->value ? "true" : "false");
         }
 
-        void VisitNull(Null*) override
+        void VisitNull(const Null*)
         {
             *stream << "null";
         }
 
-        void VisitInt(Int* integer) override
+        void VisitInt(const Int* integer)
         {
-            *stream << integer->integer;
+            *stream << integer->value;
         }
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    std::unique_ptr<Value> ParseValue(ParseResult* result, Parser* parser);
-    std::unique_ptr<Object> ParseObject(ParseResult* result, Parser* parser);
-    std::unique_ptr<Array> ParseArray(ParseResult* result, Parser* parser);
-    std::unique_ptr<String> ParseString(ParseResult* result, Parser* parser);
-    std::unique_ptr<String> ParseIdentifierAsString(ParseResult* result, Parser* parser);
-    std::unique_ptr<Value> ParseNumber(ParseResult* result, Parser* parser);
+    std::optional<Value> ParseValue(ParseResult* result, Parser* parser);
+    std::optional<Value> ParseObject(ParseResult* result, Parser* parser);
+    std::optional<Value> ParseArray(ParseResult* result, Parser* parser);
+    std::optional<String> ParseString(ParseResult* result, Parser* parser);
+    std::optional<String> ParseIdentifierAsString(ParseResult* result, Parser* parser);
+    std::optional<Value> ParseNumber(ParseResult* result, Parser* parser);
 
 #define EXPECT(error_type, expected_char)                                                         \
     do                                                                                            \
@@ -334,7 +353,7 @@ namespace jsonh::detail
             expect_ss << "Expected character " << expected_char << " but found ";                 \
             AppendChar(expect_ss, c);                                                             \
             AddError(result, parser, c ? error_type : ErrorType::UnexpectedEof, expect_ss.str()); \
-            return nullptr;                                                                       \
+            return std::nullopt;                                                                       \
         }                                                                                         \
     } while (false)
 
@@ -345,7 +364,7 @@ namespace jsonh::detail
     {
         result->errors.push_back(Error{type, err, Location{parser->line, parser->column}});
         // todo: assert here instead of assigning, since the value shouldn't be set anyway...
-        result->value = nullptr;
+        result->doc = {};
     }
 
     void AddNote(ParseResult* result, const Location& loc, const std::string& note)
@@ -353,7 +372,7 @@ namespace jsonh::detail
         result->errors.push_back(Error{ErrorType::Note, note, loc});
     }
 
-    std::unique_ptr<Value> ParseValue(ParseResult* result, Parser* parser)
+    std::optional<Value> ParseValue(ParseResult* result, Parser* parser)
     {
         if (parser->Peek() == '[')
         {
@@ -367,7 +386,12 @@ namespace jsonh::detail
 
         if (parser->Peek() == '"')
         {
-            return ParseString(result, parser);
+            const auto str = ParseString(result, parser);
+            if (!str)
+            {
+                return std::nullopt;
+            }
+            return result->doc.add(*str);
         }
 
         if (
@@ -376,14 +400,13 @@ namespace jsonh::detail
             parser->Peek(2) == 'u' &&
             parser->Peek(3) == 'e')
         {
-            auto ret = std::make_unique<Bool>(true);
-            ret->location = parser->GetLocation();
+            auto ret = Bool{parser->GetLocation() , true};
             parser->Read();  // t
             parser->Read();  // r
             parser->Read();  // u
             parser->Read();  // e
             SkipSpaces(parser);
-            return ret;
+            return result->doc.add(ret);
         }
 
         if (
@@ -393,15 +416,14 @@ namespace jsonh::detail
             parser->Peek(3) == 's' &&
             parser->Peek(4) == 'e')
         {
-            auto ret = std::make_unique<Bool>(false);
-            ret->location = parser->GetLocation();
+            auto ret = Bool{parser->GetLocation(), false};
             parser->Read();  // f
             parser->Read();  // a
             parser->Read();  // l
             parser->Read();  // s
             parser->Read();  // e
             SkipSpaces(parser);
-            return ret;
+            return result->doc.add(ret);
         }
 
         if (
@@ -410,14 +432,13 @@ namespace jsonh::detail
             parser->Peek(2) == 'l' &&
             parser->Peek(3) == 'l')
         {
-            auto ret = std::make_unique<Null>();
-            ret->location = parser->GetLocation();
+            auto ret = Null{parser->GetLocation()};
             parser->Read();  // n
             parser->Read();  // u
             parser->Read();  // l
             parser->Read();  // l
             SkipSpaces(parser);
-            return ret;
+            return result->doc.add(ret);
         }
 
         if (IsValidFirstDigit(parser->Peek()))
@@ -427,19 +448,23 @@ namespace jsonh::detail
 
         if (parser->has_flag(parse_flags::IdentifierAsString) && IsIdentifierChar(parser->Peek(), true))
         {
-            return ParseIdentifierAsString(result, parser);
+            const auto str = ParseIdentifierAsString(result, parser);
+            if (!str)
+            {
+                return std::nullopt;
+            }
+            return result->doc.add(*str);
         }
 
         std::ostringstream str;
         str << "Unexpected character found: " << parser->Peek();
         AddError(result, parser, ErrorType::InvalidCharacter, str.str());
-        return nullptr;
+        return std::nullopt;
     }
 
-    std::unique_ptr<Array> ParseArray(ParseResult* result, Parser* parser)
+    std::optional<Value> ParseArray(ParseResult* result, Parser* parser)
     {
-        auto array = std::make_unique<Array>();
-        array->location = parser->GetLocation();
+        auto array = Array{parser->GetLocation(), {}};
 
         EXPECT(ErrorType::InvalidCharacter, '[');
         SkipSpaces(parser);
@@ -463,13 +488,13 @@ namespace jsonh::detail
             }
 
             auto v = ParseValue(result, parser);
-            if (v == nullptr)
+            if (!v)
             {
-                return nullptr;
+                return std::nullopt;
             }
             else
             {
-                array->array.emplace_back(std::move(v));
+                array.array.emplace_back(std::move(*v));
             }
             SkipSpaces(parser);
 
@@ -478,11 +503,11 @@ namespace jsonh::detail
             {
             case ':':
                 AddError(result, parser, ErrorType::InvalidCharacter, "Found colon instead of comma");
-                return nullptr;
+                return std::nullopt;
             case '}':
                 AddError(result, parser, ErrorType::UnclosedArray, "Found }. A square bracket ] closes the array.");
                 AddNote(result, start_of_array, "Array started here");
-                return nullptr;
+                return std::nullopt;
             }
         }
 
@@ -494,16 +519,15 @@ namespace jsonh::detail
             AppendChar(ss, end);
             AddError(result, parser, ErrorType::UnclosedArray, ss.str());
             AddNote(result, start_of_array, "Array started here");
-            return nullptr;
+            return std::nullopt;
         }
-        return array;
+        return result->doc.add(array);
     }
 
-    std::unique_ptr<Object> ParseObject(ParseResult* result, Parser* parser)
+    std::optional<Value> ParseObject(ParseResult* result, Parser* parser)
     {
         EXPECT(ErrorType::InvalidCharacter, '{');
-        auto object = std::make_unique<Object>();
-        object->location = parser->GetLocation();
+        auto object = Object{parser->GetLocation(), {}};
         SkipSpaces(parser);
 
         bool first = true;
@@ -526,30 +550,31 @@ namespace jsonh::detail
                 parser->has_flag(parse_flags::IdentifierAsString) && IsIdentifierChar(parser->Peek(), true)
                     ? ParseIdentifierAsString(result, parser)
                     : ParseString(result, parser);
-            if (s == nullptr)
+            if (!s)
             {
-                return nullptr;
+                return std::nullopt;
             }
             EXPECT(ErrorType::InvalidCharacter, ':');
             SkipSpaces(parser);
             auto v = ParseValue(result, parser);
-            if (v == nullptr)
+            if (!v)
             {
-                return nullptr;
+                return std::nullopt;
             }
             else
             {
                 if (!parser->has_flag(parse_flags::DuplicateKeysOnlyLatest))
                 {
-                    auto found = object->object.find(s->string);
-                    if (found != object->object.end())
+                    auto found = object.object.find(s->value);
+                    if (found != object.object.end())
                     {
-                        AddError(result, parser, ErrorType::DuplicateKey, "Duplicate key found " + s->string);
-                        AddNote(result, found->second->location, "Previously defined here");
-                        return nullptr;
+                        const auto defined_at = GetLocation(&result->doc, found->second);
+                        AddError(result, parser, ErrorType::DuplicateKey, "Duplicate key found " + s->value);
+                        AddNote(result, defined_at, "Previously defined here");
+                        return std::nullopt;
                     }
                 }
-                object->object[s->string] = std::move(v);
+                object.object[s->value] = *v;
             }
             SkipSpaces(parser);
         }
@@ -557,7 +582,7 @@ namespace jsonh::detail
         EXPECT(ErrorType::InvalidCharacter, '}');
         SkipSpaces(parser);
 
-        return object;
+        return result->doc.add(object);
     }
 
     bool ParseEscapeCode(ParseResult* result, Parser* parser, std::ostringstream& ss)
@@ -594,7 +619,7 @@ namespace jsonh::detail
         return true;
     }
 
-    std::unique_ptr<String> ParseString(ParseResult* result, Parser* parser)
+    std::optional<String> ParseString(ParseResult* result, Parser* parser)
     {
         const auto loc = parser->GetLocation();
         EXPECT(ErrorType::InvalidCharacter, '\"');
@@ -607,13 +632,13 @@ namespace jsonh::detail
             if (c == 0)
             {
                 AddError(result, parser, ErrorType::InvalidCharacter, "Unexpected EOF in string");
-                return nullptr;
+                return std::nullopt;
             }
             else if (c == '\\')
             {
                 if (!ParseEscapeCode(result, parser, string_buffer))
                 {
-                    return nullptr;
+                    return std::nullopt;
                 }
             }
             // is this correct? checker fail25 and fail27 seems to think so
@@ -625,7 +650,7 @@ namespace jsonh::detail
                 AppendChar(ss, c);
                 ss << " character must be escaped";
                 AddError(result, parser, ErrorType::InvalidCharacterInString, ss.str());
-                return nullptr;
+                return std::nullopt;
             }
             else
             {
@@ -635,12 +660,11 @@ namespace jsonh::detail
         EXPECT(ErrorType::InvalidCharacter, '\"');
         SkipSpaces(parser);
 
-        auto ret = std::make_unique<String>(string_buffer.str());
-        ret->location = loc;
+        auto ret = String{loc, string_buffer.str()};
         return ret;
     }
 
-    std::unique_ptr<String> ParseIdentifierAsString(ParseResult* result, Parser* parser)
+    std::optional<String> ParseIdentifierAsString(ParseResult* result, Parser* parser)
     {
         std::ostringstream string_buffer;
         const auto loc = parser->GetLocation();
@@ -652,12 +676,12 @@ namespace jsonh::detail
             first = false;
         }
 
-        auto ret = std::make_unique<String>(string_buffer.str());
-        ret->location = loc;
+        // todo(Gustav): error on empty
+        auto ret = String{loc, string_buffer.str()};
         return ret;
     }
 
-    std::unique_ptr<Value> ParseNumber(ParseResult* result, Parser* parser)
+    std::optional<Value> ParseNumber(ParseResult* result, Parser* parser)
     {
         std::ostringstream o;
 
@@ -674,7 +698,7 @@ namespace jsonh::detail
             if (IsNumberChar(parser->Peek()))
             {
                 AddError(result, parser, ErrorType::InvalidNumber, "Numbers can't have leading zeroes");
-                return nullptr;
+                return std::nullopt;
             }
         }
         else
@@ -682,7 +706,7 @@ namespace jsonh::detail
             if (!IsNumberChar(parser->Peek()))
             {
                 AddError(result, parser, ErrorType::InvalidCharacter, "Invalid first character as a number");
-                return nullptr;
+                return std::nullopt;
             }
             o << parser->Read();
             while (IsNumberChar(parser->Peek()))
@@ -700,7 +724,7 @@ namespace jsonh::detail
             if (!IsNumberChar(parser->Peek()))
             {
                 AddError(result, parser, ErrorType::InvalidCharacter, "Invalid first character in a fractional number");
-                return nullptr;
+                return std::nullopt;
             }
             o << parser->Read();
             while (IsNumberChar(parser->Peek()))
@@ -721,7 +745,7 @@ namespace jsonh::detail
             if (!IsNumberChar(parser->Peek()))
             {
                 AddError(result, parser, ErrorType::InvalidCharacter, "Invalid first character in a exponent");
-                return nullptr;
+                return std::nullopt;
             }
             o << parser->Read();
             while (IsNumberChar(parser->Peek()))
@@ -739,11 +763,10 @@ namespace jsonh::detail
             if (in.fail())
             {
                 AddError(result, parser, ErrorType::UnknownError, "Failed to parse integer: " + o.str());
-                return nullptr;
+                return std::nullopt;
             }
-            auto ret = std::make_unique<Int>(d);
-            ret->location = loc;
-            return ret;
+            auto ret = Int{loc, d};
+            return result->doc.add(ret);
         }
         else
         {
@@ -753,11 +776,10 @@ namespace jsonh::detail
             // if(in.fail())
             // {
             // AddError(result, parser, ErrorType::UnknownError, "Failed to parse number: " + o.str());
-            // return nullptr;
+            // return std::nullopt;
             // }
-            auto ret = std::make_unique<Number>(d);
-            ret->location = loc;
-            return ret;
+            auto ret = Number{loc, d};
+            return result->doc.add(ret);
         }
     }
 
@@ -768,9 +790,9 @@ namespace jsonh::detail
 
         if (parser->Peek() == '[')
         {
-            res.value = ParseArray(&res, parser);
+            res.root = ParseArray(&res, parser);
             SkipSpaces(parser);
-            if (res.value.get() != nullptr && parser->HasMoreChar())
+            if (res.root && parser->HasMoreChar())
             {
                 AddError(&res, parser, ErrorType::NotEof, "Expected EOF after array");
             }
@@ -778,9 +800,9 @@ namespace jsonh::detail
         }
         else if (parser->Peek() == '{')
         {
-            res.value = ParseObject(&res, parser);
+            res.root = ParseObject(&res, parser);
             SkipSpaces(parser);
-            if (res.value.get() != nullptr && parser->HasMoreChar())
+            if (res.root && parser->HasMoreChar())
             {
                 AddError(&res, parser, ErrorType::NotEof, "Expected EOF after object");
             }
@@ -823,6 +845,23 @@ namespace jsonh::detail
 
 namespace jsonh
 {
+    Location GetLocation(const Document* d, const Value& val)
+    {
+        switch (val.type)
+        {
+        case ValueType::Object: return val.AsObject(d)->location;
+        case ValueType::Array: return val.AsArray(d)->location;
+        case ValueType::String: return val.AsString(d)->location;
+        case ValueType::Number: return val.AsNumber(d)->location;
+        case ValueType::Int: return val.AsInt(d)->location;
+        case ValueType::Bool: return val.AsBool(d)->location;
+        case ValueType::Null: return val.AsNull(d)->location;
+        default:
+            assert(false);
+            return {0, 0};
+        }
+    }
+
     Error::Error(ErrorType t, const std::string& m, const Location& l)
         : type(t)
         , message(m)
@@ -857,7 +896,7 @@ namespace jsonh
         }
         else
         {
-            s << Print(result.value.get(), print_flags::Json, Compact);
+            s << Print(*result.root, &result.doc, print_flags::Json, Compact);
         }
         return s;
     }
@@ -908,138 +947,83 @@ namespace jsonh
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //
 
-    Object* Value::AsObject() { return nullptr; }
-    Array* Value::AsArray() { return nullptr; }
-    String* Value::AsString() { return nullptr; }
-    Number* Value::AsNumber() { return nullptr; }
-    Bool* Value::AsBool() { return nullptr; }
-    Null* Value::AsNull() { return nullptr; }
-    Int* Value::AsInt() { return nullptr; }
+#define ADD(Object, objects)\
+    Value Document::add(Object x)\
+    {\
+        const auto r = objects.size();\
+        objects.emplace_back(x);\
+        return {ValueType::Object, r};\
+    }\
+    Object* Value::As##Object(Document* doc) \
+    {\
+        if (type != ValueType::Object)\
+        {\
+            return nullptr;\
+        }\
+        return &doc->objects[index];\
+    }\
+    const Object* Value::As##Object(const Document* doc) const \
+    {                                        \
+        if (type != ValueType::Object)       \
+        {                                    \
+            return nullptr;                  \
+        }                                    \
+        return &doc->objects[index];         \
+    }
 
-    [[nodiscard]] bool ParseResult::HasError() const { return value == nullptr; }
+    ADD(Object, objects)
+    ADD(Array, arrays)
+    ADD(String, strings)
+    ADD(Number, numbers)
+    ADD(Int, ints)
+    ADD(Bool, bools)
+    ADD(Null, nulls)
+#undef ADD
+
+    Value::Value()
+        : type(ValueType::Invalid)
+        , index(0)
+    {
+    }
+
+    Value::Value(ValueType vt, std::size_t i)
+        : type(vt)
+        , index(i)
+    {
+        assert(vt != ValueType::Invalid);
+    }
+
+    bool Value::is_valid() const
+    {
+        return type != ValueType::Invalid;
+    }
+
+    Value::operator bool() const
+    {
+        return is_valid();
+    }
+
+    bool Value::operator!() const
+    {
+        return !is_valid();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+
+    [[nodiscard]] bool ParseResult::HasError() const { return errors.empty() == false; }
     ParseResult::operator bool() const { return !HasError(); }
 
-    std::string Print(Value* value, print_flags::Type flags, const PrintStyle& pp)
+    std::string Print(const Value& value, const Document* doc, print_flags::Type flags, const PrintStyle& pp)
     {
         std::ostringstream ss;
         detail::PrettyPrintVisitor vis;
         vis.flags = flags;
         vis.settings = pp;
         vis.stream = &ss;
-        value->Visit(&vis);
+        vis.Visit(value, doc);
         ss << pp.newline;
         return ss.str();
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    void Array::Visit(Visitor* visitor)
-    {
-        visitor->VisitArray(this);
-    }
-
-    Array* Array::AsArray()
-    {
-        return this;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    void Bool::Visit(Visitor* visitor)
-    {
-        visitor->VisitBool(this);
-    }
-
-    Bool* Bool::AsBool()
-    {
-        return this;
-    }
-
-    Bool::Bool(bool b)
-        : boolean(b)
-    {
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    void Int::Visit(Visitor* visitor)
-    {
-        visitor->VisitInt(this);
-    }
-
-    Int* Int::AsInt()
-    {
-        return this;
-    }
-
-    Int::Int(tint i)
-        : integer(i)
-    {
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    void Null::Visit(Visitor* visitor)
-    {
-        visitor->VisitNull(this);
-    }
-
-    Null* Null::AsNull()
-    {
-        return this;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    void Number::Visit(Visitor* visitor)
-    {
-        visitor->VisitNumber(this);
-    }
-
-    Number* Number::AsNumber()
-    {
-        return this;
-    }
-
-    Number::Number(tnum d)
-        : number(d)
-    {
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    void Object::Visit(Visitor* visitor)
-    {
-        visitor->VisitObject(this);
-    }
-
-    Object* Object::AsObject()
-    {
-        return this;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    //
-
-    void String::Visit(Visitor* visitor)
-    {
-        visitor->VisitString(this);
-    }
-
-    String* String::AsString()
-    {
-        return this;
-    }
-
-    String::String(const std::string& s)
-        : string(s)
-    {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1048,6 +1032,11 @@ namespace jsonh
     ParseResult Parse(const std::string& str, parse_flags::Type flags)
     {
         detail::Parser parser{str, flags};
-        return detail::Parse(&parser);
+        auto result = detail::Parse(&parser);
+        if (result.errors.empty() == false)
+        {
+            result.root = std::nullopt;
+        }
+        return result;
     }
 }

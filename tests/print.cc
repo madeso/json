@@ -11,11 +11,13 @@ TEST_CASE("print-object-one", "[print]")
         "}\n";
     const std::string compact = "{\"prop\":5}";
 
-    auto root = std::make_unique<Object>();
-    root->object["prop"] = std::make_unique<Int>(5);
+    auto doc = Document{};
+    auto root = Object{};
+    root.object["prop"] = doc.add(Int{{}, 5});
+    const auto json = doc.add(root);
 
-    const auto print_compact = Print(root.get(), print_flags::Json, Compact);
-    const auto print_pretty = Print(root.get(), print_flags::Json, Pretty);
+    const auto print_compact = Print(json, &doc, print_flags::Json, Compact);
+    const auto print_pretty = Print(json, &doc, print_flags::Json, Pretty);
 
     CHECK(compact == print_compact);
     CHECK(pretty == print_pretty);
@@ -33,12 +35,14 @@ TEST_CASE("print-object-two", "[print]")
         "}\n";
     const std::string compact = "{\"cat\":4,\"dog\":2}";
 
-    auto root = std::make_unique<Object>();
-    root->object["cat"] = std::make_unique<Int>(4);
-    root->object["dog"] = std::make_unique<Int>(2);
+    auto doc = Document{};
+    auto root = Object{};
+    root.object["cat"] = doc.add(Int{{}, 4});
+    root.object["dog"] = doc.add(Int{{}, 2});
+    const auto json = doc.add(root);
 
-    const auto print_compact = Print(root.get(), print_flags::Json, Compact);
-    const auto print_pretty = Print(root.get(), print_flags::Json, Pretty);
+    const auto print_compact = Print(json, &doc, print_flags::Json, Compact);
+    const auto print_pretty = Print(json, &doc, print_flags::Json, Pretty);
 
     CHECK(compact == print_compact);
     CHECK(pretty == print_pretty);
@@ -55,11 +59,13 @@ TEST_CASE("print-array-one", "[print]")
         "]\n";
     const std::string compact = "[5]";
 
-    auto root = std::make_unique<Array>();
-    root->array.push_back(std::make_unique<Int>(5));
+    auto doc = Document{};
+    auto root = Array{};
+    root.array.push_back(doc.add(Int{{}, 5}));
+    const auto json = doc.add(root);
 
-    const auto print_compact = Print(root.get(), print_flags::Json, Compact);
-    const auto print_pretty = Print(root.get(), print_flags::Json, Pretty);
+    const auto print_compact = Print(json, &doc, print_flags::Json, Compact);
+    const auto print_pretty = Print(json, &doc, print_flags::Json, Pretty);
 
     CHECK(compact == print_compact);
     CHECK(pretty == print_pretty);
@@ -77,12 +83,14 @@ TEST_CASE("print-array-two", "[print]")
         "]\n";
     const std::string compact = "[4,2]";
 
-    auto root = std::make_unique<Array>();
-    root->array.push_back(std::make_unique<Int>(4));
-    root->array.push_back(std::make_unique<Int>(2));
+    auto doc = Document{};
+    auto root = Array{};
+    root.array.push_back(doc.add(Int{{}, 4}));
+    root.array.push_back(doc.add(Int{{}, 2}));
+    const auto json = doc.add(root);
 
-    const auto print_compact = Print(root.get(), print_flags::Json, Compact);
-    const auto print_pretty = Print(root.get(), print_flags::Json, Pretty);
+    const auto print_compact = Print(json, &doc, print_flags::Json, Compact);
+    const auto print_pretty = Print(json, &doc, print_flags::Json, Pretty);
 
     CHECK(compact == print_compact);
     CHECK(pretty == print_pretty);

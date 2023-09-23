@@ -30,10 +30,13 @@ int main()
         return 1;
     }
 
+    // all allocations are in the document, we're going to be using it so lets grab a ref
+    auto& doc = result.doc;
+
     // the root of a json can either be a array or a object
     // our json in this esxample needs to be a array, so we abort if it's not
 
-    auto* array = result.value->AsArray();
+    auto* array = result.root->AsArray(&doc);
     if (array == nullptr)
     {
         // one thing that makes this json libary stand out (as far as I can tell)
@@ -41,7 +44,7 @@ int main()
         // proper errors when parsing a json.
         // To make this example shorter, all errors hence further
         // will only return.
-        const auto& loc = result.value->location;
+        const auto loc = GetLocation(&doc, *result.root);
         std::cerr << "file("
                   << loc.line << ", "
                   << loc.column << "): "
@@ -50,13 +53,13 @@ int main()
     }
 
     // cool, after all that we have our array we can loop all the items
-    for (std::unique_ptr<jsonh::Value>& item : array->array)
+    for (const jsonh::Value& item : array->array)
     {
         // now this json example is a little bit cotrived...
         // if the value is a object, we print the member text
         // if the value is a integer we print that many "random" strings
 
-        jsonh::Object* object = item->AsObject();
+        const jsonh::Object* object = item.AsObject(&doc);
         if (object)
         {
             auto found = object->object.find("text");
@@ -64,12 +67,12 @@ int main()
             {
                 return 3;
             }
-            jsonh::String* string = found->second->AsString();
+            const jsonh::String* string = found->second.AsString(&doc);
             if (string == nullptr)
             {
                 return 4;
             }
-            std::cout << string->string;
+            std::cout << string->value;
             continue;
         }
 
@@ -79,17 +82,17 @@ int main()
         //
         // jsonh doesn't autoconvert from numbers to integers so if you need a double,
         // you should probably autoconvert yourself instead of returning a error
-        jsonh::Int* integer = item->AsInt();
+        const jsonh::Int* integer = item.AsInt(&doc);
         if (integer)
         {
             // accept only positive numbers, greater than 0
-            if (integer->integer < 1)
+            if (integer->value < 1)
             {
                 return 5;
             }
 
             static int index = 0;
-            for (int i = 0; i < integer->integer; i += 1)
+            for (int i = 0; i < integer->value; i += 1)
             {
                 switch (index % 4)
                 {
@@ -117,12 +120,12 @@ int main()
         // one thing that makes this json libary stand out (as far as I know)
         // it the fact that all json values has a location so you can display
         // proper errors when parsing a json.
-        const auto& loc = item->location;
+        const auto& loc =  jsonh::GetLocation(&doc, item);
         std::cerr << "WARNING: file(line: "
                   << loc.line << ", column:"
                   << loc.column << "): "
                   << "Neiter a object nor a integer.\n"
-                  << "was: " << Print(item.get(), jsonh::print_flags::Json, jsonh::Compact)
+                  << "was: " << Print(item, &doc, jsonh::print_flags::Json, jsonh::Compact)
                   << "\n";
     }
 

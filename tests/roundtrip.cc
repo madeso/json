@@ -11,19 +11,19 @@ TEST_CASE("roundtrip01", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    CHECK(j1.value->location.line == 1);
-    CHECK(j2.value->location.line == 1);
-    CHECK(j1.value->location.column == 0);
-    CHECK(j2.value->location.column == 0);
+    CHECK(GetLocation(&j1.doc, *j1.root).line == 1);
+    CHECK(GetLocation(&j2.doc, *j2.root).line == 1);
+    CHECK(GetLocation(&j1.doc, *j1.root).column == 0);
+    CHECK(GetLocation(&j2.doc, *j2.root).column == 0);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -31,8 +31,8 @@ TEST_CASE("roundtrip01", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto n1 = aj1->array[0]->AsNull();
-    auto n2 = aj2->array[0]->AsNull();
+    auto n1 = aj1->array[0].AsNull(&j1.doc);
+    auto n2 = aj2->array[0].AsNull(&j2.doc);
 
     REQUIRE(n1);
     REQUIRE(n2);
@@ -49,14 +49,14 @@ TEST_CASE("roundtrip02", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -64,28 +64,28 @@ TEST_CASE("roundtrip02", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto b1 = aj1->array[0]->AsBool();
-    auto b2 = aj2->array[0]->AsBool();
+    auto b1 = aj1->array[0].AsBool(&j1.doc);
+    auto b2 = aj2->array[0].AsBool(&j2.doc);
 
     REQUIRE(b1);
     REQUIRE(b2);
 
-    REQUIRE(b1->boolean);
-    REQUIRE(b2->boolean);
+    REQUIRE(b1->value);
+    REQUIRE(b2->value);
 
     // get coverage...
-    REQUIRE(aj1->array[0]->AsObject() == nullptr);
-    REQUIRE(aj2->array[0]->AsObject() == nullptr);
-    REQUIRE(aj1->array[0]->AsArray() == nullptr);
-    REQUIRE(aj2->array[0]->AsArray() == nullptr);
-    REQUIRE(aj1->array[0]->AsString() == nullptr);
-    REQUIRE(aj2->array[0]->AsString() == nullptr);
-    REQUIRE(aj1->array[0]->AsNumber() == nullptr);
-    REQUIRE(aj2->array[0]->AsNumber() == nullptr);
-    REQUIRE(aj1->array[0]->AsNull() == nullptr);
-    REQUIRE(aj2->array[0]->AsNull() == nullptr);
-    REQUIRE(aj1->array[0]->AsInt() == nullptr);
-    REQUIRE(aj2->array[0]->AsInt() == nullptr);
+    REQUIRE(aj1->array[0].AsObject(&j1.doc) == nullptr);
+    REQUIRE(aj2->array[0].AsObject(&j2.doc) == nullptr);
+    REQUIRE(aj1->array[0].AsArray(&j1.doc) == nullptr);
+    REQUIRE(aj2->array[0].AsArray(&j2.doc) == nullptr);
+    REQUIRE(aj1->array[0].AsString(&j1.doc) == nullptr);
+    REQUIRE(aj2->array[0].AsString(&j2.doc) == nullptr);
+    REQUIRE(aj1->array[0].AsNumber(&j1.doc) == nullptr);
+    REQUIRE(aj2->array[0].AsNumber(&j2.doc) == nullptr);
+    REQUIRE(aj1->array[0].AsNull(&j1.doc) == nullptr);
+    REQUIRE(aj2->array[0].AsNull(&j2.doc) == nullptr);
+    REQUIRE(aj1->array[0].AsInt(&j1.doc) == nullptr);
+    REQUIRE(aj2->array[0].AsInt(&j2.doc) == nullptr);
 }
 
 TEST_CASE("roundtrip03", "[roundtrip]")
@@ -94,14 +94,14 @@ TEST_CASE("roundtrip03", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -109,14 +109,14 @@ TEST_CASE("roundtrip03", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto b1 = aj1->array[0]->AsBool();
-    auto b2 = aj2->array[0]->AsBool();
+    auto b1 = aj1->array[0].AsBool(&j1.doc);
+    auto b2 = aj2->array[0].AsBool(&j2.doc);
 
     REQUIRE(b1);
     REQUIRE(b2);
 
-    REQUIRE_FALSE(b1->boolean);
-    REQUIRE_FALSE(b2->boolean);
+    REQUIRE_FALSE(b1->value);
+    REQUIRE_FALSE(b2->value);
 }
 
 TEST_CASE("roundtrip04", "[roundtrip]")
@@ -125,14 +125,14 @@ TEST_CASE("roundtrip04", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -140,14 +140,14 @@ TEST_CASE("roundtrip04", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == 0);
-    REQUIRE(i2->integer == 0);
+    REQUIRE(i1->value == 0);
+    REQUIRE(i2->value == 0);
 }
 
 TEST_CASE("roundtrip05", "[roundtrip]")
@@ -156,14 +156,14 @@ TEST_CASE("roundtrip05", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -171,14 +171,14 @@ TEST_CASE("roundtrip05", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto s1 = aj1->array[0]->AsString();
-    auto s2 = aj2->array[0]->AsString();
+    auto s1 = aj1->array[0].AsString(&j1.doc);
+    auto s2 = aj2->array[0].AsString(&j2.doc);
 
     REQUIRE(s1);
     REQUIRE(s2);
 
-    REQUIRE(s1->string == "foo");
-    REQUIRE(s2->string == "foo");
+    REQUIRE(s1->value == "foo");
+    REQUIRE(s2->value == "foo");
 }
 
 TEST_CASE("roundtrip06", "[roundtrip]")
@@ -187,14 +187,14 @@ TEST_CASE("roundtrip06", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -209,14 +209,14 @@ TEST_CASE("roundtrip07", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto oj1 = j1.value->AsObject();
-    auto oj2 = j2.value->AsObject();
+    auto oj1 = j1.root->AsObject(&j1.doc);
+    auto oj2 = j2.root->AsObject(&j2.doc);
 
     REQUIRE(oj1);
     REQUIRE(oj2);
@@ -231,14 +231,14 @@ TEST_CASE("roundtrip08", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -246,19 +246,19 @@ TEST_CASE("roundtrip08", "[roundtrip]")
     REQUIRE(aj1->array.size() == 2);
     REQUIRE(aj2->array.size() == 2);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
     REQUIRE(i1);
     REQUIRE(i2);
-    REQUIRE(i1->integer == 0);
-    REQUIRE(i2->integer == 0);
+    REQUIRE(i1->value == 0);
+    REQUIRE(i2->value == 0);
 
-    i1 = aj1->array[1]->AsInt();
-    i2 = aj2->array[1]->AsInt();
+    i1 = aj1->array[1].AsInt(&j1.doc);
+    i2 = aj2->array[1].AsInt(&j2.doc);
     REQUIRE(i1);
     REQUIRE(i2);
-    REQUIRE(i1->integer == 1);
-    REQUIRE(i2->integer == 1);
+    REQUIRE(i1->value == 1);
+    REQUIRE(i2->value == 1);
 }
 
 TEST_CASE("roundtrip09", "[roundtrip]")
@@ -267,14 +267,14 @@ TEST_CASE("roundtrip09", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto oj1 = j1.value->AsObject();
-    auto oj2 = j2.value->AsObject();
+    auto oj1 = j1.root->AsObject(&j1.doc);
+    auto oj2 = j2.root->AsObject(&j2.doc);
 
     REQUIRE(oj1);
     REQUIRE(oj2);
@@ -288,14 +288,14 @@ TEST_CASE("roundtrip09", "[roundtrip]")
     REQUIRE(f1);
     REQUIRE(f2);
 
-    const auto& v1 = f1->AsString();
-    const auto& v2 = f2->AsString();
+    const auto& v1 = f1.AsString(&j1.doc);
+    const auto& v2 = f2.AsString(&j2.doc);
 
     REQUIRE(v1);
     REQUIRE(v2);
 
-    REQUIRE(v1->string == "bar");
-    REQUIRE(v2->string == "bar");
+    REQUIRE(v1->value == "bar");
+    REQUIRE(v2->value == "bar");
 }
 
 TEST_CASE("roundtrip10", "[roundtrip]")
@@ -304,14 +304,14 @@ TEST_CASE("roundtrip10", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto oj1 = j1.value->AsObject();
-    auto oj2 = j2.value->AsObject();
+    auto oj1 = j1.root->AsObject(&j1.doc);
+    auto oj2 = j2.root->AsObject(&j2.doc);
 
     REQUIRE(oj1);
     REQUIRE(oj2);
@@ -325,14 +325,14 @@ TEST_CASE("roundtrip10", "[roundtrip]")
     REQUIRE(f1);
     REQUIRE(f2);
 
-    auto v1 = f1->AsString();
-    auto v2 = f2->AsString();
+    auto v1 = f1.AsString(&j1.doc);
+    auto v2 = f2.AsString(&j2.doc);
 
     REQUIRE(v1);
     REQUIRE(v2);
 
-    REQUIRE(v1->string == "bar");
-    REQUIRE(v2->string == "bar");
+    REQUIRE(v1->value == "bar");
+    REQUIRE(v2->value == "bar");
 
     const auto& a1 = oj1->object["a"];
     const auto& a2 = oj2->object["a"];
@@ -340,8 +340,8 @@ TEST_CASE("roundtrip10", "[roundtrip]")
     REQUIRE(a1);
     REQUIRE(a2);
 
-    auto n1 = a1->AsNull();
-    auto n2 = a2->AsNull();
+    auto n1 = a1.AsNull(&j1.doc);
+    auto n2 = a2.AsNull(&j2.doc);
 
     REQUIRE(n1);
     REQUIRE(n2);
@@ -353,14 +353,14 @@ TEST_CASE("roundtrip11", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -368,14 +368,14 @@ TEST_CASE("roundtrip11", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == -1);
-    REQUIRE(i2->integer == -1);
+    REQUIRE(i1->value == -1);
+    REQUIRE(i2->value == -1);
 }
 
 TEST_CASE("roundtrip12", "[roundtrip]")
@@ -384,14 +384,14 @@ TEST_CASE("roundtrip12", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -399,14 +399,14 @@ TEST_CASE("roundtrip12", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == -2147483648LL);
-    REQUIRE(i2->integer == -2147483648LL);
+    REQUIRE(i1->value == -2147483648LL);
+    REQUIRE(i2->value == -2147483648LL);
 }
 
 TEST_CASE("roundtrip13", "[roundtrip]")
@@ -415,14 +415,14 @@ TEST_CASE("roundtrip13", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -430,14 +430,14 @@ TEST_CASE("roundtrip13", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == -1234567890123456789);
-    REQUIRE(i2->integer == -1234567890123456789);
+    REQUIRE(i1->value == -1234567890123456789);
+    REQUIRE(i2->value == -1234567890123456789);
 }
 
 TEST_CASE("roundtrip14", "[roundtrip]")
@@ -454,14 +454,14 @@ TEST_CASE("roundtrip14", "[roundtrip]")
     INFO(src);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -469,14 +469,14 @@ TEST_CASE("roundtrip14", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == value);
-    REQUIRE(i2->integer == value);
+    REQUIRE(i1->value == value);
+    REQUIRE(i2->value == value);
 }
 
 TEST_CASE("roundtrip15", "[roundtrip]")
@@ -485,14 +485,14 @@ TEST_CASE("roundtrip15", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -500,14 +500,14 @@ TEST_CASE("roundtrip15", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == 1);
-    REQUIRE(i2->integer == 1);
+    REQUIRE(i1->value == 1);
+    REQUIRE(i2->value == 1);
 }
 
 TEST_CASE("roundtrip16", "[roundtrip]")
@@ -516,14 +516,14 @@ TEST_CASE("roundtrip16", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -531,14 +531,14 @@ TEST_CASE("roundtrip16", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == 2147483647);
-    REQUIRE(i2->integer == 2147483647);
+    REQUIRE(i1->value == 2147483647);
+    REQUIRE(i2->value == 2147483647);
 }
 
 TEST_CASE("roundtrip17", "[roundtrip]")
@@ -547,14 +547,14 @@ TEST_CASE("roundtrip17", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -562,14 +562,14 @@ TEST_CASE("roundtrip17", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == 4294967295);
-    REQUIRE(i2->integer == 4294967295);
+    REQUIRE(i1->value == 4294967295);
+    REQUIRE(i2->value == 4294967295);
 }
 
 TEST_CASE("roundtrip18", "[roundtrip]")
@@ -578,14 +578,14 @@ TEST_CASE("roundtrip18", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -593,14 +593,14 @@ TEST_CASE("roundtrip18", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == 1234567890123456789);
-    REQUIRE(i2->integer == 1234567890123456789);
+    REQUIRE(i1->value == 1234567890123456789);
+    REQUIRE(i2->value == 1234567890123456789);
 }
 
 TEST_CASE("roundtrip19", "[roundtrip]")
@@ -609,14 +609,14 @@ TEST_CASE("roundtrip19", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -624,14 +624,14 @@ TEST_CASE("roundtrip19", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto i1 = aj1->array[0]->AsInt();
-    auto i2 = aj2->array[0]->AsInt();
+    auto i1 = aj1->array[0].AsInt(&j1.doc);
+    auto i2 = aj2->array[0].AsInt(&j2.doc);
 
     REQUIRE(i1);
     REQUIRE(i2);
 
-    REQUIRE(i1->integer == 9223372036854775807);
-    REQUIRE(i2->integer == 9223372036854775807);
+    REQUIRE(i1->value == 9223372036854775807);
+    REQUIRE(i2->value == 9223372036854775807);
 }
 
 TEST_CASE("roundtrip20", "[roundtrip]")
@@ -640,14 +640,14 @@ TEST_CASE("roundtrip20", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -655,14 +655,14 @@ TEST_CASE("roundtrip20", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto n1 = aj1->array[0]->AsNumber();
-    auto n2 = aj2->array[0]->AsNumber();
+    auto n1 = aj1->array[0].AsNumber(&j1.doc);
+    auto n2 = aj2->array[0].AsNumber(&j2.doc);
 
     REQUIRE(n1);
     REQUIRE(n2);
 
-    REQUIRE(n1->number == Approx(0.0));
-    REQUIRE(n2->number == Approx(0.0));
+    REQUIRE(n1->value == Approx(0.0));
+    REQUIRE(n2->value == Approx(0.0));
 }
 
 // should we support -0.0
@@ -683,14 +683,14 @@ TEST_CASE("roundtrip22", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -698,14 +698,14 @@ TEST_CASE("roundtrip22", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto n1 = aj1->array[0]->AsNumber();
-    auto n2 = aj2->array[0]->AsNumber();
+    auto n1 = aj1->array[0].AsNumber(&j1.doc);
+    auto n2 = aj2->array[0].AsNumber(&j2.doc);
 
     REQUIRE(n1);
     REQUIRE(n2);
 
-    REQUIRE(n1->number == Approx(1.2345));
-    REQUIRE(n2->number == Approx(1.2345));
+    REQUIRE(n1->value == Approx(1.2345));
+    REQUIRE(n2->value == Approx(1.2345));
 }
 
 TEST_CASE("roundtrip23", "[roundtrip]")
@@ -714,14 +714,14 @@ TEST_CASE("roundtrip23", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -729,14 +729,14 @@ TEST_CASE("roundtrip23", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto n1 = aj1->array[0]->AsNumber();
-    auto n2 = aj2->array[0]->AsNumber();
+    auto n1 = aj1->array[0].AsNumber(&j1.doc);
+    auto n2 = aj2->array[0].AsNumber(&j2.doc);
 
     REQUIRE(n1);
     REQUIRE(n2);
 
-    REQUIRE(n1->number == Approx(-1.2345));
-    REQUIRE(n2->number == Approx(-1.2345));
+    REQUIRE(n1->value == Approx(-1.2345));
+    REQUIRE(n2->value == Approx(-1.2345));
 }
 
 // fails to parse number on osx but not on linux?
@@ -746,15 +746,15 @@ TEST_CASE("roundtrip24", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     // do we need to support roundtrip of doubles?
     // REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -762,14 +762,14 @@ TEST_CASE("roundtrip24", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto n1 = aj1->array[0]->AsNumber();
-    auto n2 = aj2->array[0]->AsNumber();
+    auto n1 = aj1->array[0].AsNumber(&j1.doc);
+    auto n2 = aj2->array[0].AsNumber(&j2.doc);
 
     REQUIRE(n1);
     REQUIRE(n2);
 
-    REQUIRE(n1->number == Approx(5e-324));
-    REQUIRE(n2->number == Approx(5e-324));
+    REQUIRE(n1->value == Approx(5e-324));
+    REQUIRE(n2->value == Approx(5e-324));
 }
 
 // fails to parse number on osx but not on linux?
@@ -779,15 +779,15 @@ TEST_CASE("roundtrip25", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     // do we need to support roundtrip of doubles?
     // REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -795,14 +795,14 @@ TEST_CASE("roundtrip25", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto n1 = aj1->array[0]->AsNumber();
-    auto n2 = aj2->array[0]->AsNumber();
+    auto n1 = aj1->array[0].AsNumber(&j1.doc);
+    auto n2 = aj2->array[0].AsNumber(&j2.doc);
 
     REQUIRE(n1);
     REQUIRE(n2);
 
-    REQUIRE(n1->number == Approx(2.225073858507201e-308));
-    REQUIRE(n2->number == Approx(2.225073858507201e-308));
+    REQUIRE(n1->value == Approx(2.225073858507201e-308));
+    REQUIRE(n2->value == Approx(2.225073858507201e-308));
 }
 
 TEST_CASE("roundtrip26", "[roundtrip]")
@@ -811,15 +811,15 @@ TEST_CASE("roundtrip26", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     // do we need to support roundtrip of doubles?
     // REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -827,14 +827,14 @@ TEST_CASE("roundtrip26", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto n1 = aj1->array[0]->AsNumber();
-    auto n2 = aj2->array[0]->AsNumber();
+    auto n1 = aj1->array[0].AsNumber(&j1.doc);
+    auto n2 = aj2->array[0].AsNumber(&j2.doc);
 
     REQUIRE(n1);
     REQUIRE(n2);
 
-    REQUIRE(n1->number == Approx(2.2250738585072014e-308));
-    REQUIRE(n2->number == Approx(2.2250738585072014e-308));
+    REQUIRE(n1->value == Approx(2.2250738585072014e-308));
+    REQUIRE(n2->value == Approx(2.2250738585072014e-308));
 }
 
 TEST_CASE("roundtrip27", "[roundtrip]")
@@ -843,15 +843,15 @@ TEST_CASE("roundtrip27", "[roundtrip]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     // same reason as above
     // REQUIRE(dmp == src);
 
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 
-    auto aj1 = j1.value->AsArray();
-    auto aj2 = j2.value->AsArray();
+    auto aj1 = j1.root->AsArray(&j1.doc);
+    auto aj2 = j2.root->AsArray(&j2.doc);
 
     REQUIRE(aj1);
     REQUIRE(aj2);
@@ -859,12 +859,12 @@ TEST_CASE("roundtrip27", "[roundtrip]")
     REQUIRE(aj1->array.size() == 1);
     REQUIRE(aj2->array.size() == 1);
 
-    auto n1 = aj1->array[0]->AsNumber();
-    auto n2 = aj2->array[0]->AsNumber();
+    auto n1 = aj1->array[0].AsNumber(&j1.doc);
+    auto n2 = aj2->array[0].AsNumber(&j2.doc);
 
     REQUIRE(n1);
     REQUIRE(n2);
 
-    REQUIRE(n1->number == Approx(1.7976931348623157e308));
-    REQUIRE(n2->number == Approx(1.7976931348623157e308));
+    REQUIRE(n1->value == Approx(1.7976931348623157e308));
+    REQUIRE(n2->value == Approx(1.7976931348623157e308));
 }

@@ -23,5 +23,5 @@ TEST_CASE("dup-ok", "[dup]")
 )";
     auto j1 = Parse(src, parse_flags::DuplicateKeysOnlyLatest);
     REQUIRE(j1);
-    CHECK(j1.value->AsObject()->object["a"]->AsInt()->integer == 3);
+    CHECK(j1.root->AsObject(&j1.doc)->object["a"].AsInt(&j1.doc)->value == 3);
 }

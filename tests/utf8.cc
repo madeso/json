@@ -27,7 +27,7 @@ TEST_CASE("utf8", "[utf8]")
     auto j1 = Parse(src, parse_flags::Json);
     REQUIRE(j1);
 
-    const auto dmp = Print(j1.value.get(), print_flags::Json, Compact);
+    const auto dmp = Print(*j1.root, &j1.doc, print_flags::Json, Compact);
     auto j2 = Parse(dmp, parse_flags::Json);
     REQUIRE(j2);
 

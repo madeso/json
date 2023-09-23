@@ -176,7 +176,7 @@ int main(int argc, char* const argv[])
             {
                 if (please_print)
                 {
-                    std::cout << jsonh::Print(parse_result.value.get(), output_flags, pretty_print);
+                    std::cout << jsonh::Print(*parse_result.root, &parse_result.doc, output_flags, pretty_print);
                 }
             }
         }
