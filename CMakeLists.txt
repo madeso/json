@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.5.0)
-set_property(GLOBAL PROPERTY USE_FOLDERS OFF)
+
+if(NOT DEFINED JSON_MASTER_PROJECT)
+    set(JSON_MASTER_PROJECT OFF)
+    if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+        set(JSON_MASTER_PROJECT ON)
+    endif()
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(jsonh)
 
@@ -25,18 +32,22 @@ add_subdirectory(src)
 
 ###############################################################################
 # examples
-add_subdirectory(examples)
+if(JSON_MASTER_PROJECT)
+    add_subdirectory(examples)
+endif()
 
 
 
 
 ###############################################################################
 # tests
-add_library(jsonh_catch INTERFACE)
-target_include_directories(jsonh_catch
-    INTERFACE SYSTEM external/catch
-)
-add_library(jsonh::catch ALIAS jsonh_catch)
+if(JSON_MASTER_PROJECT)
+    add_library(jsonh_catch INTERFACE)
+    target_include_directories(jsonh_catch
+        INTERFACE SYSTEM external/catch
+    )
+    add_library(jsonh::catch ALIAS jsonh_catch)
 
-include(CTest)
-add_subdirectory(tests)
+    include(CTest)
+    add_subdirectory(tests)
+endif()
