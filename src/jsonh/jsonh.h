@@ -46,11 +46,14 @@ namespace jsonh
             /// if not set, duplicate keys are considered a error
             DuplicateKeysOnlyLatest = 1 << 1,
 
-            // if set, all commas are optional
+            /// if set, all commas are optional
             IgnoreAllCommas = 1 << 2,
 
-            // if set, identifiers (including names with -) are considered strings
+            /// if set, identifiers (including names with -) are considered strings
             IdentifierAsString = 1 << 3,
+
+            /// Ignore c style comments
+            IgnoreComments = 1 << 4,
 
             Json = None
         };

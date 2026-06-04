@@ -111,11 +111,23 @@ namespace jsonh::detail
         return false;
     }
 
+    bool EatLine(Parser* parser)
+    {
+        while (parser->HasMoreChar() && parser->Peek() != '\n')
+        {
+            parser->Read();
+        }
+        // don't consume the new line, it will be consumed by SkipSpaces
+        return true;
+    }
+
     void SkipSpaces(Parser* parser)
     {
         while (
             IsSpace(parser->Peek()) ||
-            (parser->has_flag(parse_flags::IgnoreAllCommas) && parser->Peek() == ','))
+            (parser->has_flag(parse_flags::IgnoreAllCommas) && parser->Peek() == ',') ||
+            (parser->has_flag(parse_flags::IgnoreComments) && parser->Peek() == '/' && parser->Peek(1) == '/' && EatLine(parser))
+        )
         {
             parser->Read();
         }
